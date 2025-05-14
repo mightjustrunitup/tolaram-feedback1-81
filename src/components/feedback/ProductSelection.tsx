@@ -54,7 +54,12 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
               <TabsTrigger 
                 key={product.id} 
                 value={product.id}
-                className="flex flex-col items-center py-3 px-2 rounded-lg data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-gray-200 data-[state=active]:shadow-md transition-shadow"
+                className={cn(
+                  "flex flex-col items-center py-3 px-2 rounded-lg transition-all",
+                  product.id === selectedProduct?.id 
+                    ? "bg-white border-2 border-indomie-red shadow-md ring-2 ring-indomie-red/20" 
+                    : "bg-white border border-gray-200 shadow-sm"
+                )}
               >
                 <div className="w-16 h-16 mb-2 flex items-center justify-center bg-white rounded-full p-2 shadow-sm">
                   <img 
@@ -63,7 +68,9 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
                     className="max-w-full max-h-full object-contain"
                   />
                 </div>
-                <span className="text-xs sm:text-sm font-medium text-center line-clamp-2">{product.name}</span>
+                <span className="text-xs sm:text-sm font-medium text-center line-clamp-2">
+                  {product.name}
+                </span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -89,7 +96,15 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
             )}
           >
             {selectedProduct.variants.map((variant) => (
-              <div key={variant.id} className="flex items-center space-x-2 p-3 rounded-md border border-gray-200 bg-white shadow-sm">
+              <div 
+                key={variant.id} 
+                className={cn(
+                  "flex items-center space-x-2 p-3 rounded-md border bg-white shadow-sm transition-all",
+                  variant.id === selectedVariant 
+                    ? "border-indomie-red bg-indomie-red/5" 
+                    : "border-gray-200"
+                )}
+              >
                 <RadioGroupItem value={variant.id} id={variant.id} />
                 <Label htmlFor={variant.id} className="cursor-pointer flex-grow text-sm font-medium">
                   {variant.name}
