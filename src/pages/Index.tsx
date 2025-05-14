@@ -1,6 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import Logo from "@/components/layout/Logo";
 import { toast } from "sonner";
 import { FeedbackService, FeedbackSubmission } from "@/services/feedbackService";
 import { CustomerInfoForm } from "@/components/feedback/CustomerInfoForm";
