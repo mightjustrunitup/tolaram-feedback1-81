@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import Logo from "@/components/layout/Logo";
 import { toast } from "sonner";
 import { FeedbackService, FeedbackSubmission } from "@/services/feedbackService";
 import { CustomerInfoForm } from "@/components/feedback/CustomerInfoForm";
@@ -144,6 +142,19 @@ const Index = () => {
       }
     }
   };
+
+  // Handle removing uploaded images
+  const handleImageRemove = (index: number) => {
+    setUploadedImages(prevImages => {
+      const updatedImages = [...prevImages];
+      // Release the object URL to avoid memory leaks
+      URL.revokeObjectURL(updatedImages[index]);
+      // Remove the image from the array
+      updatedImages.splice(index, 1);
+      toast.info("Image removed");
+      return updatedImages;
+    });
+  };
   
   const validateForm = () => {
     const newErrors: {[key: string]: string} = {};
@@ -276,6 +287,7 @@ const Index = () => {
                     errors={errors}
                     uploadedImages={uploadedImages}
                     onImageUpload={handleImageUpload}
+                    onImageRemove={handleImageRemove}
                   />
                 )}
                 

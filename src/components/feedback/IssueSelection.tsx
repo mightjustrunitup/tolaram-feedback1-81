@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Paperclip } from "lucide-react";
+import { Paperclip, X } from "lucide-react";
 
 interface IssueSelectionProps {
   issues: string[];
@@ -15,6 +15,7 @@ interface IssueSelectionProps {
   errors: { [key: string]: string };
   uploadedImages?: string[];
   onImageUpload?: (files: FileList) => void;
+  onImageRemove?: (index: number) => void;
 }
 
 export const IssueSelection: React.FC<IssueSelectionProps> = ({
@@ -26,6 +27,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
   errors,
   uploadedImages = [],
   onImageUpload,
+  onImageRemove,
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -36,6 +38,8 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0 && onImageUpload) {
       onImageUpload(e.target.files);
+      // Reset the file input so the same file can be selected again
+      e.target.value = '';
     }
   };
 
@@ -106,18 +110,28 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
           </div>
         </div>
         
-        {/* Display uploaded images */}
+        {/* Display uploaded images with delete option */}
         {uploadedImages.length > 0 && (
           <div className="mt-2">
             <p className="text-sm text-gray-500 mb-2">Uploaded images:</p>
             <div className="flex flex-wrap gap-2">
               {uploadedImages.map((src, index) => (
-                <div key={index} className="relative w-16 h-16 border rounded overflow-hidden">
+                <div key={index} className="relative w-16 h-16 border rounded overflow-hidden group">
                   <img 
                     src={src} 
                     alt={`Uploaded image ${index + 1}`} 
                     className="w-full h-full object-cover" 
                   />
+                  {onImageRemove && (
+                    <button
+                      type="button"
+                      className="absolute top-0 right-0 bg-black/60 p-1 rounded-bl hidden group-hover:block"
+                      onClick={() => onImageRemove(index)}
+                      title="Remove image"
+                    >
+                      <X size={12} className="text-white" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
