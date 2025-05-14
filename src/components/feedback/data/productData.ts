@@ -20,14 +20,46 @@ export const products: Product[] = [
     image: "/lovable-uploads/461ea3d8-05b3-48c8-8bc4-9e4b89861ab6.png",
     description: "Delicious instant noodles with a variety of flavors",
     variants: [
-      { id: "indomie-chicken", name: "Indomie Tables Chicken" },
-      { id: "indomie-jollof", name: "Indomie Jollof Flavor" },
-      { id: "indomie-onion-chicken", name: "Indomie Onion Chicken Flavour" },
-      { id: "indomie-crayfish", name: "Indomie Crayfish Flavour" },
-      { id: "indomie-chicken-pepper-soup", name: "Indomie Chicken Pepper Soup" },
-      { id: "indomie-oriental", name: "Indomie Oriental Fried Noodle" },
-      { id: "indomie-relish-beef", name: "Indomie Relish Beef" },
-      { id: "indomie-relish-seafood", name: "Indomie Relish Sea Food Delight" }
+      { 
+        id: "indomie-chicken", 
+        name: "Indomie Tables Chicken",
+        image: "/lovable-uploads/19507191-d68b-49e6-b02b-a3fc272a922e.png"
+      },
+      { 
+        id: "indomie-jollof", 
+        name: "Indomie Jollof Flavor",
+        image: "/lovable-uploads/ee01ce2c-39be-485d-800e-5bc751726dfd.png"
+      },
+      { 
+        id: "indomie-onion-chicken", 
+        name: "Indomie Onion Chicken Flavour",
+        image: "/lovable-uploads/3aa5cd23-bbc0-4539-aa97-1e4a36b1e2fd.png"
+      },
+      { 
+        id: "indomie-crayfish", 
+        name: "Indomie Crayfish Flavour",
+        image: "/lovable-uploads/af5c8ae0-3124-4685-b64c-05f8a28d55ac.png"
+      },
+      { 
+        id: "indomie-chicken-pepper-soup", 
+        name: "Indomie Chicken Pepper Soup",
+        image: "/lovable-uploads/fca65c10-c4b6-4fa1-9336-0ee81af3afd1.png"
+      },
+      { 
+        id: "indomie-oriental", 
+        name: "Indomie Oriental Fried Noodle",
+        image: "/lovable-uploads/4c92e67e-7e2a-4b02-9f0f-e94b9eef39c8.png"
+      },
+      { 
+        id: "indomie-relish-beef", 
+        name: "Indomie Relish Beef",
+        image: "/lovable-uploads/4ebbb1d4-24c2-433a-971f-add5b7de206e.png"
+      },
+      { 
+        id: "indomie-relish-seafood", 
+        name: "Indomie Relish Sea Food Delight",
+        image: "/lovable-uploads/f583fe31-cca9-41cd-a1f1-dccd0b32c375.png"
+      }
     ]
   },
   {

@@ -82,7 +82,7 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
         )}
       </div>
 
-      {selectedProduct && selectedProduct.id === "dano" && (
+      {selectedProduct && (selectedProduct.id === "dano" || selectedProduct.id === "indomie") && (
         <div className="space-y-2 mt-4">
           <Label htmlFor="variant" className="flex justify-between">
             <span>Select {selectedProduct.name} Variant</span>
@@ -130,7 +130,7 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
         </div>
       )}
 
-      {selectedProduct && selectedProduct.id !== "dano" && (
+      {selectedProduct && !(selectedProduct.id === "dano" || selectedProduct.id === "indomie") && (
         <div className="space-y-2 mt-4">
           <Label htmlFor="variant" className="flex justify-between">
             <span>Select {selectedProduct.name} Variant</span>
@@ -169,4 +169,3 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
     </>
   );
 };
-
