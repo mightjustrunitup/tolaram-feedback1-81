@@ -1,8 +1,10 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Image } from "lucide-react";
 
 interface IssueSelectionProps {
   issues: string[];
@@ -11,6 +13,8 @@ interface IssueSelectionProps {
   handleIssueToggle: (issue: string) => void;
   onInputChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   errors: { [key: string]: string };
+  uploadedImages?: string[];
+  onImageUpload?: (files: FileList) => void;
 }
 
 export const IssueSelection: React.FC<IssueSelectionProps> = ({
@@ -20,7 +24,21 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
   handleIssueToggle,
   onInputChange,
   errors,
+  uploadedImages = [],
+  onImageUpload,
 }) => {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0 && onImageUpload) {
+      onImageUpload(e.target.files);
+    }
+  };
+
   return (
     <>
       <div className="space-y-3 p-4 bg-white/80 rounded-md backdrop-blur-sm border border-gray-200">
@@ -54,14 +72,56 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
       
       <div className="space-y-2">
         <Label htmlFor="comments">Additional Comments</Label>
-        <Textarea
-          id="comments"
-          name="comments"
-          placeholder="Please share any additional details about the issues you experienced..."
-          className="min-h-[120px]"
-          value={comments}
-          onChange={onInputChange}
-        />
+        <div className="relative">
+          <Textarea
+            id="comments"
+            name="comments"
+            placeholder="Please share any additional details about the issues you experienced..."
+            className="min-h-[120px]"
+            value={comments}
+            onChange={onInputChange}
+          />
+          
+          {/* Image upload button */}
+          <div className="absolute right-2 bottom-2">
+            <input 
+              type="file" 
+              accept="image/*" 
+              multiple 
+              className="hidden"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+            />
+            <Button
+              type="button"
+              variant="ghost" 
+              size="sm"
+              onClick={handleFileButtonClick}
+              className="bg-transparent hover:bg-gray-100"
+              title="Upload images"
+            >
+              <Image size={18} />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Display uploaded images */}
+        {uploadedImages.length > 0 && (
+          <div className="mt-2">
+            <p className="text-sm text-gray-500 mb-2">Uploaded images:</p>
+            <div className="flex flex-wrap gap-2">
+              {uploadedImages.map((src, index) => (
+                <div key={index} className="relative w-16 h-16 border rounded overflow-hidden">
+                  <img 
+                    src={src} 
+                    alt={`Uploaded image ${index + 1}`} 
+                    className="w-full h-full object-cover" 
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </>
   );

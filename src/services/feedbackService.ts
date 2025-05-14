@@ -10,6 +10,7 @@ export interface FeedbackSubmission {
   variantId: string;
   issues: string[];
   comments?: string;
+  imageUrls?: string[]; // Added image URLs field
 }
 
 export interface FeedbackResponse {
@@ -37,7 +38,8 @@ export const FeedbackService = {
         product_id: data.productId,
         variant_id: data.variantId,
         issues: data.issues,
-        comments: data.comments || null
+        comments: data.comments || null,
+        image_urls: data.imageUrls || null // Added image_urls field
       };
       
       console.log("Cleaned submission data:", submissionData);

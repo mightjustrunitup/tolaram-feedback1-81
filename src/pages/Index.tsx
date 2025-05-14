@@ -19,9 +19,8 @@ const Index = () => {
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [formValid, setFormValid] = useState(false);
-  
-  // Changed from single issue to multiple issues with checkboxes
   const [selectedIssues, setSelectedIssues] = useState<string[]>([]);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   
   const [formData, setFormData] = useState({
     customerName: "",
@@ -105,7 +104,7 @@ const Index = () => {
     }
   };
 
-  // New function to handle checkbox changes for issues
+  // Function to handle checkbox changes for issues
   const handleIssueToggle = (issue: string) => {
     setSelectedIssues(current => {
       // If already selected, remove it
@@ -119,6 +118,30 @@ const Index = () => {
     // Clear issue error if any issue is selected
     if (errors.issue) {
       setErrors(prev => ({ ...prev, issue: "" }));
+    }
+  };
+  
+  // New function to handle image uploads
+  const handleImageUpload = (files: FileList) => {
+    if (files) {
+      const newImages: string[] = [];
+      
+      Array.from(files).forEach(file => {
+        // Limit to image files
+        if (!file.type.startsWith('image/')) {
+          toast.error(`${file.name} is not an image file`);
+          return;
+        }
+        
+        // Create URL for preview
+        const imageUrl = URL.createObjectURL(file);
+        newImages.push(imageUrl);
+      });
+      
+      if (newImages.length > 0) {
+        setUploadedImages(prev => [...prev, ...newImages]);
+        toast.success(`${newImages.length} image${newImages.length > 1 ? 's' : ''} uploaded`);
+      }
     }
   };
   
@@ -159,12 +182,13 @@ const Index = () => {
     try {
       // Prepare data to send to Supabase
       const feedbackData: FeedbackSubmission = {
-        customerName: formData.customerName || undefined, // Don't send empty strings
+        customerName: formData.customerName || undefined,
         location: formData.location || undefined,
         productId: selectedProduct?.id || "",
         variantId: selectedVariant || "",
         issues: selectedIssues,
-        comments: formData.comments || undefined
+        comments: formData.comments || undefined,
+        imageUrls: uploadedImages.length > 0 ? uploadedImages : undefined
       };
       
       console.log("Preparing to submit feedback:", feedbackData);
@@ -250,6 +274,8 @@ const Index = () => {
                     handleIssueToggle={handleIssueToggle}
                     onInputChange={handleInputChange}
                     errors={errors}
+                    uploadedImages={uploadedImages}
+                    onImageUpload={handleImageUpload}
                   />
                 )}
                 
