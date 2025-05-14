@@ -20,7 +20,7 @@ export default function NavigationBar({ className }: NavigationBarProps) {
       className
     )}>
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        {/* Logo and navigation elements removed as requested */}
+        {/* Empty navigation bar as requested */}
       </div>
     </nav>
   );
