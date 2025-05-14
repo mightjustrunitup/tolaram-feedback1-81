@@ -133,9 +133,9 @@ export const products: Product[] = [
       { id: "kelloggs-cocopops", name: "Kelloggs Cocopops" },
       { id: "kelloggs-frosties", name: "Kelloggs Frosties" },
       { id: "kelloggs-rice-krispies", name: "Kelloggs Rice Krispies" },
-      { id: "kelloggs-crunchy-nut", name: "Kelloggs Crunchy Nut" },
-      { id: "kelloggs-crispix", name: "Kelloggs Crispix" },
-      { id: "kelloggs-krave", name: "Kelloggs Krave" }
+      { id: "kelloggs-go-grains", name: "Kelloggs Go grains" },
+      { id: "kelloggs-fruit-n-fiber", name: "Kelloggs Fruit 'n fiber" },
+      { id: "kelloggs-moon-star", name: "Kelloggs Moon & Star" }
     ]
   }
 ];
