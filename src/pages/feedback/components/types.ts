@@ -17,7 +17,7 @@ export interface FeedbackFormData {
   overallExperience: number;
   comments: string;
   isAnonymous: boolean;
-  selectedIssue?: string;
+  selectedIssues: string[]; // Updated from selectedIssue to selectedIssues
   date: Date;
 }
 
