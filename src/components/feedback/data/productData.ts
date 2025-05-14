@@ -1,5 +1,4 @@
 
-
 // Define product types
 export interface Product {
   id: string;
@@ -69,11 +68,31 @@ export const products: Product[] = [
     image: "/lovable-uploads/874305fb-be2c-4f17-8a4f-421c6431e26b.png",
     description: "Mini-sized instant noodles perfect for snacking",
     variants: [
-      { id: "minimie-chinchin", name: "Minimie Chinchin" },
-      { id: "minimie-chinchin-spicy", name: "Minimie Chinchin (Hot and Spicy)" },
-      { id: "minimie-noodle-chicken", name: "Minimie Instant Noodle Chicken Flavour" },
-      { id: "minimie-pasta", name: "Minimie Pasta" },
-      { id: "minimie-jollof", name: "Minimie Noodles Party Jollof Flavour" }
+      { 
+        id: "minimie-chinchin", 
+        name: "Minimie Chinchin", 
+        image: "/lovable-uploads/044616ce-3a83-4a2d-ad81-e583ab77ea89.png"
+      },
+      { 
+        id: "minimie-chinchin-spicy", 
+        name: "Minimie Chinchin (Hot and Spicy)",
+        image: "/lovable-uploads/ba7c8321-4704-423d-b9dd-28a5f175cf59.png"
+      },
+      { 
+        id: "minimie-noodle-chicken", 
+        name: "Minimie Instant Noodle Chicken Flavour",
+        image: "/lovable-uploads/9d485cac-7c00-40d6-a249-902744d69cb7.png"
+      },
+      { 
+        id: "minimie-pasta", 
+        name: "Minimie Pasta",
+        image: "/lovable-uploads/356b57d9-e21b-45a3-bf73-a92c7aa0b67c.png"
+      },
+      { 
+        id: "minimie-jollof", 
+        name: "Minimie Noodles Party Jollof Flavour",
+        image: "/lovable-uploads/be4d2b2a-1293-4768-87e7-cb4cabdd3cac.png"
+      }
     ]
   },
   {

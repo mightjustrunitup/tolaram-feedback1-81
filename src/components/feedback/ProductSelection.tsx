@@ -82,7 +82,7 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
         )}
       </div>
 
-      {selectedProduct && (selectedProduct.id === "dano" || selectedProduct.id === "indomie") && (
+      {selectedProduct && (
         <div className="space-y-2 mt-4">
           <Label htmlFor="variant" className="flex justify-between">
             <span>Select {selectedProduct.name} Variant</span>
@@ -121,43 +121,6 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
                     {variant.name}
                   </Label>
                 </div>
-              </div>
-            ))}
-          </RadioGroup>
-          {errors.variant && (
-            <p className="text-sm text-red-500 mt-1">{errors.variant}</p>
-          )}
-        </div>
-      )}
-
-      {selectedProduct && !(selectedProduct.id === "dano" || selectedProduct.id === "indomie") && (
-        <div className="space-y-2 mt-4">
-          <Label htmlFor="variant" className="flex justify-between">
-            <span>Select {selectedProduct.name} Variant</span>
-            <span className="text-red-500">*</span>
-          </Label>
-          <RadioGroup 
-            value={selectedVariant || ""} 
-            onValueChange={handleVariantSelect}
-            className={cn(
-              "grid grid-cols-1 sm:grid-cols-2 gap-2 p-2", 
-              errors.variant ? "border-2 border-red-500 rounded-md" : ""
-            )}
-          >
-            {selectedProduct.variants.map((variant) => (
-              <div 
-                key={variant.id} 
-                className={cn(
-                  "flex items-center space-x-2 p-3 rounded-md border bg-white shadow-sm transition-all",
-                  variant.id === selectedVariant 
-                    ? "border-indomie-red bg-indomie-red/5" 
-                    : "border-gray-200"
-                )}
-              >
-                <RadioGroupItem value={variant.id} id={variant.id} />
-                <Label htmlFor={variant.id} className="cursor-pointer flex-grow text-sm font-medium">
-                  {variant.name}
-                </Label>
               </div>
             ))}
           </RadioGroup>
