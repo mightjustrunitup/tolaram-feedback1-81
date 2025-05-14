@@ -8,6 +8,7 @@ export interface Product {
   variants: Array<{
     id: string;
     name: string;
+    image?: string;
   }>;
 }
 
@@ -48,10 +49,26 @@ export const products: Product[] = [
     image: "/lovable-uploads/15ba117d-4dfb-4486-b205-31156682b35f.png",
     description: "High quality milk products for your daily needs",
     variants: [
-      { id: "dano-slim", name: "Dano Slim" },
-      { id: "dano-cool-cow", name: "Dano Cool Cow" },
-      { id: "dano-uht", name: "Dano UHT" },
-      { id: "dano-vitakids", name: "Dano Vitakids" }
+      { 
+        id: "dano-slim", 
+        name: "Dano Slim", 
+        image: "/lovable-uploads/929d4442-067d-473f-84da-ba6dd8fb000e.png" 
+      },
+      { 
+        id: "dano-cool-cow", 
+        name: "Dano Cool Cow", 
+        image: "/lovable-uploads/012175b8-ec5c-4474-ae7b-7f031bf68f8a.png" 
+      },
+      { 
+        id: "dano-uht", 
+        name: "Dano UHT", 
+        image: "/lovable-uploads/677e8614-0e6b-49a5-b622-22b1771e6e3e.png" 
+      },
+      { 
+        id: "dano-vitakids", 
+        name: "Dano Vitakids", 
+        image: "/lovable-uploads/fdbfb76d-5599-4bf4-b8b8-e0de3461ec20.png" 
+      }
     ]
   },
   {
