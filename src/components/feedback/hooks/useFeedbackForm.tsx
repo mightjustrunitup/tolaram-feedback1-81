@@ -4,12 +4,16 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { FeedbackService, FeedbackSubmission } from "@/services/feedbackService";
 
-// Import our new smaller hooks
+// Import our smaller hooks
 import { useFormValidation } from "./useFormValidation";
 import { useProductSelection } from "./useProductSelection";
 import { useImageHandling } from "./useImageHandling";
 import { useFormData } from "./useFormData";
 
+/**
+ * Main feedback form hook that composes smaller, focused hooks
+ * to manage the feedback submission process.
+ */
 export function useFeedbackForm() {
   const navigate = useNavigate();
   const [submitting, setSubmitting] = useState(false);
@@ -35,19 +39,17 @@ export function useFeedbackForm() {
     formData
   );
 
-  // Enhance handleInputChange to clear errors
+  // Enhanced handlers with validation
   const handleInputWithValidation = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     handleInputChange(e);
     clearError(e.target.name);
   };
 
-  // Enhanced variant select to clear errors
   const handleVariantSelectWithValidation = (variantId: string) => {
     handleVariantSelect(variantId);
     clearError('variant');
   };
 
-  // Enhanced issue toggle to clear errors
   const handleIssueToggleWithValidation = (issue: string) => {
     handleIssueToggle(issue);
     clearError('issue');
