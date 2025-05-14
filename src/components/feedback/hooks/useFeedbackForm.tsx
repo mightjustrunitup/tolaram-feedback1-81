@@ -1,139 +1,56 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { FeedbackService, FeedbackSubmission } from "@/services/feedbackService";
-import { Product, products, PRODUCT_ISSUES } from "@/components/feedback/data/productData";
+
+// Import our new smaller hooks
+import { useFormValidation } from "./useFormValidation";
+import { useProductSelection } from "./useProductSelection";
+import { useImageHandling } from "./useImageHandling";
+import { useFormData } from "./useFormData";
 
 export function useFeedbackForm() {
   const navigate = useNavigate();
-  
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
-  const [formValid, setFormValid] = useState(false);
-  const [selectedIssues, setSelectedIssues] = useState<string[]>([]);
-  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   
-  const [formData, setFormData] = useState({
-    customerName: "",
-    location: "",
-    comments: ""
-  });
-
-  // Check form validity whenever relevant fields change
-  useEffect(() => {
-    const isValid = selectedProduct !== null && 
-                    selectedVariant !== null && 
-                    selectedIssues.length > 0;
-    setFormValid(isValid);
-  }, [selectedProduct, selectedVariant, selectedIssues]);
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    // Clear error for this field when changed
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
-    }
-  };
-
-  const handleProductSelect = (productId: string) => {
-    const product = products.find(p => p.id === productId);
-    if (product) {
-      setSelectedProduct(product);
-      // Reset the selected variant when product changes
-      setSelectedVariant(null);
-      // Reset the selected issues when product changes
-      setSelectedIssues([]);
-    }
-  };
-
-  const handleVariantSelect = (variantId: string) => {
-    setSelectedVariant(variantId);
-    // Reset the selected issues when variant changes
-    setSelectedIssues([]);
-    // Clear variant error if it exists
-    if (errors.variant) {
-      setErrors(prev => ({ ...prev, variant: "" }));
-    }
-  };
-
-  // Function to handle checkbox changes for issues - updated for multiple selections
-  const handleIssueToggle = (issue: string) => {
-    setSelectedIssues(current => {
-      // If already selected, remove it
-      if (current.includes(issue)) {
-        return current.filter(i => i !== issue);
-      } 
-      // Otherwise add it (allows multiple selection)
-      return [...current, issue];
-    });
-    
-    // Clear issue error if any issue is selected
-    if (errors.issue) {
-      setErrors(prev => ({ ...prev, issue: "" }));
-    }
-  };
+  // Use our smaller, focused hooks
+  const { formData, handleInputChange } = useFormData();
   
-  // Handle image uploads
-  const handleImageUpload = (files: FileList) => {
-    if (files) {
-      const newImages: string[] = [];
-      
-      Array.from(files).forEach(file => {
-        // Limit to image files
-        if (!file.type.startsWith('image/')) {
-          toast.error(`${file.name} is not an image file`);
-          return;
-        }
-        
-        // Create URL for preview
-        const imageUrl = URL.createObjectURL(file);
-        newImages.push(imageUrl);
-      });
-      
-      if (newImages.length > 0) {
-        setUploadedImages(prev => [...prev, ...newImages]);
-        toast.success(`${newImages.length} image${newImages.length > 1 ? 's' : ''} uploaded`);
-      }
-    }
-  };
-
-  // Handle removing uploaded images
-  const handleImageRemove = (index: number) => {
-    setUploadedImages(prevImages => {
-      const updatedImages = [...prevImages];
-      // Release the object URL to avoid memory leaks
-      URL.revokeObjectURL(updatedImages[index]);
-      // Remove the image from the array
-      updatedImages.splice(index, 1);
-      toast.info("Image removed");
-      return updatedImages;
-    });
-  };
+  const {
+    selectedProduct,
+    selectedVariant,
+    selectedIssues,
+    handleProductSelect,
+    handleVariantSelect,
+    handleIssueToggle
+  } = useProductSelection();
   
-  const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
-    
-    // Validate product selection
-    if (!selectedProduct) {
-      newErrors.product = "Please select a product";
-    }
+  const { uploadedImages, handleImageUpload, handleImageRemove } = useImageHandling();
+  
+  const { errors, formValid, clearError, validateForm } = useFormValidation(
+    selectedProduct,
+    selectedVariant,
+    selectedIssues,
+    formData
+  );
 
-    // Validate variant selection
-    if (selectedProduct && !selectedVariant) {
-      newErrors.variant = "Please select a product variant";
-    }
+  // Enhance handleInputChange to clear errors
+  const handleInputWithValidation = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    handleInputChange(e);
+    clearError(e.target.name);
+  };
 
-    // Validate one issue is selected
-    if (selectedProduct && selectedVariant && selectedIssues.length === 0) {
-      newErrors.issue = "Please select an issue with the product";
-    }
-    
-    // Set errors and return validity result
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+  // Enhanced variant select to clear errors
+  const handleVariantSelectWithValidation = (variantId: string) => {
+    handleVariantSelect(variantId);
+    clearError('variant');
+  };
+
+  // Enhanced issue toggle to clear errors
+  const handleIssueToggleWithValidation = (issue: string) => {
+    handleIssueToggle(issue);
+    clearError('issue');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -198,10 +115,10 @@ export function useFeedbackForm() {
     formData,
     selectedIssues,
     uploadedImages,
-    handleInputChange,
+    handleInputChange: handleInputWithValidation,
     handleProductSelect,
-    handleVariantSelect,
-    handleIssueToggle,
+    handleVariantSelect: handleVariantSelectWithValidation,
+    handleIssueToggle: handleIssueToggleWithValidation,
     handleImageUpload,
     handleImageRemove,
     handleSubmit
