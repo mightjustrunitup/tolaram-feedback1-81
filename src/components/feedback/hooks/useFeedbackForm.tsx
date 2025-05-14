@@ -59,15 +59,15 @@ export function useFeedbackForm() {
     }
   };
 
-  // Function to handle radio button changes for issues
+  // Function to handle checkbox changes for issues - updated for multiple selections
   const handleIssueToggle = (issue: string) => {
     setSelectedIssues(current => {
       // If already selected, remove it
       if (current.includes(issue)) {
         return current.filter(i => i !== issue);
       } 
-      // Otherwise add it (single selection)
-      return [issue];
+      // Otherwise add it (allows multiple selection)
+      return [...current, issue];
     });
     
     // Clear issue error if any issue is selected

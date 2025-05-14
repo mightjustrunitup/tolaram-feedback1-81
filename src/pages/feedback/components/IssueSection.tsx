@@ -22,12 +22,12 @@ export const IssueSection: React.FC<IssueSectionProps> = ({
   };
 
   return (
-    <div className="space-y-3 p-4 bg-white/80 rounded-md backdrop-blur-sm border border-gray-200">
-      <Label className="text-base font-medium">Did you experience any of these issues?</Label>
+    <div className="space-y-2 p-3 bg-white/80 rounded-md backdrop-blur-sm border border-gray-200">
+      <Label className="text-sm font-medium">Did you experience any of these issues?</Label>
       
-      <div className="space-y-2">
+      <div className="grid grid-cols-2 gap-1">
         {PRODUCT_ISSUES.map((issue) => (
-          <div key={issue} className="flex items-center space-x-2 bg-white rounded-md border border-gray-100 p-2 hover:bg-indomie-yellow/5 transition-colors">
+          <div key={issue} className={`flex items-center space-x-2 rounded-md p-1.5 transition-colors ${selectedIssues.includes(issue) ? 'bg-red-50 border border-red-100' : 'bg-white border border-gray-100 hover:bg-red-50/30'}`}>
             <Checkbox 
               id={issue.replace(/\s/g, '-')}
               checked={selectedIssues.includes(issue)}
@@ -36,7 +36,7 @@ export const IssueSection: React.FC<IssueSectionProps> = ({
             />
             <Label 
               htmlFor={issue.replace(/\s/g, '-')}
-              className="text-sm md:text-base font-medium cursor-pointer w-full"
+              className="text-xs md:text-sm font-medium cursor-pointer w-full"
             >
               {issue}
             </Label>
@@ -45,9 +45,9 @@ export const IssueSection: React.FC<IssueSectionProps> = ({
       </div>
       
       {selectedIssues.length > 0 && (
-        <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md">
-          <p className="text-sm text-amber-800 flex items-center gap-2">
-            Thank you for reporting: <span className="font-medium">{selectedIssues.join(", ")}</span>
+        <div className="mt-1 p-1.5 bg-red-50 border border-red-100 rounded-md">
+          <p className="text-xs text-red-800">
+            Issues selected: <span className="font-medium">{selectedIssues.join(", ")}</span>
           </p>
         </div>
       )}
