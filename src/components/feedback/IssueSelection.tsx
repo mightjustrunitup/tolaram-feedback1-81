@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Image } from "lucide-react";
+import { Paperclip } from "lucide-react";
 
 interface IssueSelectionProps {
   issues: string[];
@@ -82,7 +82,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
             onChange={onInputChange}
           />
           
-          {/* Image upload button */}
+          {/* Image upload button - Updated to be more descriptive */}
           <div className="absolute right-2 bottom-2">
             <input 
               type="file" 
@@ -97,10 +97,11 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
               variant="ghost" 
               size="sm"
               onClick={handleFileButtonClick}
-              className="bg-transparent hover:bg-gray-100"
-              title="Upload images"
+              className="bg-transparent hover:bg-gray-100 flex items-center gap-2"
+              title="Attach images to your feedback"
             >
-              <Image size={18} />
+              <Paperclip size={16} />
+              <span>Attach image</span>
             </Button>
           </div>
         </div>
