@@ -59,15 +59,15 @@ export function useFeedbackForm() {
     }
   };
 
-  // Function to handle checkbox changes for issues
+  // Function to handle radio button changes for issues
   const handleIssueToggle = (issue: string) => {
     setSelectedIssues(current => {
       // If already selected, remove it
       if (current.includes(issue)) {
         return current.filter(i => i !== issue);
       } 
-      // Otherwise add it
-      return [...current, issue];
+      // Otherwise add it (single selection)
+      return [issue];
     });
     
     // Clear issue error if any issue is selected
@@ -126,9 +126,9 @@ export function useFeedbackForm() {
       newErrors.variant = "Please select a product variant";
     }
 
-    // Validate at least one issue is selected
+    // Validate one issue is selected
     if (selectedProduct && selectedVariant && selectedIssues.length === 0) {
-      newErrors.issue = "Please select at least one issue with the product";
+      newErrors.issue = "Please select an issue with the product";
     }
     
     // Set errors and return validity result

@@ -1,4 +1,3 @@
-
 // Define product types
 export interface Product {
   id: string;
@@ -140,7 +139,7 @@ export const products: Product[] = [
   }
 ];
 
-// Product issues list
+// Product issues list - updated with specific issues
 export const PRODUCT_ISSUES = [
   "Mislabelled products / allergies",
   "Unusual taste or odor",

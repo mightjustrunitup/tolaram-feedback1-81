@@ -1,10 +1,10 @@
 
 import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Paperclip, X } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface IssueSelectionProps {
   issues: string[];
@@ -30,6 +30,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
   onImageRemove,
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [selectedIssue, setSelectedIssue] = useState<string>("");
 
   const handleFileButtonClick = () => {
     fileInputRef.current?.click();
@@ -43,6 +44,18 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
     }
   };
 
+  const handleRadioChange = (value: string) => {
+    setSelectedIssue(value);
+    // Clear previous selections and set the new one
+    const currentSelectedIssues = selectedIssues.filter(i => issues.includes(i));
+    if (currentSelectedIssues.length > 0) {
+      currentSelectedIssues.forEach(issue => {
+        handleIssueToggle(issue);
+      });
+    }
+    handleIssueToggle(value);
+  };
+
   return (
     <>
       <div className="space-y-3 p-4 bg-white/80 rounded-md backdrop-blur-sm border border-gray-200">
@@ -51,24 +64,27 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
           <span className="text-red-500">*</span>
         </Label>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <RadioGroup 
+          value={selectedIssue} 
+          onValueChange={handleRadioChange}
+          className="grid grid-cols-1 md:grid-cols-2 gap-3"
+        >
           {issues.map((issue) => (
             <div key={issue} className="flex items-center space-x-2">
-              <Checkbox 
+              <RadioGroupItem 
                 id={issue.replace(/\s/g, '-')} 
-                checked={selectedIssues.includes(issue)}
-                onCheckedChange={() => handleIssueToggle(issue)}
-                className="border-indomie-red"
+                value={issue}
+                className="border-indomie-red text-indomie-red"
               />
-              <label
+              <Label
                 htmlFor={issue.replace(/\s/g, '-')}
                 className="text-sm md:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
               >
                 {issue}
-              </label>
+              </Label>
             </div>
           ))}
-        </div>
+        </RadioGroup>
         {errors.issue && (
           <p className="text-sm text-red-500 mt-1">{errors.issue}</p>
         )}
@@ -86,7 +102,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
             onChange={onInputChange}
           />
           
-          {/* Image upload button - Updated to be more descriptive */}
+          {/* Image upload button */}
           <div className="absolute right-2 bottom-2">
             <input 
               type="file" 

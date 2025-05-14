@@ -1,17 +1,9 @@
 
 import React from "react";
 import { Label } from "@/components/ui/label";
-import { 
-  Select, 
-  SelectContent, 
-  SelectGroup, 
-  SelectItem, 
-  SelectLabel, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
 import { AlertCircle } from "lucide-react";
 import { PRODUCT_ISSUES } from "./types";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface IssueSectionProps {
   selectedIssue: string;
@@ -26,31 +18,28 @@ export const IssueSection: React.FC<IssueSectionProps> = ({
     <div className="space-y-3 p-4 bg-white/80 rounded-md backdrop-blur-sm border border-gray-200">
       <Label className="text-base font-medium">Did you experience any of these issues?</Label>
       
-      <Select 
+      <RadioGroup 
         value={selectedIssue} 
         onValueChange={setSelectedIssue}
+        className="space-y-2"
       >
-        <SelectTrigger className="w-full bg-white">
-          <SelectValue placeholder="Select any issues you experienced..." />
-        </SelectTrigger>
-        <SelectContent className="bg-white">
-          <SelectGroup>
-            <SelectLabel className="font-semibold text-indomie-red">Common Product Issues</SelectLabel>
-            {PRODUCT_ISSUES.map((issue) => (
-              <SelectItem 
-                key={issue} 
-                value={issue}
-                className="flex items-center gap-2 focus:bg-indomie-yellow/10 hover:bg-indomie-yellow/5 cursor-pointer"
-              >
-                <div className="flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-amber-500" />
-                  <span>{issue}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+        {PRODUCT_ISSUES.map((issue) => (
+          <div key={issue} className="flex items-center space-x-2 bg-white rounded-md border border-gray-100 p-2 hover:bg-indomie-yellow/5 transition-colors">
+            <RadioGroupItem 
+              value={issue} 
+              id={issue.replace(/\s/g, '-')}
+              className="border-indomie-red text-indomie-red"
+            />
+            <Label 
+              htmlFor={issue.replace(/\s/g, '-')}
+              className="text-sm md:text-base font-medium cursor-pointer flex items-center gap-2 w-full"
+            >
+              <AlertCircle className="h-4 w-4 text-amber-500" />
+              {issue}
+            </Label>
+          </div>
+        ))}
+      </RadioGroup>
       
       {selectedIssue && (
         <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md">

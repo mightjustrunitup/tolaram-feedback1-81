@@ -46,12 +46,11 @@ export const LOCATIONS = [
   "Enugu"
 ];
 
-// Issues list
+// Issues list - updated with specific issues
 export const PRODUCT_ISSUES = [
   "Mislabelled products / allergies",
   "Unusual taste or odor",
   "Texture - too hard or soft",
   "Mold or spoilage",
-  "Foreign elements",
-  "Other"
+  "Foreign elements"
 ];
