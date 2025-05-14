@@ -11,12 +11,12 @@ export interface Product {
   }>;
 }
 
-// Use local placeholder images with text to ensure display
+// Use the uploaded images for products
 export const products: Product[] = [
   {
     id: "indomie",
     name: "Indomie",
-    image: "https://placehold.co/400x300/FFFFFF/E51E25?text=Indomie",
+    image: "/lovable-uploads/461ea3d8-05b3-48c8-8bc4-9e4b89861ab6.png",
     description: "Delicious instant noodles with a variety of flavors",
     variants: [
       { id: "indomie-chicken", name: "Indomie Tables Chicken" },
@@ -32,7 +32,7 @@ export const products: Product[] = [
   {
     id: "minimie",
     name: "Minimie",
-    image: "https://placehold.co/400x300/FFFFFF/FFB800?text=Minimie",
+    image: "/lovable-uploads/874305fb-be2c-4f17-8a4f-421c6431e26b.png",
     description: "Mini-sized instant noodles perfect for snacking",
     variants: [
       { id: "minimie-chinchin", name: "Minimie Chinchin" },
@@ -45,7 +45,7 @@ export const products: Product[] = [
   {
     id: "dano",
     name: "Dano Milk",
-    image: "https://placehold.co/400x300/FFFFFF/0075C2?text=Dano+Milk",
+    image: "/lovable-uploads/dd263000-af16-4df8-a946-c31b9246b164.png",
     description: "High quality milk products for your daily needs",
     variants: [
       { id: "dano-slim", name: "Dano Slim" },
@@ -56,8 +56,8 @@ export const products: Product[] = [
   },
   {
     id: "kelloggs",
-    name: "Kellogg's Cereals",
-    image: "https://placehold.co/400x300/FFFFFF/E31837?text=Kellogg's",
+    name: "Kellogg's",
+    image: "/lovable-uploads/2228889c-90e6-49ea-9d37-1da003554e6f.png",
     description: "Nutritious breakfast cereals for a great start to your day",
     variants: [
       { id: "kelloggs-corn-flakes", name: "Kelloggs Corn Flakes" },

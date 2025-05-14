@@ -1,9 +1,9 @@
 
 import React from "react";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Product {
   id: string;
@@ -40,37 +40,42 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
           <span>Select Product</span>
           <span className="text-red-500">*</span>
         </Label>
-        <Select 
+        
+        <Tabs 
+          value={selectedProduct?.id || ""}
           onValueChange={handleProductSelect}
-          value={selectedProduct?.id}
+          className="w-full"
         >
-          <SelectTrigger className={errors.product ? "border-red-500" : ""}>
-            <SelectValue placeholder="Choose a product to provide feedback on" />
-          </SelectTrigger>
-          <SelectContent>
+          <TabsList className={cn(
+            "w-full grid grid-cols-4 h-auto bg-gray-100 p-1",
+            errors.product ? "border border-red-500" : ""
+          )}>
             {products.map((product) => (
-              <SelectItem key={product.id} value={product.id} className="flex items-center gap-2">
-                <div className="flex items-center gap-2">
-                  <div className="w-5 h-5 rounded overflow-hidden bg-gray-100">
-                    <img 
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <span>{product.name}</span>
+              <TabsTrigger 
+                key={product.id} 
+                value={product.id}
+                className="flex flex-col items-center py-3 px-2 data-[state=active]:bg-white border border-transparent data-[state=active]:border-gray-200 data-[state=active]:border-b-white"
+              >
+                <div className="w-16 h-16 mb-2 overflow-hidden flex items-center justify-center">
+                  <img 
+                    src={product.image}
+                    alt={product.name}
+                    className="max-w-full max-h-full object-contain"
+                  />
                 </div>
-              </SelectItem>
+                <span className="text-xs font-medium text-center">{product.name}</span>
+              </TabsTrigger>
             ))}
-          </SelectContent>
-        </Select>
+          </TabsList>
+        </Tabs>
+        
         {errors.product && (
           <p className="text-sm text-red-500 mt-1">{errors.product}</p>
         )}
       </div>
 
       {selectedProduct && (
-        <div className="space-y-2">
+        <div className="space-y-2 mt-4">
           <Label htmlFor="variant" className="flex justify-between">
             <span>Select {selectedProduct.name} Variant</span>
             <span className="text-red-500">*</span>
@@ -84,7 +89,7 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
             )}
           >
             {selectedProduct.variants.map((variant) => (
-              <div key={variant.id} className="flex items-center space-x-2 hover:bg-gray-50 p-2 rounded-md">
+              <div key={variant.id} className="flex items-center space-x-2 p-2 rounded-md border border-gray-200">
                 <RadioGroupItem value={variant.id} id={variant.id} />
                 <Label htmlFor={variant.id} className="cursor-pointer flex-grow text-sm">
                   {variant.name}
