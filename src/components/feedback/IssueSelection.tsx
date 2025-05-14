@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Paperclip, X, AlertCircle } from "lucide-react";
+import { Paperclip, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
 interface IssueSelectionProps {
@@ -71,9 +71,8 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
               />
               <Label
                 htmlFor={issue.replace(/\s/g, '-')}
-                className="text-sm md:text-base font-medium leading-none cursor-pointer flex items-center gap-2"
+                className="text-sm md:text-base font-medium leading-none cursor-pointer"
               >
-                <AlertCircle className="h-4 w-4 text-amber-500" />
                 {issue}
               </Label>
             </div>
@@ -86,8 +85,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
         
         {selectedIssues.length > 0 && (
           <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md">
-            <p className="text-sm text-amber-800 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4" />
+            <p className="text-sm text-amber-800">
               Selected issues: <span className="font-medium">{selectedIssues.join(", ")}</span>
             </p>
           </div>

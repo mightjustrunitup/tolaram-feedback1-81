@@ -1,7 +1,6 @@
 
 import React from "react";
 import { Label } from "@/components/ui/label";
-import { AlertCircle } from "lucide-react";
 import { PRODUCT_ISSUES } from "./types";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -37,9 +36,8 @@ export const IssueSection: React.FC<IssueSectionProps> = ({
             />
             <Label 
               htmlFor={issue.replace(/\s/g, '-')}
-              className="text-sm md:text-base font-medium cursor-pointer flex items-center gap-2 w-full"
+              className="text-sm md:text-base font-medium cursor-pointer w-full"
             >
-              <AlertCircle className="h-4 w-4 text-amber-500" />
               {issue}
             </Label>
           </div>
@@ -49,7 +47,6 @@ export const IssueSection: React.FC<IssueSectionProps> = ({
       {selectedIssues.length > 0 && (
         <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md">
           <p className="text-sm text-amber-800 flex items-center gap-2">
-            <AlertCircle className="h-4 w-4" />
             Thank you for reporting: <span className="font-medium">{selectedIssues.join(", ")}</span>
           </p>
         </div>
