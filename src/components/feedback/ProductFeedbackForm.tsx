@@ -8,6 +8,15 @@ import { ProductSelection } from "@/components/feedback/ProductSelection";
 import { IssueSelection } from "@/components/feedback/IssueSelection";
 import { Product } from "@/components/feedback/data/productData";
 
+// Define the product issues
+const PRODUCT_ISSUES = [
+  "Mislabelled products - allergies",
+  "Unusual taste or odor",
+  "Texture - too hard or soft",
+  "Mold or spoilage",
+  "Foreign elements"
+];
+
 interface ProductFeedbackFormProps {
   selectedProduct: Product | null;
   selectedVariant: string | null;
@@ -81,7 +90,7 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
           {/* Product Issues - Only display if a variant is selected */}
           {selectedVariant && (
             <IssueSelection
-              issues={[]}
+              issues={PRODUCT_ISSUES}
               selectedIssues={selectedIssues}
               comments={comments}
               handleIssueToggle={handleIssueToggle}

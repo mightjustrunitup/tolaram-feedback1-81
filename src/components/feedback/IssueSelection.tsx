@@ -3,8 +3,8 @@ import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Paperclip, X } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Paperclip, X, AlertCircle } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface IssueSelectionProps {
   issues: string[];
@@ -30,7 +30,6 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
   onImageRemove,
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
-  const [selectedIssue, setSelectedIssue] = useState<string>("");
 
   const handleFileButtonClick = () => {
     fileInputRef.current?.click();
@@ -44,17 +43,14 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
     }
   };
 
-  const handleRadioChange = (value: string) => {
-    setSelectedIssue(value);
-    // Clear previous selections and set the new one
-    const currentSelectedIssues = selectedIssues.filter(i => issues.includes(i));
-    if (currentSelectedIssues.length > 0) {
-      currentSelectedIssues.forEach(issue => {
-        handleIssueToggle(issue);
-      });
-    }
-    handleIssueToggle(value);
-  };
+  // Define product issues if none are provided
+  const displayedIssues = issues.length > 0 ? issues : [
+    "Mislabelled products - allergies",
+    "Unusual taste or odor",
+    "Texture - too hard or soft",
+    "Mold or spoilage",
+    "Foreign elements"
+  ];
 
   return (
     <>
@@ -64,29 +60,37 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
           <span className="text-red-500">*</span>
         </Label>
         
-        <RadioGroup 
-          value={selectedIssue} 
-          onValueChange={handleRadioChange}
-          className="grid grid-cols-1 md:grid-cols-2 gap-3"
-        >
-          {issues.map((issue) => (
-            <div key={issue} className="flex items-center space-x-2">
-              <RadioGroupItem 
-                id={issue.replace(/\s/g, '-')} 
-                value={issue}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          {displayedIssues.map((issue) => (
+            <div key={issue} className="flex items-center space-x-2 bg-white rounded-md border border-gray-100 p-2 hover:bg-indomie-yellow/5 transition-colors">
+              <Checkbox 
+                id={issue.replace(/\s/g, '-')}
+                checked={selectedIssues.includes(issue)}
+                onCheckedChange={() => handleIssueToggle(issue)}
                 className="border-indomie-red text-indomie-red"
               />
               <Label
                 htmlFor={issue.replace(/\s/g, '-')}
-                className="text-sm md:text-base font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                className="text-sm md:text-base font-medium leading-none cursor-pointer flex items-center gap-2"
               >
+                <AlertCircle className="h-4 w-4 text-amber-500" />
                 {issue}
               </Label>
             </div>
           ))}
-        </RadioGroup>
+        </div>
+        
         {errors.issue && (
           <p className="text-sm text-red-500 mt-1">{errors.issue}</p>
+        )}
+        
+        {selectedIssues.length > 0 && (
+          <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md">
+            <p className="text-sm text-amber-800 flex items-center gap-2">
+              <AlertCircle className="h-4 w-4" />
+              Selected issues: <span className="font-medium">{selectedIssues.join(", ")}</span>
+            </p>
+          </div>
         )}
       </div>
       
