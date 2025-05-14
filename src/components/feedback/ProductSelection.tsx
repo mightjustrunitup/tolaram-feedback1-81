@@ -47,23 +47,23 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
           className="w-full"
         >
           <TabsList className={cn(
-            "w-full grid grid-cols-4 h-auto bg-gray-100 p-1",
-            errors.product ? "border border-red-500" : ""
+            "w-full grid grid-cols-2 sm:grid-cols-4 gap-2 h-auto bg-gray-100 p-2 rounded-lg",
+            errors.product ? "border-2 border-red-500" : ""
           )}>
             {products.map((product) => (
               <TabsTrigger 
                 key={product.id} 
                 value={product.id}
-                className="flex flex-col items-center py-3 px-2 data-[state=active]:bg-white border border-transparent data-[state=active]:border-gray-200 data-[state=active]:border-b-white"
+                className="flex flex-col items-center py-3 px-2 rounded-lg data-[state=active]:bg-white data-[state=active]:border data-[state=active]:border-gray-200 data-[state=active]:shadow-md transition-shadow"
               >
-                <div className="w-16 h-16 mb-2 overflow-hidden flex items-center justify-center">
+                <div className="w-16 h-16 mb-2 flex items-center justify-center bg-white rounded-full p-2 shadow-sm">
                   <img 
                     src={product.image}
                     alt={product.name}
                     className="max-w-full max-h-full object-contain"
                   />
                 </div>
-                <span className="text-xs font-medium text-center">{product.name}</span>
+                <span className="text-xs sm:text-sm font-medium text-center line-clamp-2">{product.name}</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -84,14 +84,14 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
             value={selectedVariant || ""} 
             onValueChange={handleVariantSelect}
             className={cn(
-              "grid grid-cols-1 md:grid-cols-2 gap-2 p-2", 
-              errors.variant ? "border border-red-500 rounded-md" : ""
+              "grid grid-cols-1 sm:grid-cols-2 gap-2 p-2", 
+              errors.variant ? "border-2 border-red-500 rounded-md" : ""
             )}
           >
             {selectedProduct.variants.map((variant) => (
-              <div key={variant.id} className="flex items-center space-x-2 p-2 rounded-md border border-gray-200">
+              <div key={variant.id} className="flex items-center space-x-2 p-3 rounded-md border border-gray-200 bg-white shadow-sm">
                 <RadioGroupItem value={variant.id} id={variant.id} />
-                <Label htmlFor={variant.id} className="cursor-pointer flex-grow text-sm">
+                <Label htmlFor={variant.id} className="cursor-pointer flex-grow text-sm font-medium">
                   {variant.name}
                 </Label>
               </div>
