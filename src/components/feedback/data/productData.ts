@@ -1,4 +1,3 @@
-
 // Define product types
 export interface Product {
   id: string;
@@ -129,13 +128,41 @@ export const products: Product[] = [
     image: "/lovable-uploads/2228889c-90e6-49ea-9d37-1da003554e6f.png",
     description: "Nutritious breakfast cereals for a great start to your day",
     variants: [
-      { id: "kelloggs-corn-flakes", name: "Kelloggs Corn Flakes" },
-      { id: "kelloggs-cocopops", name: "Kelloggs Cocopops" },
-      { id: "kelloggs-frosties", name: "Kelloggs Frosties" },
-      { id: "kelloggs-rice-krispies", name: "Kelloggs Rice Krispies" },
-      { id: "kelloggs-go-grains", name: "Kelloggs Go grains" },
-      { id: "kelloggs-fruit-n-fiber", name: "Kelloggs Fruit 'n fiber" },
-      { id: "kelloggs-moon-star", name: "Kelloggs Moon & Star" }
+      { 
+        id: "kelloggs-corn-flakes", 
+        name: "Kelloggs Corn Flakes",
+        image: "/lovable-uploads/dd6a9229-c71f-464e-b21f-2bba59b16408.png"
+      },
+      { 
+        id: "kelloggs-cocopops", 
+        name: "Kelloggs Cocopops",
+        image: "/lovable-uploads/ab1ce367-52c7-4794-8327-edef18df7584.png"
+      },
+      { 
+        id: "kelloggs-frosties", 
+        name: "Kelloggs Frosties",
+        image: "/lovable-uploads/b1e4e618-bb02-4c79-bed5-a88290fa6a60.png"
+      },
+      { 
+        id: "kelloggs-rice-krispies", 
+        name: "Kelloggs Rice Krispies",
+        image: "/lovable-uploads/75b335ee-01ac-4e4b-a724-249efb520fe5.png"
+      },
+      { 
+        id: "kelloggs-go-grains", 
+        name: "Kelloggs Go grains",
+        image: "/lovable-uploads/8a39d91b-723e-4ecb-b9cf-7efcd5da4a45.png"
+      },
+      { 
+        id: "kelloggs-fruit-n-fiber", 
+        name: "Kelloggs Fruit 'n fiber",
+        image: "/lovable-uploads/4629d5f3-c79a-462d-8693-ddff12f49221.png"
+      },
+      { 
+        id: "kelloggs-moon-star", 
+        name: "Kelloggs Moon & Star",
+        image: "/lovable-uploads/87b8f310-db5d-4554-a66e-65ac50c9763c.png"
+      }
     ]
   }
 ];
