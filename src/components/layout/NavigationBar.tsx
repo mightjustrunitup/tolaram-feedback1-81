@@ -1,5 +1,5 @@
+
 import { cn } from "@/lib/utils";
-import Logo from "./Logo";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
@@ -20,8 +20,7 @@ export default function NavigationBar({ className }: NavigationBarProps) {
       className
     )}>
       <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <Logo className="text-white" />
-        {/* Navigation elements removed as requested */}
+        {/* Logo and navigation elements removed as requested */}
       </div>
     </nav>
   );
