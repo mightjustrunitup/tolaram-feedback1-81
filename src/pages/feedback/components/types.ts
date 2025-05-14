@@ -1,24 +1,20 @@
 
-// Types for the feedback form
-export interface Product {
-  id: string;
-  name: string;
-  image: string;
-  description: string;
-}
+import { Product as DataProduct } from "@/components/feedback/data/productData";
+
+export interface Product extends DataProduct {}
 
 export interface FeedbackFormData {
   customerName: string;
   email: string;
+  isAnonymous: boolean;
+  selectedIssues: string[];
+  date: Date;
   location: string;
   staffFriendliness: number;
   cleanliness: number;
   productAvailability: number;
   overallExperience: number;
   comments: string;
-  isAnonymous: boolean;
-  selectedIssues: string[]; // Updated from selectedIssue to selectedIssues
-  date: Date;
 }
 
 export interface FeedbackFormProps {
@@ -26,29 +22,24 @@ export interface FeedbackFormProps {
   onSubmitSuccess: (data: FeedbackFormData) => void;
 }
 
-// Default product to use when no product is selected
+// Default product for testing or when no product is selected
 export const DEFAULT_PRODUCT: Product = {
-  id: "general",
-  name: "Our Products",
-  image: "https://placehold.co/400x300/FFFFFF/E51E25?text=Tolaram",
-  description: "Please provide your general feedback about our products and services"
+  id: "indomie",
+  name: "Indomie",
+  image: "/lovable-uploads/461ea3d8-05b3-48c8-8bc4-9e4b89861ab6.png",
+  description: "Delicious instant noodles with a variety of flavors",
+  variants: [
+    {
+      id: "indomie-chicken",
+      name: "Indomie Tables Chicken",
+      image: "/lovable-uploads/19507191-d68b-49e6-b02b-a3fc272a922e.png"
+    }
+  ]
 };
 
-// Example locations - updated with new examples
-export const LOCATIONS = [
-  "Ikeja",
-  "Badagry",
-  "Lekki",
-  "Abuja",
-  "Port Harcourt",
-  "Ibadan",
-  "Kano",
-  "Enugu"
-];
-
-// Issues list - updated with specific issues
+// Product issues list - updated with specific issues
 export const PRODUCT_ISSUES = [
-  "Mislabelled products / allergies",
+  "Mislabelled products",
   "Unusual taste or odor",
   "Texture - too hard or soft",
   "Mold or spoilage",

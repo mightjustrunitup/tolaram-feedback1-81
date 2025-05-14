@@ -10,7 +10,7 @@ import { Product } from "@/components/feedback/data/productData";
 
 // Define the product issues
 const PRODUCT_ISSUES = [
-  "Mislabelled products - allergies",
+  "Mislabelled products",
   "Unusual taste or odor",
   "Texture - too hard or soft",
   "Mold or spoilage",
