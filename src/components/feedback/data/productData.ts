@@ -1,4 +1,5 @@
 
+
 // Define product types
 export interface Product {
   id: string;
@@ -71,8 +72,8 @@ export const products: Product[] = [
       { id: "minimie-chinchin", name: "Minimie Chinchin" },
       { id: "minimie-chinchin-spicy", name: "Minimie Chinchin (Hot and Spicy)" },
       { id: "minimie-noodle-chicken", name: "Minimie Instant Noodle Chicken Flavour" },
-      { id: "minimie-noodle-vegetable", name: "Minimie Instant Noodle Vegetable" },
-      { id: "minimie-noodle-tomato", name: "Minimie Instant Noodle Tomato" }
+      { id: "minimie-pasta", name: "Minimie Pasta" },
+      { id: "minimie-jollof", name: "Minimie Noodles Party Jollof Flavour" }
     ]
   },
   {
