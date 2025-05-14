@@ -85,14 +85,6 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
         {errors.issue && (
           <p className="text-xs text-red-500 mt-1">{errors.issue}</p>
         )}
-        
-        {selectedIssues.length > 0 && (
-          <div className="mt-1 p-1.5 bg-red-50 border border-red-100 rounded-md">
-            <p className="text-xs text-red-800">
-              Selected issues: <span className="font-medium">{selectedIssues.join(", ")}</span>
-            </p>
-          </div>
-        )}
       </div>
       
       <div className="space-y-2">

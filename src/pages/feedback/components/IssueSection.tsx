@@ -43,14 +43,6 @@ export const IssueSection: React.FC<IssueSectionProps> = ({
           </div>
         ))}
       </div>
-      
-      {selectedIssues.length > 0 && (
-        <div className="mt-1 p-1.5 bg-red-50 border border-red-100 rounded-md">
-          <p className="text-xs text-red-800">
-            Issues selected: <span className="font-medium">{selectedIssues.join(", ")}</span>
-          </p>
-        </div>
-      )}
     </div>
   );
 };
