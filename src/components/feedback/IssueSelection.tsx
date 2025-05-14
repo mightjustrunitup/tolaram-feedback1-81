@@ -45,7 +45,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
 
   // Define product issues if none are provided
   const displayedIssues = issues.length > 0 ? issues : [
-    "Mislabelled products - allergies",
+    "Mislabelled products",
     "Unusual taste or odor",
     "Texture - too hard or soft",
     "Mold or spoilage",
