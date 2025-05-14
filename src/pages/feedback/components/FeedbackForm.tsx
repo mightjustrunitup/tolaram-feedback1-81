@@ -16,7 +16,7 @@ import { CommentsSection } from "./CommentsSection";
 
 export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormProps) => {
   const [isAnonymous, setIsAnonymous] = useState(false);
-  const [selectedIssue, setSelectedIssue] = useState<string>("");
+  const [selectedIssues, setSelectedIssues] = useState<string[]>([]);
   const [date, setDate] = useState<Date>(new Date());
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
@@ -88,7 +88,7 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
       onSubmitSuccess({
         ...formData,
         isAnonymous,
-        selectedIssue,
+        selectedIssues,
         date
       });
     }, 1500);
@@ -155,10 +155,10 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
             handleRatingChange={handleRatingChange}
           />
 
-          {/* Issues Section */}
+          {/* Issues Section - Updated to use multiple selections */}
           <IssueSection 
-            selectedIssue={selectedIssue}
-            setSelectedIssue={setSelectedIssue}
+            selectedIssues={selectedIssues}
+            setSelectedIssues={setSelectedIssues}
           />
 
           {/* Comments Section */}
