@@ -107,7 +107,7 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
                 )}
               >
                 {variant.image && (
-                  <div className="flex-shrink-0 w-14 h-14 rounded-md overflow-hidden border border-gray-100">
+                  <div className="flex-shrink-0 w-14 h-14 rounded-md overflow-hidden border border-gray-100 bg-white">
                     <img 
                       src={variant.image}
                       alt={variant.name}
@@ -169,3 +169,4 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
     </>
   );
 };
+
