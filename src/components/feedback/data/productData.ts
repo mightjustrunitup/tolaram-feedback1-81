@@ -52,7 +52,7 @@ export const products: Product[] = [
       { 
         id: "dano-slim", 
         name: "Dano Slim", 
-        image: "/lovable-uploads/929d4442-067d-473f-84da-ba6dd8fb000e.png" 
+        image: "/lovable-uploads/2c5f3951-33eb-4fed-9a3a-9cdb0e337fa4.png" 
       },
       { 
         id: "dano-cool-cow", 
@@ -62,7 +62,7 @@ export const products: Product[] = [
       { 
         id: "dano-uht", 
         name: "Dano UHT", 
-        image: "/lovable-uploads/677e8614-0e6b-49a5-b622-22b1771e6e3e.png" 
+        image: "/lovable-uploads/5b7f19d0-93a3-4eb0-8c17-cce607a8cf78.png" 
       },
       { 
         id: "dano-vitakids", 
