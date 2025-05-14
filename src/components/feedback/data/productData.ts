@@ -45,7 +45,7 @@ export const products: Product[] = [
   {
     id: "dano",
     name: "Dano Milk",
-    image: "/lovable-uploads/24aeeb1b-8f5f-4a6d-b36b-6c5bf7047e2a.png",
+    image: "/lovable-uploads/15ba117d-4dfb-4486-b205-31156682b35f.png",
     description: "High quality milk products for your daily needs",
     variants: [
       { id: "dano-slim", name: "Dano Slim" },
