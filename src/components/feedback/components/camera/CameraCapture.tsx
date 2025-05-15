@@ -29,7 +29,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [cameraError, setCameraError] = useState(false);
   const [streamActive, setStreamActive] = useState(false);
-
+  
   // Handle camera stream when active
   useEffect(() => {
     let stream: MediaStream | null = null;
@@ -42,8 +42,11 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
       setStreamActive(false);
       
       try {
+        // Pre-warm camera access before showing UI
         console.log("Accessing camera...");
-        stream = await navigator.mediaDevices.getUserMedia({ 
+        
+        // Set shorter timeout for camera access
+        const cameraAccessPromise = navigator.mediaDevices.getUserMedia({ 
           video: { 
             facingMode: 'environment',
             width: { ideal: 1280 },
@@ -51,6 +54,13 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
           }, 
           audio: false 
         });
+        
+        // Race between camera access and timeout
+        const timeoutPromise = new Promise<MediaStream>((_, reject) => {
+          setTimeout(() => reject(new Error("Camera access timeout")), 15000);
+        });
+        
+        stream = await Promise.race([cameraAccessPromise, timeoutPromise]);
         
         console.log("Camera access granted:", stream);
         
@@ -81,8 +91,12 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
       }
     };
     
+    // Start camera setup with a small delay to ensure the UI is ready
     if (isCameraActive) {
-      setupCamera();
+      const timer = setTimeout(() => {
+        setupCamera();
+      }, 100);
+      return () => clearTimeout(timer);
     }
     
     return () => {
