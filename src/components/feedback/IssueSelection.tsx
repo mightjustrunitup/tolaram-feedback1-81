@@ -201,39 +201,37 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
                 variant="ghost" 
                 size="sm"
                 onClick={handleCancelAttach}
-                className="bg-gray-100 hover:bg-gray-200 flex items-center gap-1"
+                className="bg-gray-100 hover:bg-gray-200 flex items-center"
                 title="Cancel image attachment"
               >
                 <X size={14} />
-                <span className="text-xs">Cancel</span>
               </Button>
             )}
             
-            {/* Camera button for mobile */}
+            {/* Camera button for mobile - icon only */}
             {isMobile && hasCamera && onToggleCamera && (
               <Button
                 type="button"
                 variant="ghost" 
                 size="sm"
                 onClick={onToggleCamera}
-                className="bg-transparent hover:bg-gray-100 flex items-center gap-1"
+                className="bg-transparent hover:bg-gray-100 flex items-center"
                 title="Take a photo"
               >
                 <Camera size={14} />
-                <span className="text-xs">Camera</span>
               </Button>
             )}
             
+            {/* Attach button - icon only */}
             <Button
               type="button"
               variant="ghost" 
               size="sm"
               onClick={handleFileButtonClick}
-              className="bg-transparent hover:bg-gray-100 flex items-center gap-1"
+              className="bg-transparent hover:bg-gray-100 flex items-center"
               title="Attach images to your feedback"
             >
               <Paperclip size={14} />
-              <span className="text-xs">Attach</span>
             </Button>
           </div>
         </div>
