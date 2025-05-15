@@ -35,6 +35,9 @@ interface ProductFeedbackFormProps {
   handleIssueToggle: (issue: string) => void;
   onImageUpload: (files: FileList) => void;
   onImageRemove: (index: number) => void;
+  isCameraActive?: boolean;
+  onCameraCapture?: (imageData: string) => void;
+  onToggleCamera?: () => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
@@ -56,6 +59,9 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
   handleIssueToggle,
   onImageUpload,
   onImageRemove,
+  isCameraActive,
+  onCameraCapture,
+  onToggleCamera,
   onSubmit
 }) => {
   return (
@@ -99,6 +105,9 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
               uploadedImages={uploadedImages}
               onImageUpload={onImageUpload}
               onImageRemove={onImageRemove}
+              isCameraActive={isCameraActive}
+              onCameraCapture={onCameraCapture}
+              onToggleCamera={onToggleCamera}
             />
           )}
           

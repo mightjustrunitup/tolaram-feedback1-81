@@ -4,6 +4,7 @@ import { toast } from "sonner";
 
 export function useImageHandling() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [isCameraActive, setIsCameraActive] = useState(false);
   
   // Handle image uploads
   const handleImageUpload = (files: FileList) => {
@@ -29,12 +30,26 @@ export function useImageHandling() {
     }
   };
 
+  // Handle taking a photo with device camera
+  const handleCameraCapture = (imageData: string) => {
+    setUploadedImages(prev => [...prev, imageData]);
+    setIsCameraActive(false);
+    toast.success("Photo captured successfully");
+  };
+
+  // Toggle camera on/off
+  const toggleCamera = () => {
+    setIsCameraActive(prev => !prev);
+  };
+
   // Handle removing uploaded images
   const handleImageRemove = (index: number) => {
     setUploadedImages(prevImages => {
       const updatedImages = [...prevImages];
-      // Release the object URL to avoid memory leaks
-      URL.revokeObjectURL(updatedImages[index]);
+      // If the image URL starts with blob:, it's a local file URL that needs to be revoked
+      if (updatedImages[index].startsWith('blob:')) {
+        URL.revokeObjectURL(updatedImages[index]);
+      }
       // Remove the image from the array
       updatedImages.splice(index, 1);
       toast.info("Image removed");
@@ -44,7 +59,10 @@ export function useImageHandling() {
 
   return {
     uploadedImages,
+    isCameraActive,
     handleImageUpload,
-    handleImageRemove
+    handleImageRemove,
+    handleCameraCapture,
+    toggleCamera
   };
 }
