@@ -27,6 +27,14 @@ export const useCamera = ({ isCameraActive }: UseCameraProps) => {
       try {
         console.log("Accessing camera...");
         
+        // Check if camera access is available
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          console.error("Camera API not available in this browser");
+          setCameraError(true);
+          setIsLoading(false);
+          return;
+        }
+        
         const cameraAccessPromise = navigator.mediaDevices.getUserMedia({ 
           video: { 
             facingMode: 'environment',
@@ -37,7 +45,7 @@ export const useCamera = ({ isCameraActive }: UseCameraProps) => {
         });
         
         const timeoutPromise = new Promise<MediaStream>((_, reject) => {
-          setTimeout(() => reject(new Error("Camera access timeout")), 5000);
+          setTimeout(() => reject(new Error("Camera access timeout")), 10000);
         });
         
         stream = await Promise.race([cameraAccessPromise, timeoutPromise]);
@@ -68,7 +76,14 @@ export const useCamera = ({ isCameraActive }: UseCameraProps) => {
         console.error("Error accessing camera:", error);
         setCameraError(true);
         setIsLoading(false);
-        toast.error("Could not access camera. Please check permissions.");
+        
+        // Check if it's a permissions error specifically
+        if (error instanceof DOMException && 
+            (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError')) {
+          toast.error("Camera access denied. Please check your browser settings.");
+        } else {
+          toast.error("Could not access camera. It may not be available on this device.");
+        }
       }
     };
     
@@ -91,7 +106,7 @@ export const useCamera = ({ isCameraActive }: UseCameraProps) => {
     if (!videoRef.current || !canvasRef.current || !streamActive) {
       console.log("Cannot capture - video or canvas not ready, or stream not active");
       toast.error("Camera is not ready. Please try again.");
-      return;
+      return null;
     }
     
     try {

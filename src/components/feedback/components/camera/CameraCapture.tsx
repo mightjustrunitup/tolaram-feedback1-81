@@ -71,6 +71,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
         accept="image/*"
         className="hidden"
         onChange={handleFileChange}
+        capture="environment"
       />
       
       {/* Action buttons */}
