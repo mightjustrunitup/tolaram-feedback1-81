@@ -3,22 +3,25 @@ import React, { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Camera } from "lucide-react";
+import { Loader2, Camera, FileImage } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface CameraCaptureProps {
   isCameraActive: boolean;
   onToggleCamera: () => void;
   onCameraCapture: (imageData: string) => void;
+  onImageUpload?: (files: FileList) => void;
 }
 
 export const CameraCapture: React.FC<CameraCaptureProps> = ({
   isCameraActive,
   onToggleCamera,
   onCameraCapture,
+  onImageUpload
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [cameraError, setCameraError] = useState(false);
   const [streamActive, setStreamActive] = useState(false);
@@ -123,6 +126,19 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
     }
   };
 
+  const handleFileSelect = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0 && onImageUpload) {
+      onImageUpload(e.target.files);
+      onToggleCamera(); // Close the camera modal
+    }
+  };
+
   return (
     <Dialog open={isCameraActive} onOpenChange={onToggleCamera}>
       <DialogContent className="sm:max-w-md p-0">
@@ -155,14 +171,24 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
           </div>
           <canvas ref={canvasRef} className="hidden" />
           
+          {/* Hidden file input for gallery selection */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            className="hidden"
+            onChange={handleFileChange}
+          />
+          
           <div className="flex justify-center gap-4 w-full">
             <Button
               type="button"
               variant="secondary"
-              onClick={onToggleCamera}
-              disabled={isLoading}
+              onClick={handleFileSelect}
+              className="flex items-center gap-2"
             >
-              Cancel
+              <FileImage size={16} />
+              Select from Gallery
             </Button>
             <Button 
               type="button" 

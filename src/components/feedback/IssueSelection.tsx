@@ -105,11 +105,12 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
       </div>
       
       {/* Camera Component */}
-      {isCameraActive && onCameraCapture && onToggleCamera && (
+      {isCameraActive && onCameraCapture && onToggleCamera && onImageUpload && (
         <CameraCapture
           isCameraActive={isCameraActive}
           onToggleCamera={onToggleCamera}
           onCameraCapture={onCameraCapture}
+          onImageUpload={onImageUpload}
         />
       )}
     </>
