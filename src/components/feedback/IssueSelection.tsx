@@ -1,9 +1,11 @@
+
 import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Paperclip, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface IssueSelectionProps {
   issues: string[];
@@ -29,8 +31,11 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
   onImageRemove,
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
+  const [isAttaching, setIsAttaching] = useState(false);
 
   const handleFileButtonClick = () => {
+    setIsAttaching(true);
     fileInputRef.current?.click();
   };
 
@@ -39,6 +44,18 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
       onImageUpload(e.target.files);
       // Reset the file input so the same file can be selected again
       e.target.value = '';
+      // Set isAttaching to false to hide the input on mobile after file selection
+      setIsAttaching(false);
+    } else {
+      // If no files were selected, reset the attaching state
+      setIsAttaching(false);
+    }
+  };
+
+  const handleCancelAttach = () => {
+    setIsAttaching(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
@@ -98,7 +115,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
           />
           
           {/* Image upload button */}
-          <div className="absolute right-2 bottom-2">
+          <div className="absolute right-2 bottom-2 flex items-center gap-1">
             <input 
               type="file" 
               accept="image/*" 
@@ -106,7 +123,23 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
               className="hidden"
               ref={fileInputRef}
               onChange={handleFileChange}
+              onClick={(e) => isAttaching ? e.stopPropagation() : null}
             />
+            
+            {isMobile && isAttaching && (
+              <Button
+                type="button"
+                variant="ghost" 
+                size="sm"
+                onClick={handleCancelAttach}
+                className="bg-gray-100 hover:bg-gray-200 flex items-center gap-1"
+                title="Cancel image attachment"
+              >
+                <X size={14} />
+                <span className="text-xs">Cancel</span>
+              </Button>
+            )}
+            
             <Button
               type="button"
               variant="ghost" 
@@ -125,9 +158,9 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
         {uploadedImages.length > 0 && (
           <div className="mt-1">
             <p className="text-xs text-gray-500 mb-1">Uploaded images:</p>
-            <div className="flex flex-wrap gap-1">
+            <div className="flex flex-wrap gap-2">
               {uploadedImages.map((src, index) => (
-                <div key={index} className="relative w-12 h-12 border rounded overflow-hidden group">
+                <div key={index} className="relative w-16 h-16 border rounded overflow-hidden group">
                   <img 
                     src={src} 
                     alt={`Uploaded image ${index + 1}`} 
@@ -136,11 +169,11 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
                   {onImageRemove && (
                     <button
                       type="button"
-                      className="absolute top-0 right-0 bg-black/60 p-1 rounded-bl hidden group-hover:block"
+                      className="absolute top-0 right-0 bg-black/60 p-1 rounded-bl md:hidden md:group-hover:block"
                       onClick={() => onImageRemove(index)}
                       title="Remove image"
                     >
-                      <X size={10} className="text-white" />
+                      <X size={12} className="text-white" />
                     </button>
                   )}
                 </div>
