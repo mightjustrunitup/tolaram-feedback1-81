@@ -3,7 +3,6 @@ import React, { useRef } from "react";
 import { toast } from "sonner";
 import { CameraViewport } from "./CameraViewport";
 import { CameraErrorState } from "./CameraErrorState";
-import { CameraLoadingState } from "./CameraLoadingState";
 import { CameraControls } from "./CameraControls";
 import { CameraModal } from "./CameraModal";
 import { useCamera } from "./hooks/useCamera";
@@ -26,7 +25,6 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   const { 
     videoRef, 
     canvasRef, 
-    isLoading, 
     cameraError, 
     streamActive,
     capturePhoto 
@@ -57,9 +55,8 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
     <CameraModal isOpen={isCameraActive} onClose={onToggleCamera}>
       {/* Camera viewport */}
       <div className="relative w-full aspect-[3/4] bg-black overflow-hidden">
-        {isLoading && <CameraLoadingState />}
         {cameraError && <CameraErrorState onSelectGallery={handleFileSelect} />}
-        {!isLoading && !cameraError && <CameraViewport videoRef={videoRef} />}
+        {!cameraError && <CameraViewport videoRef={videoRef} />}
       </div>
       
       <canvas ref={canvasRef} className="hidden" />
@@ -78,7 +75,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
       <CameraControls 
         onCaptureClick={handleCaptureClick}
         onGalleryClick={handleFileSelect}
-        disabled={isLoading || cameraError || !streamActive}
+        disabled={cameraError || !streamActive}
       />
     </CameraModal>
   );

@@ -9,7 +9,6 @@ interface UseCameraProps {
 export const useCamera = ({ isCameraActive }: UseCameraProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [cameraError, setCameraError] = useState(false);
   const [streamActive, setStreamActive] = useState(false);
   
@@ -20,7 +19,6 @@ export const useCamera = ({ isCameraActive }: UseCameraProps) => {
     const setupCamera = async () => {
       if (!isCameraActive) return;
       
-      setIsLoading(true);
       setCameraError(false);
       setStreamActive(false);
       
@@ -31,11 +29,10 @@ export const useCamera = ({ isCameraActive }: UseCameraProps) => {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           console.error("Camera API not available in this browser");
           setCameraError(true);
-          setIsLoading(false);
           return;
         }
         
-        const cameraAccessPromise = navigator.mediaDevices.getUserMedia({ 
+        stream = await navigator.mediaDevices.getUserMedia({ 
           video: { 
             facingMode: 'environment',
             width: { ideal: 640 },
@@ -43,12 +40,6 @@ export const useCamera = ({ isCameraActive }: UseCameraProps) => {
           }, 
           audio: false 
         });
-        
-        const timeoutPromise = new Promise<MediaStream>((_, reject) => {
-          setTimeout(() => reject(new Error("Camera access timeout")), 10000);
-        });
-        
-        stream = await Promise.race([cameraAccessPromise, timeoutPromise]);
         
         console.log("Camera access granted:", stream);
         
@@ -61,13 +52,11 @@ export const useCamera = ({ isCameraActive }: UseCameraProps) => {
               videoRef.current.play()
                 .then(() => {
                   console.log("Video playing successfully");
-                  setIsLoading(false);
                   setStreamActive(true);
                 })
                 .catch(err => {
                   console.error("Error playing video:", err);
                   setCameraError(true);
-                  setIsLoading(false);
                 });
             }
           };
@@ -75,7 +64,6 @@ export const useCamera = ({ isCameraActive }: UseCameraProps) => {
       } catch (error) {
         console.error("Error accessing camera:", error);
         setCameraError(true);
-        setIsLoading(false);
         
         // Check if it's a permissions error specifically
         if (error instanceof DOMException && 
@@ -138,7 +126,6 @@ export const useCamera = ({ isCameraActive }: UseCameraProps) => {
   return {
     videoRef,
     canvasRef,
-    isLoading,
     cameraError,
     streamActive,
     capturePhoto
