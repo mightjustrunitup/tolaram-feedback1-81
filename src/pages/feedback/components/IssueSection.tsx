@@ -27,12 +27,11 @@ export const IssueSection: React.FC<IssueSectionProps> = ({
       
       <div className="grid grid-cols-2 gap-1">
         {PRODUCT_ISSUES.map((issue) => (
-          <div key={issue} className={`flex items-center space-x-2 rounded-md p-1.5 transition-colors ${selectedIssues.includes(issue) ? 'bg-red-50 border border-red-100' : 'bg-white border border-gray-100 hover:bg-red-50/30'}`}>
+          <div key={issue} className={`flex items-center space-x-2 rounded-md p-1.5 transition-colors ${selectedIssues.includes(issue) ? 'bg-gray-50 border border-gray-200' : 'bg-white border border-gray-100 hover:bg-gray-50/30'}`}>
             <Checkbox 
               id={issue.replace(/\s/g, '-')}
               checked={selectedIssues.includes(issue)}
               onCheckedChange={() => toggleIssue(issue)}
-              className="border-indomie-red text-indomie-red"
             />
             <Label 
               htmlFor={issue.replace(/\s/g, '-')}

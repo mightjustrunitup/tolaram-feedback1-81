@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -64,13 +63,12 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
           {displayedIssues.map((issue) => (
             <div 
               key={issue} 
-              className={`flex items-center space-x-2 rounded-md p-1.5 transition-colors ${selectedIssues.includes(issue) ? 'bg-red-50 border border-red-100' : 'bg-white border border-gray-100 hover:bg-red-50/30'}`}
+              className={`flex items-center space-x-2 rounded-md p-1.5 transition-colors ${selectedIssues.includes(issue) ? 'bg-gray-50 border border-gray-200' : 'bg-white border border-gray-100 hover:bg-gray-50/30'}`}
             >
               <Checkbox 
                 id={issue.replace(/\s/g, '-')}
                 checked={selectedIssues.includes(issue)}
                 onCheckedChange={() => handleIssueToggle(issue)}
-                className="border-indomie-red text-indomie-red"
               />
               <Label
                 htmlFor={issue.replace(/\s/g, '-')}
