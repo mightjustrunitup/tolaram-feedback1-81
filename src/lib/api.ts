@@ -2,9 +2,10 @@
 /**
  * API client for communicating with PHP backend
  */
+import { devProxyFetch, getApiBaseUrl, isLocalLiveServer } from './dev-proxy';
 
-// Base URL for the PHP backend - change to your buddy's API URL when deployed
-const API_BASE_URL = "http://localhost:8000/api";
+// Base URL for the PHP backend - dynamically determined based on environment
+const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Make an API request to the PHP backend
@@ -27,8 +28,11 @@ export const apiRequest = async <T>(endpoint: string, options: RequestInit = {})
     ...options.headers,
   };
 
+  // Choose which fetch to use based on environment
+  const fetchFunc = isLocalLiveServer() ? devProxyFetch : fetch;
+
   try {
-    const response = await fetch(url, {
+    const response = await fetchFunc(url, {
       ...options,
       headers,
       // Include credentials to handle cookies if needed
