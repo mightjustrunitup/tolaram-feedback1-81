@@ -24,7 +24,7 @@ export const CameraControls: React.FC<CameraControlsProps> = ({
           className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
         >
           <FileImage size={16} className="mr-2" />
-          Gallery
+          Select Photos
         </Button>
         
         <Button 

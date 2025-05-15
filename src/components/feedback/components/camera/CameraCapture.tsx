@@ -39,6 +39,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   };
 
   const handleFileSelect = () => {
+    // Directly click the file input to open the gallery selector
     if (fileInputRef.current) {
       fileInputRef.current.click();
     }
@@ -47,7 +48,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0 && onImageUpload) {
       onImageUpload(e.target.files);
-      onToggleCamera(); // Close the camera modal
+      onToggleCamera(); // Close the camera modal after selection
     }
   };
 
@@ -68,7 +69,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
         accept="image/*"
         className="hidden"
         onChange={handleFileChange}
-        capture="environment"
+        multiple
       />
       
       {/* Action buttons */}
