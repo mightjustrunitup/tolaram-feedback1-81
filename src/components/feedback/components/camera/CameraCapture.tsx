@@ -42,22 +42,23 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
       setStreamActive(false);
       
       try {
-        // Pre-warm camera access before showing UI
+        // Initialize camera immediately
         console.log("Accessing camera...");
         
-        // Set shorter timeout for camera access
+        // Use a shorter timeout (5 seconds instead of 15)
         const cameraAccessPromise = navigator.mediaDevices.getUserMedia({ 
           video: { 
             facingMode: 'environment',
-            width: { ideal: 1280 },
-            height: { ideal: 720 }
+            // Request lower resolution first for faster initialization
+            width: { ideal: 640 },
+            height: { ideal: 480 }
           }, 
           audio: false 
         });
         
-        // Race between camera access and timeout
+        // Shorter timeout for camera access (5 seconds instead of 15)
         const timeoutPromise = new Promise<MediaStream>((_, reject) => {
-          setTimeout(() => reject(new Error("Camera access timeout")), 15000);
+          setTimeout(() => reject(new Error("Camera access timeout")), 5000);
         });
         
         stream = await Promise.race([cameraAccessPromise, timeoutPromise]);
@@ -66,6 +67,8 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
         
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
+          
+          // Play video as soon as metadata is loaded
           videoRef.current.onloadedmetadata = () => {
             console.log("Video metadata loaded");
             if (videoRef.current) {
@@ -91,12 +94,9 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
       }
     };
     
-    // Start camera setup with a small delay to ensure the UI is ready
+    // Start camera setup immediately without delay
     if (isCameraActive) {
-      const timer = setTimeout(() => {
-        setupCamera();
-      }, 100);
-      return () => clearTimeout(timer);
+      setupCamera();
     }
     
     return () => {
