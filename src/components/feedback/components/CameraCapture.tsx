@@ -1,8 +1,9 @@
 
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { toast } from "@/hooks/use-toast";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
 
 interface CameraCaptureProps {
   isCameraActive: boolean;
@@ -17,29 +18,47 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [cameraError, setCameraError] = useState(false);
 
   // Handle camera stream when active
   useEffect(() => {
     let stream: MediaStream | null = null;
     
-    if (isCameraActive && videoRef.current) {
-      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' }, audio: false })
-        .then((mediaStream) => {
-          stream = mediaStream;
-          if (videoRef.current) {
-            videoRef.current.srcObject = mediaStream;
-            videoRef.current.play().catch(error => console.error("Error playing video:", error));
-          }
-        })
-        .catch(error => {
-          console.error("Error accessing camera:", error);
-          if (onToggleCamera) onToggleCamera();
-          toast({
-            title: "Camera Error",
-            description: "Could not access camera. Please check permissions.",
-            variant: "destructive",
-          });
+    const setupCamera = async () => {
+      if (!isCameraActive || !videoRef.current) return;
+      
+      setIsLoading(true);
+      setCameraError(false);
+      
+      try {
+        // Request camera access with environment camera preferred (back camera on mobile)
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: 'environment',
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }, 
+          audio: false 
         });
+        
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          // Play needs to be called as a result of user gesture on some browsers
+          await videoRef.current.play();
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error accessing camera:", error);
+        setCameraError(true);
+        setIsLoading(false);
+        toast.error("Could not access camera. Please check permissions.");
+        if (onToggleCamera) onToggleCamera();
+      }
+    };
+    
+    if (isCameraActive) {
+      setupCamera();
     }
     
     return () => {
@@ -64,7 +83,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         
         // Convert canvas content to data URL and pass to handler
-        const imageData = canvas.toDataURL('image/jpeg');
+        const imageData = canvas.toDataURL('image/jpeg', 0.8);
         onCameraCapture(imageData);
       }
     }
@@ -72,14 +91,28 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
 
   return (
     <Dialog open={isCameraActive} onOpenChange={onToggleCamera}>
-      <DialogContent className="sm:max-w-md">
-        <div className="flex flex-col items-center space-y-4 pt-2">
+      <DialogContent className="sm:max-w-md p-0">
+        <div className="flex flex-col items-center space-y-4 p-4">
           <div className="relative w-full aspect-[3/4] bg-black rounded-lg overflow-hidden">
+            {isLoading && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <Loader2 className="h-8 w-8 animate-spin text-white" />
+                <span className="text-white ml-2">Activating camera...</span>
+              </div>
+            )}
+            
+            {cameraError && (
+              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                <p className="text-white text-center px-4">Camera access denied or not available.</p>
+              </div>
+            )}
+            
             <video 
               ref={videoRef} 
               className="absolute inset-0 w-full h-full object-cover"
               autoPlay 
               playsInline 
+              muted
             />
           </div>
           <canvas ref={canvasRef} className="hidden" />
@@ -89,6 +122,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
               type="button"
               variant="secondary"
               onClick={onToggleCamera}
+              disabled={isLoading}
             >
               Cancel
             </Button>
@@ -96,6 +130,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
               type="button" 
               onClick={capturePhoto}
               className="bg-indomie-red hover:bg-indomie-red/90"
+              disabled={isLoading || cameraError}
             >
               Capture Photo
             </Button>

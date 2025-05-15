@@ -41,10 +41,10 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
 
   // Check if device has camera capability
   useEffect(() => {
-    if (isMobile && navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
       setHasCamera(true);
     }
-  }, [isMobile]);
+  }, []);
 
   return (
     <>
@@ -90,9 +90,9 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
       </div>
       
       {/* Camera Component */}
-      {onCameraCapture && onToggleCamera && (
+      {isCameraActive && onCameraCapture && onToggleCamera && (
         <CameraCapture
-          isCameraActive={!!isCameraActive}
+          isCameraActive={isCameraActive}
           onToggleCamera={onToggleCamera}
           onCameraCapture={onCameraCapture}
         />
