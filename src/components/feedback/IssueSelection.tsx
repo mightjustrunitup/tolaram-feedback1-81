@@ -216,11 +216,11 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
                 variant="ghost" 
                 size="sm"
                 onClick={onToggleCamera}
-                className="bg-transparent hover:bg-gray-100 flex items-center gap-2"
+                className="bg-transparent hover:bg-gray-100 flex items-center gap-1"
                 title="Take a photo"
               >
                 <Camera size={14} />
-                <span className="text-xs">Take Photo</span>
+                <span className="text-xs">Camera</span>
               </Button>
             )}
             
@@ -229,11 +229,11 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
               variant="ghost" 
               size="sm"
               onClick={handleFileButtonClick}
-              className="bg-transparent hover:bg-gray-100 flex items-center gap-2"
+              className="bg-transparent hover:bg-gray-100 flex items-center gap-1"
               title="Attach images to your feedback"
             >
               <Paperclip size={14} />
-              <span className="text-xs">Attach image</span>
+              <span className="text-xs">Attach</span>
             </Button>
           </div>
         </div>
