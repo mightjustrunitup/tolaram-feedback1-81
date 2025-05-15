@@ -3,7 +3,7 @@ import React, { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, Camera, FileImage } from "lucide-react";
+import { Loader2, Camera, FileImage, X } from "lucide-react";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface CameraCaptureProps {
@@ -141,23 +141,43 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
 
   return (
     <Dialog open={isCameraActive} onOpenChange={onToggleCamera}>
-      <DialogContent className="sm:max-w-md p-0">
+      <DialogContent className="sm:max-w-md p-0 border-0 shadow-xl bg-gradient-to-b from-gray-900 to-black rounded-xl overflow-hidden">
         <VisuallyHidden>
           <DialogTitle>Camera Capture</DialogTitle>
         </VisuallyHidden>
         
-        <div className="flex flex-col items-center space-y-4 p-4">
-          <div className="relative w-full aspect-[3/4] bg-black rounded-lg overflow-hidden">
+        <div className="relative flex flex-col items-center">
+          {/* Close button overlay */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="absolute right-2 top-2 z-50 bg-black/40 backdrop-blur-sm text-white hover:bg-black/60 rounded-full"
+            onClick={onToggleCamera}
+          >
+            <X size={18} />
+          </Button>
+          
+          {/* Camera viewport */}
+          <div className="relative w-full aspect-[3/4] bg-black overflow-hidden">
             {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                <Loader2 className="h-8 w-8 animate-spin text-white" />
-                <span className="text-white ml-2">Activating camera...</span>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 backdrop-blur-sm z-20">
+                <Loader2 className="h-10 w-10 animate-spin text-indomie-yellow mb-2" />
+                <span className="text-white font-medium">Activating camera...</span>
               </div>
             )}
             
             {cameraError && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                <p className="text-white text-center px-4">Camera access denied or not available.</p>
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-20 p-6">
+                <Camera className="h-14 w-14 text-indomie-yellow/70 mb-3" />
+                <p className="text-white text-center font-medium">Camera access denied or not available.</p>
+                <Button 
+                  onClick={handleFileSelect} 
+                  variant="outline" 
+                  className="mt-4 bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
+                >
+                  <FileImage size={16} className="mr-2" />
+                  Select from Gallery
+                </Button>
               </div>
             )}
             
@@ -168,7 +188,16 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
               playsInline 
               muted
             />
+            
+            {/* Video overlay */}
+            <div className="absolute inset-0 pointer-events-none border-[1px] border-white/20 z-10">
+              <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-indomie-yellow"></div>
+              <div className="absolute top-0 right-0 w-20 h-20 border-t-2 border-r-2 border-indomie-yellow"></div>
+              <div className="absolute bottom-0 left-0 w-20 h-20 border-b-2 border-l-2 border-indomie-yellow"></div>
+              <div className="absolute bottom-0 right-0 w-20 h-20 border-b-2 border-r-2 border-indomie-yellow"></div>
+            </div>
           </div>
+          
           <canvas ref={canvasRef} className="hidden" />
           
           {/* Hidden file input for gallery selection */}
@@ -180,24 +209,29 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
             onChange={handleFileChange}
           />
           
-          <div className="flex justify-center gap-4 w-full">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={handleFileSelect}
-              className="flex items-center gap-2"
-            >
-              <FileImage size={16} />
-              Select from Gallery
-            </Button>
-            <Button 
-              type="button" 
-              onClick={capturePhoto}
-              className="bg-indomie-red hover:bg-indomie-red/90"
-              disabled={isLoading || cameraError || !streamActive}
-            >
-              Capture Photo
-            </Button>
+          {/* Action buttons */}
+          <div className="w-full p-4 bg-gradient-to-t from-black to-black/80">
+            <div className="flex justify-between items-center gap-4 w-full">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleFileSelect}
+                className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
+              >
+                <FileImage size={16} className="mr-2" />
+                Gallery
+              </Button>
+              
+              <Button 
+                type="button" 
+                onClick={capturePhoto}
+                className="flex-1 bg-indomie-yellow text-black hover:bg-indomie-yellow/90 font-medium"
+                disabled={isLoading || cameraError || !streamActive}
+              >
+                <Camera size={16} className="mr-2" />
+                Capture
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>
