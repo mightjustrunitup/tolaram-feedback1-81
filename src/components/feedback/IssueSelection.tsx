@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +6,7 @@ import { Paperclip, X, Camera } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { toast } from "@/hooks/use-toast";
 
 interface IssueSelectionProps {
   issues: string[];
@@ -67,7 +67,11 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
         .catch(error => {
           console.error("Error accessing camera:", error);
           if (onToggleCamera) onToggleCamera();
-          toast.error("Could not access camera. Please check permissions.");
+          toast({
+            title: "Camera Error",
+            description: "Could not access camera. Please check permissions.",
+            variant: "destructive",
+          });
         });
     }
     
