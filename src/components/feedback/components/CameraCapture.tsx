@@ -1,9 +1,10 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, Camera } from "lucide-react";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface CameraCaptureProps {
   isCameraActive: boolean;
@@ -20,18 +21,21 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [cameraError, setCameraError] = useState(false);
+  const [streamActive, setStreamActive] = useState(false);
 
   // Handle camera stream when active
   useEffect(() => {
     let stream: MediaStream | null = null;
     
     const setupCamera = async () => {
-      if (!isCameraActive || !videoRef.current) return;
+      if (!isCameraActive) return;
       
       setIsLoading(true);
       setCameraError(false);
+      setStreamActive(false);
       
       try {
+        console.log("Accessing camera...");
         // Request camera access with environment camera preferred (back camera on mobile)
         stream = await navigator.mediaDevices.getUserMedia({ 
           video: { 
@@ -42,18 +46,32 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
           audio: false 
         });
         
+        console.log("Camera access granted:", stream);
+        
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-          // Play needs to be called as a result of user gesture on some browsers
-          await videoRef.current.play();
-          setIsLoading(false);
+          videoRef.current.onloadedmetadata = () => {
+            console.log("Video metadata loaded");
+            if (videoRef.current) {
+              videoRef.current.play()
+                .then(() => {
+                  console.log("Video playing successfully");
+                  setIsLoading(false);
+                  setStreamActive(true);
+                })
+                .catch(err => {
+                  console.error("Error playing video:", err);
+                  setCameraError(true);
+                  setIsLoading(false);
+                });
+            }
+          };
         }
       } catch (error) {
         console.error("Error accessing camera:", error);
         setCameraError(true);
         setIsLoading(false);
         toast.error("Could not access camera. Please check permissions.");
-        if (onToggleCamera) onToggleCamera();
       }
     };
     
@@ -62,20 +80,32 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
     }
     
     return () => {
+      console.log("Cleaning up camera stream");
       if (stream) {
-        stream.getTracks().forEach(track => track.stop());
+        stream.getTracks().forEach(track => {
+          console.log("Stopping track:", track);
+          track.stop();
+        });
       }
     };
   }, [isCameraActive, onToggleCamera]);
 
   const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current && onCameraCapture) {
+    if (!videoRef.current || !canvasRef.current || !streamActive) {
+      console.log("Cannot capture - video or canvas not ready, or stream not active");
+      toast.error("Camera is not ready. Please try again.");
+      return;
+    }
+    
+    try {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       
       // Set canvas dimensions to match video
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
+      
+      console.log("Capturing photo", { width: canvas.width, height: canvas.height });
       
       // Draw current video frame to canvas
       const context = canvas.getContext('2d');
@@ -85,13 +115,21 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
         // Convert canvas content to data URL and pass to handler
         const imageData = canvas.toDataURL('image/jpeg', 0.8);
         onCameraCapture(imageData);
+        console.log("Photo captured successfully");
       }
+    } catch (error) {
+      console.error("Error capturing photo:", error);
+      toast.error("Failed to capture photo. Please try again.");
     }
   };
 
   return (
     <Dialog open={isCameraActive} onOpenChange={onToggleCamera}>
       <DialogContent className="sm:max-w-md p-0">
+        <VisuallyHidden>
+          <DialogTitle>Camera Capture</DialogTitle>
+        </VisuallyHidden>
+        
         <div className="flex flex-col items-center space-y-4 p-4">
           <div className="relative w-full aspect-[3/4] bg-black rounded-lg overflow-hidden">
             {isLoading && (
@@ -130,7 +168,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
               type="button" 
               onClick={capturePhoto}
               className="bg-indomie-red hover:bg-indomie-red/90"
-              disabled={isLoading || cameraError}
+              disabled={isLoading || cameraError || !streamActive}
             >
               Capture Photo
             </Button>

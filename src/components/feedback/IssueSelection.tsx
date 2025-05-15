@@ -41,9 +41,24 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
 
   // Check if device has camera capability
   useEffect(() => {
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      setHasCamera(true);
-    }
+    const checkCameraCapability = async () => {
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          setHasCamera(false);
+          return;
+        }
+        
+        // Just check if we can get camera access without actually using it
+        await navigator.mediaDevices.getUserMedia({ video: true });
+        console.log("Camera is available");
+        setHasCamera(true);
+      } catch (error) {
+        console.log("Camera not available or permission denied:", error);
+        setHasCamera(false);
+      }
+    };
+    
+    checkCameraCapability();
   }, []);
 
   return (
