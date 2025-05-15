@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -208,7 +209,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
               </Button>
             )}
             
-            {/* Camera button for mobile - icon only */}
+            {/* Only show Camera button on mobile */}
             {isMobile && hasCamera && onToggleCamera && (
               <Button
                 type="button"
@@ -222,17 +223,19 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
               </Button>
             )}
             
-            {/* Attach button - icon only */}
-            <Button
-              type="button"
-              variant="ghost" 
-              size="sm"
-              onClick={handleFileButtonClick}
-              className="bg-transparent hover:bg-gray-100 flex items-center"
-              title="Attach images to your feedback"
-            >
-              <Paperclip size={14} />
-            </Button>
+            {/* Only show Attach button on web (non-mobile) */}
+            {!isMobile && (
+              <Button
+                type="button"
+                variant="ghost" 
+                size="sm"
+                onClick={handleFileButtonClick}
+                className="bg-transparent hover:bg-gray-100 flex items-center"
+                title="Attach images to your feedback"
+              >
+                <Paperclip size={14} />
+              </Button>
+            )}
           </div>
         </div>
         
