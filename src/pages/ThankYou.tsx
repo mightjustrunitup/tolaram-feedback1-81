@@ -1,7 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { CheckCircle2, Gift, BadgeDollarSign } from "lucide-react";
+import { CheckCircle2, Gift, BadgeDollarSign, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -29,15 +29,19 @@ export default function ThankYou() {
   const customerName = location.state?.customerName || "Valued Customer";
   const productName = location.state?.productName || "our products";
   
+  // Show gift dialog immediately when the component mounts
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowGiftDialog(true);
+    }, 1200); // Show after a short delay so user can read the thank you message
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
   // Handler for when user submits their rating
   const handleRatingSubmit = () => {
     toast.success(`Thank you for your ${rating}-star rating!`);
     setHasRated(true);
-    
-    // Show gift dialog after a short delay
-    setTimeout(() => {
-      setShowGiftDialog(true);
-    }, 1000);
   };
   
   // Phone number input handler
@@ -71,17 +75,44 @@ export default function ThankYou() {
         <div className="absolute -left-16 -bottom-16 w-32 h-32 rounded-full bg-blue-100/30 blur-xl"></div>
         
         <CardHeader className="pt-8 pb-0 flex flex-col items-center">
-          <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-4">
-            <CheckCircle2 className="h-8 w-8 text-indomie-red" />
+          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
+            <CheckCircle2 className="h-8 w-8 text-green-600" />
           </div>
         </CardHeader>
         
         <CardContent className="pt-4 pb-6 text-center space-y-4">
-          <h1 className="text-2xl font-bold">Thank You!</h1>
+          <h1 className="text-2xl font-bold text-green-700">Thank You!</h1>
           
           <p className="text-gray-700">
             Thank you {customerName} for your valuable feedback about {productName}. Your input helps us improve our products and services.
           </p>
+          
+          {!submittedContact && (
+            <div className="mt-6 animate-pulse">
+              <Button 
+                variant="outline"
+                className="border-dashed border-2 border-orange-300 hover:border-orange-400 hover:bg-orange-50/50 group transition-all duration-300"
+                onClick={() => setShowGiftDialog(true)}
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <div className="relative">
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-ping"></div>
+                    <Gift className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="font-medium text-orange-600">Claim Your Reward!</span>
+                </div>
+              </Button>
+            </div>
+          )}
+          
+          {submittedContact && (
+            <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200 animate-fade-in">
+              <div className="flex items-center justify-center gap-2 text-green-600">
+                <BadgeDollarSign className="h-5 w-5" />
+                <span className="font-medium">You're entered in our rewards program!</span>
+              </div>
+            </div>
+          )}
           
           <div className="py-6 space-y-4">
             <h2 className="text-lg font-semibold">How was your experience using our feedback system?</h2>
@@ -106,54 +137,35 @@ export default function ThankYou() {
                 Submit Rating
               </Button>
             )}
-            
-            {hasRated && !submittedContact && (
-              <div className="mt-4 animate-fade-in">
-                <Button 
-                  variant="outline"
-                  className="border-dashed border-2 border-orange-300 hover:border-orange-400 hover:bg-orange-50/50 group transition-all duration-300"
-                  onClick={() => setShowGiftDialog(true)}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="relative">
-                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-ping"></div>
-                      <Gift className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
-                    </div>
-                    <span className="font-medium text-orange-600">Claim Your Reward!</span>
-                  </div>
-                </Button>
-              </div>
-            )}
-            
-            {submittedContact && (
-              <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200 animate-fade-in">
-                <div className="flex items-center justify-center gap-2 text-green-600">
-                  <BadgeDollarSign className="h-5 w-5" />
-                  <span className="font-medium">You're entered in our rewards program!</span>
-                </div>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
       
-      {/* Gift Dialog */}
+      {/* Enhanced Gift Dialog with more attractive design */}
       <Dialog open={showGiftDialog} onOpenChange={setShowGiftDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center justify-center gap-2 text-xl">
-              <Gift className="h-6 w-6 text-orange-500" />
-              <span>Customer Rewards Program</span>
-            </DialogTitle>
-            <DialogDescription className="text-center">
-              We appreciate your feedback! We regularly select customers for special rewards and promotions.
+        <DialogContent className="sm:max-w-md border-2 border-orange-300 overflow-hidden">
+          <div className="absolute -right-10 -top-10 w-32 h-32 bg-orange-100 rounded-full blur-xl"></div>
+          <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-yellow-100 rounded-full blur-xl"></div>
+          
+          <DialogHeader className="relative z-10">
+            <div className="flex flex-col items-center space-y-2 py-2">
+              <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center">
+                <Award className="h-8 w-8 text-orange-500" />
+              </div>
+              <DialogTitle className="text-2xl font-bold text-orange-700">Special Reward!</DialogTitle>
+            </div>
+            <DialogDescription className="text-center text-orange-700">
+              Thanks for your feedback! We're giving away exclusive rewards to our loyal customers.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="p-6">
-            <div className="bg-gradient-to-r from-orange-100 to-amber-50 p-4 rounded-lg mb-4 border border-orange-200">
+          <div className="p-6 relative z-10">
+            <div className="bg-gradient-to-r from-orange-100 to-amber-50 p-4 rounded-lg mb-4 border border-orange-200 shadow-inner">
               <div className="flex flex-col items-center gap-3">
-                <BadgeDollarSign className="h-12 w-12 text-orange-500" />
+                <div className="relative">
+                  <Gift className="h-12 w-12 text-orange-500" />
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-orange-400 rounded-full animate-pulse"></div>
+                </div>
                 <h3 className="font-bold text-lg text-orange-800">Join Our Rewards Program</h3>
                 <p className="text-center text-sm text-orange-700">
                   Enter your contact number below to join our rewards program and get a chance to win exclusive gifts and discounts!
@@ -163,7 +175,7 @@ export default function ThankYou() {
             
             <div className="space-y-4">
               <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium mb-1">
+                <label htmlFor="phoneNumber" className="block text-sm font-medium mb-1 text-orange-700">
                   Contact Number
                 </label>
                 <Input
@@ -172,7 +184,7 @@ export default function ThankYou() {
                   placeholder="Enter your phone number"
                   value={phoneNumber}
                   onChange={handlePhoneChange}
-                  className="w-full"
+                  className="w-full border-orange-300 focus:border-orange-500 focus:ring-orange-500"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Your information will be kept confidential and only used for rewards.
@@ -185,9 +197,10 @@ export default function ThankYou() {
                 </DialogClose>
                 <Button 
                   onClick={handleContactSubmit}
-                  className="bg-orange-500 hover:bg-orange-600"
+                  className="bg-orange-500 hover:bg-orange-600 relative overflow-hidden group"
                 >
-                  Join Rewards Program
+                  <span className="relative z-10">Join Rewards Program</span>
+                  <span className="absolute bottom-0 left-0 w-full h-0 bg-yellow-400 transition-all duration-300 group-hover:h-full -z-0"></span>
                 </Button>
               </div>
             </div>
