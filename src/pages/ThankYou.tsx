@@ -135,7 +135,6 @@ export default function ThankYou() {
         </CardContent>
       </Card>
       
-      {/* Modified dialog without icon and title */}
       <Dialog open={showGiftDialog} onOpenChange={setShowGiftDialog}>
         <DialogContent className="sm:max-w-md border-2 border-indomie-yellow">
           <DialogHeader className="relative z-10">

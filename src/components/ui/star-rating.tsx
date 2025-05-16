@@ -76,7 +76,7 @@ export function StarRating({
         </div>
         {showValue && (
           <span className="text-xs font-medium text-gray-600">
-            {value.toFixed(1)} / {max}
+            {Math.round(value)} / {max}
           </span>
         )}
       </div>
