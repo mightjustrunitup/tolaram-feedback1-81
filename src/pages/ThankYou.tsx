@@ -1,17 +1,29 @@
 
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, Gift, BadgeDollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
 import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose
+} from "@/components/ui/dialog";
 
 export default function ThankYou() {
   const navigate = useNavigate();
   const location = useLocation();
   const [rating, setRating] = useState(5); // Default to 5 stars
   const [hasRated, setHasRated] = useState(false);
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [showGiftDialog, setShowGiftDialog] = useState(false);
+  const [submittedContact, setSubmittedContact] = useState(false);
   
   // Get the data from location state or set defaults if not available
   const customerName = location.state?.customerName || "Valued Customer";
@@ -21,6 +33,31 @@ export default function ThankYou() {
   const handleRatingSubmit = () => {
     toast.success(`Thank you for your ${rating}-star rating!`);
     setHasRated(true);
+    
+    // Show gift dialog after a short delay
+    setTimeout(() => {
+      setShowGiftDialog(true);
+    }, 1000);
+  };
+  
+  // Phone number input handler
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhoneNumber(e.target.value);
+  };
+  
+  // Submit contact info
+  const handleContactSubmit = () => {
+    if (!phoneNumber || phoneNumber.length < 10) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+    
+    // Here you would send this to your database
+    console.log("Phone number submitted:", phoneNumber);
+    
+    toast.success("Thank you! You're now entered into our customer rewards program!");
+    setSubmittedContact(true);
+    setShowGiftDialog(false);
   };
 
   return (
@@ -70,14 +107,93 @@ export default function ThankYou() {
               </Button>
             )}
             
-            {hasRated && (
-              <p className="text-indomie-red font-medium animate-fade-in">
-                Thank you for rating our feedback system!
-              </p>
+            {hasRated && !submittedContact && (
+              <div className="mt-4 animate-fade-in">
+                <Button 
+                  variant="outline"
+                  className="border-dashed border-2 border-orange-300 hover:border-orange-400 hover:bg-orange-50/50 group transition-all duration-300"
+                  onClick={() => setShowGiftDialog(true)}
+                >
+                  <div className="flex items-center justify-center gap-2">
+                    <div className="relative">
+                      <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-ping"></div>
+                      <Gift className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+                    </div>
+                    <span className="font-medium text-orange-600">Claim Your Reward!</span>
+                  </div>
+                </Button>
+              </div>
+            )}
+            
+            {submittedContact && (
+              <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200 animate-fade-in">
+                <div className="flex items-center justify-center gap-2 text-green-600">
+                  <BadgeDollarSign className="h-5 w-5" />
+                  <span className="font-medium">You're entered in our rewards program!</span>
+                </div>
+              </div>
             )}
           </div>
         </CardContent>
       </Card>
+      
+      {/* Gift Dialog */}
+      <Dialog open={showGiftDialog} onOpenChange={setShowGiftDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center justify-center gap-2 text-xl">
+              <Gift className="h-6 w-6 text-orange-500" />
+              <span>Customer Rewards Program</span>
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              We appreciate your feedback! We regularly select customers for special rewards and promotions.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="p-6">
+            <div className="bg-gradient-to-r from-orange-100 to-amber-50 p-4 rounded-lg mb-4 border border-orange-200">
+              <div className="flex flex-col items-center gap-3">
+                <BadgeDollarSign className="h-12 w-12 text-orange-500" />
+                <h3 className="font-bold text-lg text-orange-800">Join Our Rewards Program</h3>
+                <p className="text-center text-sm text-orange-700">
+                  Enter your contact number below to join our rewards program and get a chance to win exclusive gifts and discounts!
+                </p>
+              </div>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="phoneNumber" className="block text-sm font-medium mb-1">
+                  Contact Number
+                </label>
+                <Input
+                  id="phoneNumber"
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  value={phoneNumber}
+                  onChange={handlePhoneChange}
+                  className="w-full"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Your information will be kept confidential and only used for rewards.
+                </p>
+              </div>
+              
+              <div className="flex gap-3 justify-end">
+                <DialogClose asChild>
+                  <Button variant="outline">Maybe Later</Button>
+                </DialogClose>
+                <Button 
+                  onClick={handleContactSubmit}
+                  className="bg-orange-500 hover:bg-orange-600"
+                >
+                  Join Rewards Program
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
