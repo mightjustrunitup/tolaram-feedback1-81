@@ -178,14 +178,15 @@ export default function ThankYou() {
               
               <div className="flex gap-3 justify-end">
                 <DialogClose asChild>
-                  <Button variant="outline">Maybe Later</Button>
+                  <Button variant="outline" className="transition-none hover:bg-transparent">
+                    Maybe Later
+                  </Button>
                 </DialogClose>
                 <Button 
                   onClick={handleContactSubmit}
-                  className="bg-indomie-red hover:bg-indomie-red/90 relative overflow-hidden group"
+                  className="bg-indomie-red transition-none hover:bg-indomie-red"
                 >
-                  <span className="relative z-10">Join Rewards Program</span>
-                  <span className="absolute bottom-0 left-0 w-full h-0 bg-indomie-yellow transition-all duration-300 group-hover:h-full -z-0"></span>
+                  Join Rewards Program
                 </Button>
               </div>
             </div>
