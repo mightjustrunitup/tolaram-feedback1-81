@@ -67,12 +67,12 @@ export default function ThankYou() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-rose-50 to-gray-50">
       <div className="absolute inset-0 w-full h-full">
-        <div className="w-full h-full bg-[radial-gradient(#64748b_1px,transparent_1px)] [background-size:20px_20px] opacity-10"></div>
+        <div className="w-full h-full bg-[radial-gradient(#FFC72C_1px,transparent_1px)] [background-size:20px_20px] opacity-10"></div>
       </div>
       
       <Card className="max-w-md w-full shadow-lg border-t-4 border-t-indomie-red animate-fade-in relative overflow-hidden">
-        <div className="absolute -right-16 -top-16 w-32 h-32 rounded-full bg-red-100/30 blur-xl"></div>
-        <div className="absolute -left-16 -bottom-16 w-32 h-32 rounded-full bg-blue-100/30 blur-xl"></div>
+        <div className="absolute -right-16 -top-16 w-32 h-32 rounded-full bg-indomie-yellow/30 blur-xl"></div>
+        <div className="absolute -left-16 -bottom-16 w-32 h-32 rounded-full bg-indomie-red/30 blur-xl"></div>
         
         <CardHeader className="pt-8 pb-0 flex flex-col items-center">
           <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
@@ -81,7 +81,7 @@ export default function ThankYou() {
         </CardHeader>
         
         <CardContent className="pt-4 pb-6 text-center space-y-4">
-          <h1 className="text-2xl font-bold text-green-700">Thank You!</h1>
+          <h1 className="text-2xl font-bold text-indomie-red">Thank You!</h1>
           
           <p className="text-gray-700">
             Thank you {customerName} for your valuable feedback about {productName}. Your input helps us improve our products and services.
@@ -91,15 +91,15 @@ export default function ThankYou() {
             <div className="mt-6 animate-pulse">
               <Button 
                 variant="outline"
-                className="border-dashed border-2 border-orange-300 hover:border-orange-400 hover:bg-orange-50/50 group transition-all duration-300"
+                className="border-dashed border-2 border-indomie-yellow hover:border-indomie-yellow/80 hover:bg-amber-50/50 group transition-all duration-300"
                 onClick={() => setShowGiftDialog(true)}
               >
                 <div className="flex items-center justify-center gap-2">
                   <div className="relative">
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-orange-400 rounded-full animate-ping"></div>
-                    <Gift className="h-5 w-5 text-orange-500 group-hover:scale-110 transition-transform" />
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-indomie-yellow rounded-full animate-ping"></div>
+                    <Gift className="h-5 w-5 text-indomie-yellow group-hover:scale-110 transition-transform" />
                   </div>
-                  <span className="font-medium text-orange-600">Claim Your Reward!</span>
+                  <span className="font-medium text-indomie-red">Claim Your Reward!</span>
                 </div>
               </Button>
             </div>
@@ -123,7 +123,7 @@ export default function ThankYou() {
                 onChange={!hasRated ? setRating : undefined}
                 max={5}
                 size="lg"
-                color="text-yellow-400"
+                color="text-indomie-yellow"
                 showValue={true}
                 readOnly={hasRated}
               />
@@ -143,31 +143,31 @@ export default function ThankYou() {
       
       {/* Enhanced Gift Dialog with more attractive design */}
       <Dialog open={showGiftDialog} onOpenChange={setShowGiftDialog}>
-        <DialogContent className="sm:max-w-md border-2 border-orange-300 overflow-hidden">
-          <div className="absolute -right-10 -top-10 w-32 h-32 bg-orange-100 rounded-full blur-xl"></div>
-          <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-yellow-100 rounded-full blur-xl"></div>
+        <DialogContent className="sm:max-w-md border-2 border-indomie-yellow overflow-hidden">
+          <div className="absolute -right-10 -top-10 w-32 h-32 bg-indomie-yellow/20 rounded-full blur-xl"></div>
+          <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-indomie-red/20 rounded-full blur-xl"></div>
           
           <DialogHeader className="relative z-10">
             <div className="flex flex-col items-center space-y-2 py-2">
-              <div className="w-16 h-16 rounded-full bg-orange-100 flex items-center justify-center">
-                <Award className="h-8 w-8 text-orange-500" />
+              <div className="w-16 h-16 rounded-full bg-indomie-yellow/20 flex items-center justify-center">
+                <Award className="h-8 w-8 text-indomie-yellow" />
               </div>
-              <DialogTitle className="text-2xl font-bold text-orange-700">Special Reward!</DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-indomie-red">Special Reward!</DialogTitle>
             </div>
-            <DialogDescription className="text-center text-orange-700">
+            <DialogDescription className="text-center text-indomie-red">
               Thanks for your feedback! We're giving away exclusive rewards to our loyal customers.
             </DialogDescription>
           </DialogHeader>
           
           <div className="p-6 relative z-10">
-            <div className="bg-gradient-to-r from-orange-100 to-amber-50 p-4 rounded-lg mb-4 border border-orange-200 shadow-inner">
+            <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-lg mb-4 border border-indomie-yellow shadow-inner">
               <div className="flex flex-col items-center gap-3">
                 <div className="relative">
-                  <Gift className="h-12 w-12 text-orange-500" />
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-orange-400 rounded-full animate-pulse"></div>
+                  <Gift className="h-12 w-12 text-indomie-yellow" />
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-indomie-red rounded-full animate-pulse"></div>
                 </div>
-                <h3 className="font-bold text-lg text-orange-800">Join Our Rewards Program</h3>
-                <p className="text-center text-sm text-orange-700">
+                <h3 className="font-bold text-lg text-indomie-red">Join Our Rewards Program</h3>
+                <p className="text-center text-sm text-gray-700">
                   Enter your contact number below to join our rewards program and get a chance to win exclusive gifts and discounts!
                 </p>
               </div>
@@ -175,7 +175,7 @@ export default function ThankYou() {
             
             <div className="space-y-4">
               <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium mb-1 text-orange-700">
+                <label htmlFor="phoneNumber" className="block text-sm font-medium mb-1 text-indomie-red">
                   Contact Number
                 </label>
                 <Input
@@ -184,7 +184,7 @@ export default function ThankYou() {
                   placeholder="Enter your phone number"
                   value={phoneNumber}
                   onChange={handlePhoneChange}
-                  className="w-full border-orange-300 focus:border-orange-500 focus:ring-orange-500"
+                  className="w-full border-indomie-yellow focus:border-indomie-red focus:ring-indomie-red"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Your information will be kept confidential and only used for rewards.
@@ -197,10 +197,10 @@ export default function ThankYou() {
                 </DialogClose>
                 <Button 
                   onClick={handleContactSubmit}
-                  className="bg-orange-500 hover:bg-orange-600 relative overflow-hidden group"
+                  className="bg-indomie-red hover:bg-indomie-red/90 relative overflow-hidden group"
                 >
                   <span className="relative z-10">Join Rewards Program</span>
-                  <span className="absolute bottom-0 left-0 w-full h-0 bg-yellow-400 transition-all duration-300 group-hover:h-full -z-0"></span>
+                  <span className="absolute bottom-0 left-0 w-full h-0 bg-indomie-yellow transition-all duration-300 group-hover:h-full -z-0"></span>
                 </Button>
               </div>
             </div>
