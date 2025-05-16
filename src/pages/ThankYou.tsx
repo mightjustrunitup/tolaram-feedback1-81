@@ -65,25 +65,26 @@ export default function ThankYou() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-rose-50 to-gray-50">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-black">
+      {/* Background pattern */}
       <div className="absolute inset-0 w-full h-full">
-        <div className="w-full h-full bg-[radial-gradient(#FFC72C_1px,transparent_1px)] [background-size:20px_20px] opacity-10"></div>
+        <div className="w-full h-full bg-[radial-gradient(#ffffff_1px,transparent_1px)] [background-size:20px_20px] opacity-5"></div>
       </div>
       
-      <Card className="max-w-md w-full shadow-lg border-t-4 border-t-indomie-red animate-fade-in relative overflow-hidden">
-        <div className="absolute -right-16 -top-16 w-32 h-32 rounded-full bg-indomie-yellow/30 blur-xl"></div>
-        <div className="absolute -left-16 -bottom-16 w-32 h-32 rounded-full bg-indomie-red/30 blur-xl"></div>
+      <Card className="max-w-md w-full shadow-2xl border-t-4 border-t-[#ea384c] bg-white/10 backdrop-blur-md relative overflow-hidden">
+        <div className="absolute -right-16 -top-16 w-32 h-32 rounded-full bg-[#ea384c]/20 blur-xl"></div>
+        <div className="absolute -left-16 -bottom-16 w-32 h-32 rounded-full bg-white/10 blur-xl"></div>
         
         <CardHeader className="pt-8 pb-0 flex flex-col items-center">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
-            <CheckCircle2 className="h-8 w-8 text-green-600" />
+          <div className="w-16 h-16 rounded-full bg-[#ea384c]/10 flex items-center justify-center mb-4">
+            <CheckCircle2 className="h-8 w-8 text-[#ea384c]" />
           </div>
         </CardHeader>
         
         <CardContent className="pt-4 pb-6 text-center space-y-4">
-          <h1 className="text-2xl font-bold text-indomie-red">Thank You!</h1>
+          <h1 className="text-2xl font-bold text-white">Thank You!</h1>
           
-          <p className="text-gray-700">
+          <p className="text-gray-300">
             Thank you {customerName} for your valuable feedback about {productName}. Your input helps us improve our products and services.
           </p>
           
@@ -91,23 +92,23 @@ export default function ThankYou() {
             <div className="mt-6 animate-pulse">
               <Button 
                 variant="outline"
-                className="border-dashed border-2 border-indomie-yellow hover:border-indomie-yellow/80 hover:bg-amber-50/50 group transition-all duration-300"
+                className="border-dashed border-2 border-[#ea384c] hover:border-[#ea384c]/80 hover:bg-[#ea384c]/10 group transition-all duration-300"
                 onClick={() => setShowGiftDialog(true)}
               >
                 <div className="flex items-center justify-center gap-2">
                   <div className="relative">
-                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-indomie-yellow rounded-full animate-ping"></div>
-                    <Gift className="h-5 w-5 text-indomie-yellow group-hover:scale-110 transition-transform" />
+                    <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#ea384c] rounded-full animate-ping"></div>
+                    <Gift className="h-5 w-5 text-white group-hover:scale-110 transition-transform" />
                   </div>
-                  <span className="font-medium text-indomie-red">Claim Your Reward!</span>
+                  <span className="font-medium text-white">Claim Your Reward!</span>
                 </div>
               </Button>
             </div>
           )}
           
           {submittedContact && (
-            <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200 animate-fade-in">
-              <div className="flex items-center justify-center gap-2 text-green-600">
+            <div className="mt-4 p-3 bg-[#ea384c]/10 rounded-lg border border-[#ea384c]/20 animate-fade-in">
+              <div className="flex items-center justify-center gap-2 text-white">
                 <BadgeDollarSign className="h-5 w-5" />
                 <span className="font-medium">You're entered in our rewards program!</span>
               </div>
@@ -115,7 +116,7 @@ export default function ThankYou() {
           )}
           
           <div className="py-6 space-y-4">
-            <h2 className="text-lg font-semibold">How was your experience using our feedback system?</h2>
+            <h2 className="text-lg font-semibold text-white">How was your experience using our feedback system?</h2>
             
             <div className="flex justify-center">
               <StarRating
@@ -123,7 +124,7 @@ export default function ThankYou() {
                 onChange={!hasRated ? setRating : undefined}
                 max={5}
                 size="lg"
-                color="text-indomie-yellow"
+                color="text-[#ea384c]"
                 showValue={true}
                 readOnly={hasRated}
               />
@@ -132,7 +133,7 @@ export default function ThankYou() {
             {!hasRated && (
               <Button 
                 onClick={handleRatingSubmit}
-                className="bg-indomie-red hover:bg-indomie-red/90 mt-2"
+                className="bg-[#ea384c] hover:bg-[#ea384c]/90 mt-2"
               >
                 Submit Rating
               </Button>
@@ -141,33 +142,33 @@ export default function ThankYou() {
         </CardContent>
       </Card>
       
-      {/* Enhanced Gift Dialog with more attractive design */}
+      {/* Enhanced Gift Dialog with attractive red/black/white design */}
       <Dialog open={showGiftDialog} onOpenChange={setShowGiftDialog}>
-        <DialogContent className="sm:max-w-md border-2 border-indomie-yellow overflow-hidden">
-          <div className="absolute -right-10 -top-10 w-32 h-32 bg-indomie-yellow/20 rounded-full blur-xl"></div>
-          <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-indomie-red/20 rounded-full blur-xl"></div>
+        <DialogContent className="sm:max-w-md border-2 border-[#ea384c] bg-black text-white overflow-hidden">
+          <div className="absolute -right-10 -top-10 w-32 h-32 bg-[#ea384c]/20 rounded-full blur-xl"></div>
+          <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-white/10 rounded-full blur-xl"></div>
           
           <DialogHeader className="relative z-10">
             <div className="flex flex-col items-center space-y-2 py-2">
-              <div className="w-16 h-16 rounded-full bg-indomie-yellow/20 flex items-center justify-center">
-                <Award className="h-8 w-8 text-indomie-yellow" />
+              <div className="w-16 h-16 rounded-full bg-[#ea384c]/20 flex items-center justify-center">
+                <Award className="h-8 w-8 text-[#ea384c]" />
               </div>
-              <DialogTitle className="text-2xl font-bold text-indomie-red">Special Reward!</DialogTitle>
+              <DialogTitle className="text-2xl font-bold text-white">Special Reward!</DialogTitle>
             </div>
-            <DialogDescription className="text-center text-indomie-red">
+            <DialogDescription className="text-center text-gray-400">
               Thanks for your feedback! We're giving away exclusive rewards to our loyal customers.
             </DialogDescription>
           </DialogHeader>
           
           <div className="p-6 relative z-10">
-            <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-lg mb-4 border border-indomie-yellow shadow-inner">
+            <div className="bg-gradient-to-r from-[#ea384c]/10 to-black/40 p-4 rounded-lg mb-4 border border-[#ea384c]/30 shadow-inner">
               <div className="flex flex-col items-center gap-3">
                 <div className="relative">
-                  <Gift className="h-12 w-12 text-indomie-yellow" />
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-indomie-red rounded-full animate-pulse"></div>
+                  <Gift className="h-12 w-12 text-[#ea384c]" />
+                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-white rounded-full animate-pulse"></div>
                 </div>
-                <h3 className="font-bold text-lg text-indomie-red">Join Our Rewards Program</h3>
-                <p className="text-center text-sm text-gray-700">
+                <h3 className="font-bold text-lg text-white">Join Our Rewards Program</h3>
+                <p className="text-center text-sm text-gray-300">
                   Enter your contact number below to join our rewards program and get a chance to win exclusive gifts and discounts!
                 </p>
               </div>
@@ -175,7 +176,7 @@ export default function ThankYou() {
             
             <div className="space-y-4">
               <div>
-                <label htmlFor="phoneNumber" className="block text-sm font-medium mb-1 text-indomie-red">
+                <label htmlFor="phoneNumber" className="block text-sm font-medium mb-1 text-gray-300">
                   Contact Number
                 </label>
                 <Input
@@ -184,7 +185,7 @@ export default function ThankYou() {
                   placeholder="Enter your phone number"
                   value={phoneNumber}
                   onChange={handlePhoneChange}
-                  className="w-full border-indomie-yellow focus:border-indomie-red focus:ring-indomie-red"
+                  className="w-full border-[#ea384c]/50 bg-black/50 text-white focus:border-[#ea384c] focus:ring-[#ea384c]"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Your information will be kept confidential and only used for rewards.
@@ -193,14 +194,16 @@ export default function ThankYou() {
               
               <div className="flex gap-3 justify-end">
                 <DialogClose asChild>
-                  <Button variant="outline">Maybe Later</Button>
+                  <Button variant="outline" className="border-gray-700 text-gray-300 hover:bg-gray-800">
+                    Maybe Later
+                  </Button>
                 </DialogClose>
                 <Button 
                   onClick={handleContactSubmit}
-                  className="bg-indomie-red hover:bg-indomie-red/90 relative overflow-hidden group"
+                  className="bg-[#ea384c] hover:bg-[#ea384c]/80 relative overflow-hidden group"
                 >
                   <span className="relative z-10">Join Rewards Program</span>
-                  <span className="absolute bottom-0 left-0 w-full h-0 bg-indomie-yellow transition-all duration-300 group-hover:h-full -z-0"></span>
+                  <span className="absolute bottom-0 left-0 w-full h-0 bg-white/10 transition-all duration-300 group-hover:h-full -z-0"></span>
                 </Button>
               </div>
             </div>
