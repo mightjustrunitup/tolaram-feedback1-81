@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { CheckCircle2, Gift, BadgeDollarSign, Award } from "lucide-react";
+import { Gift, BadgeDollarSign, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -75,9 +75,7 @@ export default function ThankYou() {
         <div className="absolute -left-16 -bottom-16 w-32 h-32 rounded-full bg-indomie-red/30 blur-xl"></div>
         
         <CardHeader className="pt-8 pb-0 flex flex-col items-center">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
-            <CheckCircle2 className="h-8 w-8 text-green-600" />
-          </div>
+          {/* Check circle removed */}
         </CardHeader>
         
         <CardContent className="pt-4 pb-6 text-center space-y-4">
@@ -106,8 +104,8 @@ export default function ThankYou() {
           )}
           
           {submittedContact && (
-            <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200 animate-fade-in">
-              <div className="flex items-center justify-center gap-2 text-green-600">
+            <div className="mt-4 p-3 bg-red-50 rounded-lg border border-red-200 animate-fade-in">
+              <div className="flex items-center justify-center gap-2 text-red-600">
                 <BadgeDollarSign className="h-5 w-5" />
                 <span className="font-medium">You're entered in our rewards program!</span>
               </div>
@@ -210,3 +208,4 @@ export default function ThankYou() {
     </div>
   );
 }
+
