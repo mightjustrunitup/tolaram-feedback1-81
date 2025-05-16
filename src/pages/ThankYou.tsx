@@ -71,9 +71,6 @@ export default function ThankYou() {
       </div>
       
       <Card className="max-w-md w-full shadow-lg border-t-4 border-t-indomie-red animate-fade-in relative overflow-hidden">
-        <div className="absolute -right-16 -top-16 w-32 h-32 rounded-full bg-indomie-yellow/30 blur-xl"></div>
-        <div className="absolute -left-16 -bottom-16 w-32 h-32 rounded-full bg-indomie-red/30 blur-xl"></div>
-        
         <CardHeader className="pt-8 pb-0 flex flex-col items-center">
           {/* Check circle removed */}
         </CardHeader>
@@ -139,12 +136,9 @@ export default function ThankYou() {
         </CardContent>
       </Card>
       
-      {/* Enhanced Gift Dialog with more attractive design */}
+      {/* Gift Dialog with removed color bubbles */}
       <Dialog open={showGiftDialog} onOpenChange={setShowGiftDialog}>
-        <DialogContent className="sm:max-w-md border-2 border-indomie-yellow overflow-hidden">
-          <div className="absolute -right-10 -top-10 w-32 h-32 bg-indomie-yellow/20 rounded-full blur-xl"></div>
-          <div className="absolute -left-10 -bottom-10 w-32 h-32 bg-indomie-red/20 rounded-full blur-xl"></div>
-          
+        <DialogContent className="sm:max-w-md border-2 border-indomie-yellow">
           <DialogHeader className="relative z-10">
             <div className="flex flex-col items-center space-y-2 py-2">
               <div className="w-16 h-16 rounded-full bg-indomie-yellow/20 flex items-center justify-center">
@@ -208,4 +202,3 @@ export default function ThankYou() {
     </div>
   );
 }
-
