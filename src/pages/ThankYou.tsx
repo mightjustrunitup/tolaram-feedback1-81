@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { 
   Dialog,
   DialogContent,
@@ -18,6 +19,7 @@ import {
 export default function ThankYou() {
   const navigate = useNavigate();
   const location = useLocation();
+  const isMobile = useIsMobile();
   const [rating, setRating] = useState(5); // Default to 5 stars
   const [hasRated, setHasRated] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -70,8 +72,8 @@ export default function ThankYou() {
       </div>
       
       <Card className="max-w-md w-full shadow-lg border-t-4 border-t-indomie-red animate-fade-in relative overflow-hidden">
-        <CardHeader className="pt-8 pb-0 flex flex-col items-center">
-          {/* Check circle removed */}
+        <CardHeader className="pt-6 pb-0 flex flex-col items-center">
+          {/* Card header content */}
         </CardHeader>
         
         <CardContent className="pt-4 pb-6 text-center space-y-4">
@@ -116,7 +118,7 @@ export default function ThankYou() {
                 value={rating}
                 onChange={!hasRated ? setRating : undefined}
                 max={5}
-                size="lg"
+                size={isMobile ? "md" : "lg"}
                 color="text-indomie-yellow"
                 showValue={true}
                 readOnly={hasRated}
@@ -136,14 +138,14 @@ export default function ThankYou() {
       </Card>
       
       <Dialog open={showGiftDialog} onOpenChange={setShowGiftDialog}>
-        <DialogContent className="sm:max-w-md border-2 border-indomie-yellow">
+        <DialogContent className={`${isMobile ? "w-[95%] p-4 max-h-[90vh] overflow-auto" : "sm:max-w-md"} border-2 border-indomie-yellow`}>
           <DialogHeader className="relative z-10">
             <DialogDescription className="text-center text-indomie-red">
               Thanks for your feedback! We're giving away exclusive rewards to our loyal customers.
             </DialogDescription>
           </DialogHeader>
           
-          <div className="p-6 relative z-10">
+          <div className={`${isMobile ? "p-3" : "p-6"} relative z-10`}>
             <div className="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-lg mb-4 border border-indomie-yellow shadow-inner">
               <div className="flex flex-col items-center gap-3">
                 <div className="relative">
@@ -175,15 +177,15 @@ export default function ThankYou() {
                 </p>
               </div>
               
-              <div className="flex gap-3 justify-end">
+              <div className={`flex ${isMobile ? "flex-col" : "flex-row justify-end"} gap-3`}>
                 <DialogClose asChild>
-                  <Button variant="outline" className="transition-none hover:bg-transparent">
+                  <Button variant="outline" className="transition-none hover:bg-transparent w-full">
                     Maybe Later
                   </Button>
                 </DialogClose>
                 <Button 
                   onClick={handleContactSubmit}
-                  className="bg-indomie-red transition-none hover:bg-indomie-red"
+                  className="bg-indomie-red transition-none hover:bg-indomie-red w-full"
                 >
                   Join Rewards Program
                 </Button>
