@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Gift, BadgeDollarSign, Award } from "lucide-react";
+import { Gift, BadgeDollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { StarRating } from "@/components/ui/star-rating";
@@ -11,7 +11,6 @@ import {
   Dialog,
   DialogContent,
   DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogClose
 } from "@/components/ui/dialog";
@@ -136,16 +135,10 @@ export default function ThankYou() {
         </CardContent>
       </Card>
       
-      {/* Gift Dialog with removed color bubbles */}
+      {/* Modified dialog without icon and title */}
       <Dialog open={showGiftDialog} onOpenChange={setShowGiftDialog}>
         <DialogContent className="sm:max-w-md border-2 border-indomie-yellow">
           <DialogHeader className="relative z-10">
-            <div className="flex flex-col items-center space-y-2 py-2">
-              <div className="w-16 h-16 rounded-full bg-indomie-yellow/20 flex items-center justify-center">
-                <Award className="h-8 w-8 text-indomie-yellow" />
-              </div>
-              <DialogTitle className="text-2xl font-bold text-indomie-red">Special Reward!</DialogTitle>
-            </div>
             <DialogDescription className="text-center text-indomie-red">
               Thanks for your feedback! We're giving away exclusive rewards to our loyal customers.
             </DialogDescription>
