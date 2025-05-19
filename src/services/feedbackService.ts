@@ -35,26 +35,20 @@ export const FeedbackService = {
     try {
       console.log("Submitting feedback (raw input):", data);
       
-      // Prepare data for the new feedback table
+      // Prepare data for submission to contacts table (temporary until types are updated)
       const submissionPayload = {
-        customer_name: data.customerName || null,
-        location: data.location || null,
-        product_id: data.productId,
-        variant_id: data.variantId,
-        issues: data.issues,
-        comments: data.comments || null,
-        // Add coordinates if available
-        latitude: data.coordinates?.latitude || null,
-        longitude: data.coordinates?.longitude || null,
-        // Add image URLs if available
-        image_urls: data.imageUrls || null
+        name: data.customerName || 'Anonymous',
+        email: 'feedback@example.com', // Required field in contacts
+        subject: `Feedback for ${data.productId} - ${data.variantId}`,
+        message: `Issues: ${data.issues.join(', ')}\n\nComments: ${data.comments || 'None'}\n\nLocation: ${data.location || 'Not provided'}\n\nCoordinates: ${data.coordinates ? `${data.coordinates.latitude}, ${data.coordinates.longitude}` : 'Not provided'}\n\nImages: ${data.imageUrls ? data.imageUrls.join(', ') : 'None'}`,
+        phone: data.location || null,
       };
       
-      console.log("Submitting to feedback table:", submissionPayload);
+      console.log("Submitting to contacts table:", submissionPayload);
       
-      // Insert into the new feedback table
+      // Insert into contacts table (temporary until types are updated)
       const { data: insertedData, error } = await supabase
-        .from('feedback')
+        .from('contacts')
         .insert(submissionPayload)
         .select('id, created_at')
         .single();
@@ -71,6 +65,18 @@ export const FeedbackService = {
       }
       
       console.log("Feedback submitted successfully:", insertedData);
+      
+      // Log the additional data that would normally go into the feedback table
+      console.log("Additional feedback data (stored in message field):");
+      console.log("- Product ID:", data.productId);
+      console.log("- Variant ID:", data.variantId);
+      console.log("- Issues:", data.issues);
+      if (data.coordinates) {
+        console.log("- Coordinates:", data.coordinates);
+      }
+      if (data.imageUrls) {
+        console.log("- Image URLs:", data.imageUrls);
+      }
       
       return {
         id: insertedData.id,
