@@ -220,5 +220,75 @@ export const FeedbackService = {
    */
   getProductVariants: (productId: string) => {
     return get<any[]>(`/products/${productId}/variants`);
+  },
+  
+  /**
+   * Execute database schema changes to enhance feedback querying
+   */
+  enhanceFeedbackSchema: async (): Promise<{ success: boolean; message: string }> => {
+    try {
+      console.log("Applying database schema enhancements...");
+      
+      // Create index on feedback.created_at
+      const { error: indexError } = await supabase.rpc('create_feedback_index');
+      
+      if (indexError) {
+        console.error('Error creating index:', indexError);
+        return {
+          success: false,
+          message: `Failed to create index: ${indexError.message}`
+        };
+      }
+      
+      // Create complete_feedback view
+      const { error: viewError } = await supabase.rpc('create_complete_feedback_view');
+      
+      if (viewError) {
+        console.error('Error creating view:', viewError);
+        return {
+          success: false,
+          message: `Failed to create view: ${viewError.message}`
+        };
+      }
+      
+      return {
+        success: true,
+        message: "Successfully enhanced feedback schema with index and view"
+      };
+    } catch (error) {
+      console.error('Error enhancing feedback schema:', error);
+      let errorMessage = "Failed to enhance feedback schema";
+      if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      return {
+        success: false,
+        message: errorMessage
+      };
+    }
+  },
+  
+  /**
+   * Get complete feedback data using the new view
+   */
+  getCompleteFeedback: async () => {
+    try {
+      const { data, error } = await supabase
+        .from('complete_feedback')
+        .select('*');
+        
+      if (error) {
+        console.error('Error fetching complete feedback:', error);
+        throw error;
+      }
+      
+      return data;
+    } catch (error) {
+      console.error('Error in getCompleteFeedback:', error);
+      throw error;
+    }
   }
 };
