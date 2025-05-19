@@ -40,6 +40,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
 }) => {
   const isMobile = useIsMobile();
   const [hasCamera, setHasCamera] = useState(false);
+  const [imagePreviewMode, setImagePreviewMode] = useState<"grid" | "carousel">("grid");
 
   // Check if device has camera capability
   useEffect(() => {
@@ -103,6 +104,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
               onToggleCamera={onToggleCamera}
               hasCamera={hasCamera}
               isUploading={isUploading}
+              showFullSizePreview={true}
             />
           )}
         </div>

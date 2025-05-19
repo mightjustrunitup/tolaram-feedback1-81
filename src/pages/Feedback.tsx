@@ -41,7 +41,7 @@ export default function Feedback() {
       }
     };
     
-    // Test the complete_feedback view to ensure it's working properly
+    // Test the complete_feedback view to ensure it's working properly with image display
     const testCompleteFeedback = async () => {
       try {
         const feedbackData = await FeedbackService.getCompleteFeedback();
@@ -64,6 +64,11 @@ export default function Feedback() {
             console.log("Warning: No images found in the loaded feedback");
           } else {
             console.log("Images found:", firstEntry.images);
+            // Test to see if images can be displayed
+            const testImg = new Image();
+            testImg.onload = () => console.log("Test image loaded successfully");
+            testImg.onerror = () => console.error("Test image failed to load");
+            testImg.src = firstEntry.images[0];
           }
         } else {
           console.log("No feedback entries found yet");

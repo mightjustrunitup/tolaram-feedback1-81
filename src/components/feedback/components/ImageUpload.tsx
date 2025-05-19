@@ -1,7 +1,7 @@
 
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Paperclip, X, Camera, Loader2 } from "lucide-react";
+import { Paperclip, X, Camera, Loader2, Maximize2, Minimize2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ImageUploadProps {
@@ -11,6 +11,7 @@ interface ImageUploadProps {
   onToggleCamera?: () => void;
   hasCamera: boolean;
   isUploading?: boolean;
+  showFullSizePreview?: boolean;
 }
 
 export const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -19,11 +20,13 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   uploadedImages,
   onToggleCamera,
   hasCamera,
-  isUploading = false
+  isUploading = false,
+  showFullSizePreview = false
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
   const [isAttaching, setIsAttaching] = useState(false);
+  const [expandedImageIndex, setExpandedImageIndex] = useState<number | null>(null);
 
   const handleFileButtonClick = () => {
     setIsAttaching(true);
@@ -47,6 +50,14 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
     setIsAttaching(false);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const toggleImageExpand = (index: number) => {
+    if (expandedImageIndex === index) {
+      setExpandedImageIndex(null);
+    } else {
+      setExpandedImageIndex(index);
     }
   };
 
@@ -113,21 +124,49 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           <p className="text-xs text-gray-500 mb-1">Uploaded images:</p>
           <div className="flex flex-wrap gap-2">
             {uploadedImages.map((src, index) => (
-              <div key={index} className="relative w-16 h-16 border rounded overflow-hidden group">
+              <div 
+                key={index} 
+                className={`relative border rounded overflow-hidden group transition-all duration-300 ${
+                  expandedImageIndex === index ? "w-full h-60" : "w-16 h-16"
+                }`}
+                onClick={() => showFullSizePreview && toggleImageExpand(index)}
+              >
                 <img 
                   src={src} 
                   alt={`Uploaded image ${index + 1}`} 
-                  className="w-full h-full object-cover" 
+                  className={`w-full h-full ${
+                    expandedImageIndex === index ? "object-contain" : "object-cover"
+                  }`}
                 />
                 {onImageRemove && !isUploading && (
                   <button
                     type="button"
-                    className="absolute top-0 right-0 bg-black/60 p-1 rounded-bl md:opacity-0 md:group-hover:opacity-100 transition-opacity"
-                    onClick={() => onImageRemove(index)}
+                    className="absolute top-0 right-0 bg-black/60 p-1 rounded-bl md:opacity-0 md:group-hover:opacity-100 transition-opacity z-10"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onImageRemove(index);
+                    }}
                     title="Remove image"
                     disabled={isUploading}
                   >
                     <X size={12} className="text-white" />
+                  </button>
+                )}
+                {showFullSizePreview && (
+                  <button
+                    type="button"
+                    className="absolute bottom-0 right-0 bg-black/60 p-1 rounded-tl md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleImageExpand(index);
+                    }}
+                    title={expandedImageIndex === index ? "Minimize" : "Expand"}
+                  >
+                    {expandedImageIndex === index ? (
+                      <Minimize2 size={12} className="text-white" />
+                    ) : (
+                      <Maximize2 size={12} className="text-white" />
+                    )}
                   </button>
                 )}
               </div>

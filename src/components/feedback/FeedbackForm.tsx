@@ -3,6 +3,7 @@ import { ProductFeedbackForm } from "@/components/feedback/ProductFeedbackForm";
 import { useFeedbackForm } from "@/components/feedback/hooks/useFeedbackForm";
 import { useImageHandling } from "@/components/feedback/hooks/useImageHandling";
 import { products } from "@/components/feedback/data/productData";
+import { useEffect } from "react";
 
 export const FeedbackForm = () => {
   const {
@@ -31,6 +32,13 @@ export const FeedbackForm = () => {
     toggleCamera,
     uploadFilesToStorage
   } = useImageHandling();
+
+  // Log when images change to verify they're being processed correctly
+  useEffect(() => {
+    if (uploadedImageUrls.length > 0) {
+      console.log("Current images in FeedbackForm:", uploadedImageUrls);
+    }
+  }, [uploadedImageUrls]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     // Use the existing form submission handler but pass the actual image files
