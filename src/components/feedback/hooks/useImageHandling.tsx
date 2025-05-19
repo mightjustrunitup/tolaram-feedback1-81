@@ -118,6 +118,18 @@ export function useImageHandling() {
           if (publicUrlData && publicUrlData.publicUrl) {
             imageUrls.push(publicUrlData.publicUrl);
             console.log("Uploaded image URL:", publicUrlData.publicUrl);
+            
+            // Verify the image is accessible by making a HEAD request
+            try {
+              const response = await fetch(publicUrlData.publicUrl, { method: 'HEAD' });
+              if (!response.ok) {
+                console.warn(`Image might not be publicly accessible: ${publicUrlData.publicUrl}`);
+              } else {
+                console.log(`Verified image is accessible: ${publicUrlData.publicUrl}`);
+              }
+            } catch (error) {
+              console.warn(`Could not verify image accessibility: ${error}`);
+            }
           }
         }
       }

@@ -16,14 +16,79 @@ import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 // Mock data for the admin dashboard (kept from original)
-const MOCK_FEEDBACK_DATA = [
-  { id: 1, customerName: "John Doe", date: "2023-04-25", storeLocation: "Lagos - Ikeja Mall", staffFriendliness: 8, cleanliness: 9, productAvailability: 7, overallExperience: 8, comment: "Great experience overall, staff was very helpful." },
-  { id: 2, customerName: "Anonymous", date: "2023-04-24", storeLocation: "Abuja - Wuse II", staffFriendliness: 6, cleanliness: 5, productAvailability: 4, overallExperience: 5, comment: "The store was not very clean, and some products were out of stock." },
-  { id: 3, customerName: "Sarah Johnson", date: "2023-04-23", storeLocation: "Lagos - Lekki Phase 1", staffFriendliness: 9, cleanliness: 8, productAvailability: 9, overallExperience: 9, comment: "Excellent service, very satisfied customer." },
-  { id: 4, customerName: "Michael Brown", date: "2023-04-22", storeLocation: "Port Harcourt - GRA", staffFriendliness: 7, cleanliness: 8, productAvailability: 6, overallExperience: 7, comment: "Good experience, but some products were missing." },
-  { id: 5, customerName: "Anonymous", date: "2023-04-21", storeLocation: "Abuja - Jabi Lake Mall", staffFriendliness: 5, cleanliness: 6, productAvailability: 7, overallExperience: 6, comment: "Average experience, staff could be more friendly." },
+const MOCK_FEEDBACK_DATA_WITH_IMAGES = [
+  { 
+    id: 1, 
+    customerName: "John Doe", 
+    date: "2023-04-25", 
+    storeLocation: "Lagos - Ikeja Mall", 
+    staffFriendliness: 8, 
+    cleanliness: 9, 
+    productAvailability: 7, 
+    overallExperience: 8, 
+    comment: "Great experience overall, staff was very helpful.",
+    images: [
+      "https://yadcdvyzfnhjzognvqtb.supabase.co/storage/v1/object/public/feedback-images/61106a2a-3fe7-4bf7-8a44-30fe51c2dfa0_1747664157560_hot_and_spicy.jpg",
+      "https://yadcdvyzfnhjzognvqtb.supabase.co/storage/v1/object/public/feedback-images/61106a2a-3fe7-4bf7-8a44-30fe51c2dfa0_1747664157560_hot_and_spicy.jpg"
+    ]
+  },
+  { 
+    id: 2, 
+    customerName: "Anonymous", 
+    date: "2023-04-24", 
+    storeLocation: "Abuja - Wuse II", 
+    staffFriendliness: 6, 
+    cleanliness: 5, 
+    productAvailability: 4, 
+    overallExperience: 5, 
+    comment: "The store was not very clean, and some products were out of stock.",
+    images: []
+  },
+  { 
+    id: 3, 
+    customerName: "Sarah Johnson", 
+    date: "2023-04-23", 
+    storeLocation: "Lagos - Lekki Phase 1", 
+    staffFriendliness: 9, 
+    cleanliness: 8, 
+    productAvailability: 9, 
+    overallExperience: 9, 
+    comment: "Excellent service, very satisfied customer.",
+    images: [
+      "https://yadcdvyzfnhjzognvqtb.supabase.co/storage/v1/object/public/feedback-images/61106a2a-3fe7-4bf7-8a44-30fe51c2dfa0_1747664157560_hot_and_spicy.jpg"
+    ]
+  },
+  { 
+    id: 4, 
+    customerName: "Michael Brown", 
+    date: "2023-04-22", 
+    storeLocation: "Port Harcourt - GRA", 
+    staffFriendliness: 7, 
+    cleanliness: 8, 
+    productAvailability: 6, 
+    overallExperience: 7, 
+    comment: "Good experience, but some products were missing.",
+    images: []
+  },
+  { 
+    id: 5, 
+    customerName: "Anonymous", 
+    date: "2023-04-21", 
+    storeLocation: "Abuja - Jabi Lake Mall", 
+    staffFriendliness: 5, 
+    cleanliness: 6, 
+    productAvailability: 7, 
+    overallExperience: 6, 
+    comment: "Average experience, staff could be more friendly.",
+    images: [
+      "https://yadcdvyzfnhjzognvqtb.supabase.co/storage/v1/object/public/feedback-images/61106a2a-3fe7-4bf7-8a44-30fe51c2dfa0_1747664157560_hot_and_spicy.jpg",
+      "https://yadcdvyzfnhjzognvqtb.supabase.co/storage/v1/object/public/feedback-images/61106a2a-3fe7-4bf7-8a44-30fe51c2dfa0_1747664157560_hot_and_spicy.jpg",
+      "https://yadcdvyzfnhjzognvqtb.supabase.co/storage/v1/object/public/feedback-images/61106a2a-3fe7-4bf7-8a44-30fe51c2dfa0_1747664157560_hot_and_spicy.jpg"
+    ]
+  },
 ];
 
 // Mock data for the charts (kept from original)
@@ -59,7 +124,7 @@ export default function Admin() {
   const [selectedFeedback, setSelectedFeedback] = useState<any>(null);
 
   // Filter feedback data based on selected filters
-  const filteredFeedback = MOCK_FEEDBACK_DATA.filter((feedback) => {
+  const filteredFeedback = MOCK_FEEDBACK_DATA_WITH_IMAGES.filter((feedback) => {
     const dateMatch = !startDate || !endDate || (new Date(feedback.date) >= startDate && new Date(feedback.date) <= endDate);
     const storeMatch = selectedStore === "all" || feedback.storeLocation === selectedStore;
     const searchMatch = searchTerm === "" || 
@@ -285,30 +350,30 @@ export default function Admin() {
                     </Button>
                   </div>
                   
-                  {/* Responsive Feedback Table */}
+                  {/* Responsive Feedback Table - Updated with image column */}
                   <div className="rounded-md border overflow-hidden bg-white shadow-sm">
                     <div className="overflow-x-auto">
-                      <table className="min-w-full divide-y divide-gray-200">
-                        <thead className="bg-gray-50">
-                          <tr>
-                            <th className="px-2 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
-                            <th className="px-2 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                            <th className="px-2 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Store</th>
-                            <th className="px-2 md:px-6 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Staff</th>
-                            <th className="px-2 md:px-6 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Clean</th>
-                            <th className="px-2 md:px-6 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
-                            <th className="px-2 md:px-6 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Overall</th>
-                            <th className="px-2 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
-                            <th className="px-2 md:px-6 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Images</th>
-                          </tr>
-                        </thead>
-                        <tbody className="bg-white divide-y divide-gray-200">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-[100px]">Customer</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Store</TableHead>
+                            <TableHead className="text-center">Staff</TableHead>
+                            <TableHead className="text-center">Clean</TableHead>
+                            <TableHead className="text-center">Products</TableHead>
+                            <TableHead className="text-center">Overall</TableHead>
+                            <TableHead>Comments</TableHead>
+                            <TableHead className="text-center">Images</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
                           {filteredFeedback.map((feedback) => (
-                            <tr key={feedback.id} className="hover:bg-gray-50">
-                              <td className="px-2 md:px-6 py-2 md:py-4 text-xs md:text-sm font-medium text-gray-900">{feedback.customerName}</td>
-                              <td className="px-2 md:px-6 py-2 md:py-4 text-xs md:text-sm text-gray-500 whitespace-nowrap">{feedback.date}</td>
-                              <td className="px-2 md:px-6 py-2 md:py-4 text-xs md:text-sm text-gray-500 max-w-[8rem] md:max-w-none truncate">{feedback.storeLocation}</td>
-                              <td className="px-2 md:px-6 py-2 md:py-4 text-center whitespace-nowrap">
+                            <TableRow key={feedback.id} className="hover:bg-gray-50">
+                              <TableCell className="font-medium">{feedback.customerName}</TableCell>
+                              <TableCell className="whitespace-nowrap">{feedback.date}</TableCell>
+                              <TableCell className="max-w-[8rem] md:max-w-none truncate">{feedback.storeLocation}</TableCell>
+                              <TableCell className="text-center whitespace-nowrap">
                                 <span className={cn(
                                   "px-1 md:px-2 py-0.5 md:py-1 rounded-full text-xs font-medium",
                                   feedback.staffFriendliness >= 8 ? "bg-green-100 text-green-800" :
@@ -317,8 +382,8 @@ export default function Admin() {
                                 )}>
                                   {feedback.staffFriendliness}
                                 </span>
-                              </td>
-                              <td className="px-2 md:px-6 py-2 md:py-4 text-center whitespace-nowrap">
+                              </TableCell>
+                              <TableCell className="text-center whitespace-nowrap">
                                 <span className={cn(
                                   "px-1 md:px-2 py-0.5 md:py-1 rounded-full text-xs font-medium",
                                   feedback.cleanliness >= 8 ? "bg-green-100 text-green-800" :
@@ -327,8 +392,8 @@ export default function Admin() {
                                 )}>
                                   {feedback.cleanliness}
                                 </span>
-                              </td>
-                              <td className="px-2 md:px-6 py-2 md:py-4 text-center whitespace-nowrap">
+                              </TableCell>
+                              <TableCell className="text-center whitespace-nowrap">
                                 <span className={cn(
                                   "px-1 md:px-2 py-0.5 md:py-1 rounded-full text-xs font-medium",
                                   feedback.productAvailability >= 8 ? "bg-green-100 text-green-800" :
@@ -337,8 +402,8 @@ export default function Admin() {
                                 )}>
                                   {feedback.productAvailability}
                                 </span>
-                              </td>
-                              <td className="px-2 md:px-6 py-2 md:py-4 text-center whitespace-nowrap">
+                              </TableCell>
+                              <TableCell className="text-center whitespace-nowrap">
                                 <span className={cn(
                                   "px-1 md:px-2 py-0.5 md:py-1 rounded-full text-xs font-medium",
                                   feedback.overallExperience >= 8 ? "bg-green-100 text-green-800" :
@@ -347,23 +412,48 @@ export default function Admin() {
                                 )}>
                                   {feedback.overallExperience}
                                 </span>
-                              </td>
-                              <td className="px-2 md:px-6 py-2 md:py-4 text-xs md:text-sm text-gray-500 max-w-[6rem] sm:max-w-xs truncate">{feedback.comment}</td>
-                              <td className="px-2 md:px-6 py-2 md:py-4 text-center">
-                                {/* Add a button to view images */}
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleViewImages(feedback)}
-                                  className="text-xs"
-                                >
-                                  View Images
-                                </Button>
-                              </td>
-                            </tr>
+                              </TableCell>
+                              <TableCell className="max-w-[6rem] sm:max-w-xs truncate">{feedback.comment}</TableCell>
+                              <TableCell className="text-center">
+                                {feedback.images && feedback.images.length > 0 ? (
+                                  <div className="flex gap-1 items-center justify-center">
+                                    {/* Show small thumbnails of first image */}
+                                    <div className="w-10 h-10 rounded overflow-hidden border border-gray-200">
+                                      <img
+                                        src={feedback.images[0]}
+                                        alt="Feedback"
+                                        className="w-full h-full object-cover"
+                                        onError={(e) => {
+                                          (e.target as HTMLImageElement).src = 'https://placehold.co/100?text=Error';
+                                        }}
+                                      />
+                                    </div>
+                                    
+                                    {/* Show count if more than one image */}
+                                    {feedback.images.length > 1 && (
+                                      <span className="text-xs bg-gray-100 px-1 py-0.5 rounded">
+                                        +{feedback.images.length - 1}
+                                      </span>
+                                    )}
+                                    
+                                    {/* View button */}
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      onClick={() => handleViewImages(feedback)}
+                                      className="text-xs ml-1"
+                                    >
+                                      View
+                                    </Button>
+                                  </div>
+                                ) : (
+                                  <span className="text-xs text-gray-500">None</span>
+                                )}
+                              </TableCell>
+                            </TableRow>
                           ))}
-                        </tbody>
-                      </table>
+                        </TableBody>
+                      </Table>
                     </div>
                   </div>
                 </CardContent>
@@ -580,7 +670,7 @@ export default function Admin() {
         </div>
       </div>
 
-      {/* Image Viewer Dialog */}
+      {/* Image Viewer Dialog - Updated to display actual images */}
       {selectedFeedback && (
         <Dialog open={!!selectedFeedback} onOpenChange={() => setSelectedFeedback(null)}>
           <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
@@ -592,21 +682,23 @@ export default function Admin() {
             </DialogHeader>
             
             <div className="grid grid-cols-1 gap-4 my-4">
-              {/* Mock images for demonstration - in a real app, these would come from your Supabase storage */}
-              <div className="aspect-video rounded-lg overflow-hidden border border-gray-200">
-                <img
-                  src="https://yadcdvyzfnhjzognvqtb.supabase.co/storage/v1/object/public/feedback-images/61106a2a-3fe7-4bf7-8a44-30fe51c2dfa0_1747664157560_hot_and_spicy.jpg"
-                  alt="Feedback image"
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="aspect-video rounded-lg overflow-hidden border border-gray-200">
-                <img
-                  src="https://yadcdvyzfnhjzognvqtb.supabase.co/storage/v1/object/public/feedback-images/61106a2a-3fe7-4bf7-8a44-30fe51c2dfa0_1747664157560_hot_and_spicy.jpg" 
-                  alt="Feedback image"
-                  className="w-full h-full object-contain"
-                />
-              </div>
+              {selectedFeedback.images && selectedFeedback.images.length > 0 ? (
+                selectedFeedback.images.map((imageSrc: string, index: number) => (
+                  <div key={index} className="aspect-video rounded-lg overflow-hidden border border-gray-200 bg-gray-50">
+                    <img
+                      src={imageSrc}
+                      alt={`Feedback image ${index + 1}`}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        console.error(`Failed to load image in dialog: ${imageSrc}`);
+                        (e.target as HTMLImageElement).src = 'https://placehold.co/800x450?text=Image+Load+Error';
+                      }}
+                    />
+                  </div>
+                ))
+              ) : (
+                <p className="text-center text-gray-500 py-8">No images available for this feedback</p>
+              )}
             </div>
             
             <DialogFooter>

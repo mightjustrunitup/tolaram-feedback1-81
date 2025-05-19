@@ -62,7 +62,7 @@ export const IssueSection: React.FC<IssueSectionProps> = ({
       </div>
       
       <div className="mt-4">
-        <Label className="text-sm font-medium mb-2 block">Attach Images (Optional)</Label>
+        <Label className="text-sm font-medium mb-2 block">Attached Images</Label>
         
         {uploadedImages && uploadedImages.length > 0 ? (
           <div className="mt-4">
@@ -71,13 +71,17 @@ export const IssueSection: React.FC<IssueSectionProps> = ({
               {uploadedImages.map((src, index) => (
                 <div 
                   key={index}
-                  className="aspect-square rounded-md overflow-hidden border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                  className="aspect-square rounded-md overflow-hidden border border-gray-200 cursor-pointer hover:opacity-90 transition-opacity relative"
                   onClick={() => openLightbox(index)}
                 >
                   <img 
                     src={src} 
                     alt={`Product issue ${index + 1}`}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      console.error(`Failed to load image: ${src}`);
+                      (e.target as HTMLImageElement).src = 'https://placehold.co/200x200?text=Image+Error';
+                    }}
                   />
                 </div>
               ))}
