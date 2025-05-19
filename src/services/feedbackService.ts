@@ -29,26 +29,32 @@ export interface FeedbackResponse {
  */
 export const FeedbackService = {
   /**
-   * Submit feedback to the backend - using contacts table as placeholder until feedback table types are generated
+   * Submit feedback to the backend
    */
   submitFeedback: async (data: FeedbackSubmission): Promise<FeedbackResponse> => {
     try {
       console.log("Submitting feedback (raw input):", data);
       
-      // Prepare data for submission to contacts table (as temporary solution)
+      // Prepare data for the new feedback table
       const submissionPayload = {
-        name: data.customerName || 'Anonymous',
-        email: 'feedback@example.com', // Required field in contacts
-        subject: `Feedback for ${data.productId}`,
-        message: `Issues: ${data.issues.join(', ')}\n\n${data.comments || ''}`,
-        phone: data.location || null,
+        customer_name: data.customerName || null,
+        location: data.location || null,
+        product_id: data.productId,
+        variant_id: data.variantId,
+        issues: data.issues,
+        comments: data.comments || null,
+        // Add coordinates if available
+        latitude: data.coordinates?.latitude || null,
+        longitude: data.coordinates?.longitude || null,
+        // Add image URLs if available
+        image_urls: data.imageUrls || null
       };
       
-      console.log("Submitting to contacts table:", submissionPayload);
+      console.log("Submitting to feedback table:", submissionPayload);
       
-      // Insert into contacts table (this is a temporary solution)
+      // Insert into the new feedback table
       const { data: insertedData, error } = await supabase
-        .from('contacts')
+        .from('feedback')
         .insert(submissionPayload)
         .select('id, created_at')
         .single();
@@ -65,12 +71,6 @@ export const FeedbackService = {
       }
       
       console.log("Feedback submitted successfully:", insertedData);
-      
-      // Store location data in the logs since we can't add it to the contacts table
-      if (data.coordinates) {
-        console.log("Location coordinates captured but stored only in logs:", data.coordinates);
-        console.log("Location name:", data.location);
-      }
       
       return {
         id: insertedData.id,
