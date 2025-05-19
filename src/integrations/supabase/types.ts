@@ -39,6 +39,167 @@ export type Database = {
         }
         Relationships: []
       }
+      customer_rewards: {
+        Row: {
+          coordinates: Json | null
+          customer_name: string | null
+          enrolled_at: string
+          feedback_id: string | null
+          id: string
+          location: string | null
+          phone: string
+        }
+        Insert: {
+          coordinates?: Json | null
+          customer_name?: string | null
+          enrolled_at?: string
+          feedback_id?: string | null
+          id?: string
+          location?: string | null
+          phone: string
+        }
+        Update: {
+          coordinates?: Json | null
+          customer_name?: string | null
+          enrolled_at?: string
+          feedback_id?: string | null
+          id?: string
+          location?: string | null
+          phone?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "customer_rewards_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback: {
+        Row: {
+          comments: string | null
+          created_at: string
+          customer_name: string | null
+          id: string
+          location: string | null
+          product_id: string
+          updated_at: string
+          variant_id: string
+        }
+        Insert: {
+          comments?: string | null
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          location?: string | null
+          product_id: string
+          updated_at?: string
+          variant_id: string
+        }
+        Update: {
+          comments?: string | null
+          created_at?: string
+          customer_name?: string | null
+          id?: string
+          location?: string | null
+          product_id?: string
+          updated_at?: string
+          variant_id?: string
+        }
+        Relationships: []
+      }
+      feedback_images: {
+        Row: {
+          created_at: string
+          feedback_id: string
+          id: string
+          image_url: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_id: string
+          id?: string
+          image_url: string
+        }
+        Update: {
+          created_at?: string
+          feedback_id?: string
+          id?: string
+          image_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_images_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_issues: {
+        Row: {
+          created_at: string
+          feedback_id: string
+          id: string
+          issue: string
+        }
+        Insert: {
+          created_at?: string
+          feedback_id: string
+          id?: string
+          issue: string
+        }
+        Update: {
+          created_at?: string
+          feedback_id?: string
+          id?: string
+          issue?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_issues_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feedback_ratings: {
+        Row: {
+          category: string
+          created_at: string
+          feedback_id: string
+          id: string
+          score: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          feedback_id: string
+          id?: string
+          score: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          feedback_id?: string
+          id?: string
+          score?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_ratings_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "feedback"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

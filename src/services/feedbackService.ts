@@ -35,53 +35,77 @@ export const FeedbackService = {
     try {
       console.log("Submitting feedback (raw input):", data);
       
-      // Prepare data for submission to contacts table (temporary until types are updated)
-      const submissionPayload = {
-        name: data.customerName || 'Anonymous',
-        email: 'feedback@example.com', // Required field in contacts
-        subject: `Feedback for ${data.productId} - ${data.variantId}`,
-        message: `Issues: ${data.issues.join(', ')}\n\nComments: ${data.comments || 'None'}\n\nLocation: ${data.location || 'Not provided'}\n\nCoordinates: ${data.coordinates ? `${data.coordinates.latitude}, ${data.coordinates.longitude}` : 'Not provided'}\n\nImages: ${data.imageUrls ? data.imageUrls.join(', ') : 'None'}`,
-        phone: data.location || null,
-      };
-      
-      console.log("Submitting to contacts table:", submissionPayload);
-      
-      // Insert into contacts table (temporary until types are updated)
-      const { data: insertedData, error } = await supabase
-        .from('contacts')
-        .insert(submissionPayload)
+      // Step 1: Insert the main feedback record
+      const { data: feedbackData, error: feedbackError } = await supabase
+        .from('feedback')
+        .insert({
+          customer_name: data.customerName || null,
+          location: data.location || null,
+          product_id: data.productId,
+          variant_id: data.variantId,
+          comments: data.comments || null
+        })
         .select('id, created_at')
         .single();
       
-      if (error) {
-        console.error('Supabase error during submission:', error);
-        
+      if (feedbackError) {
+        console.error('Supabase error during feedback submission:', feedbackError);
         return {
           id: '',
           submitted: false,
           timestamp: new Date().toISOString(),
-          message: `Database error: ${error.message || 'Unknown error'}`
+          message: `Database error: ${feedbackError.message || 'Unknown error'}`
         };
       }
       
-      console.log("Feedback submitted successfully:", insertedData);
+      const feedbackId = feedbackData.id;
+      console.log("Feedback record created with ID:", feedbackId);
       
-      // Log the additional data that would normally go into the feedback table
-      console.log("Additional feedback data (stored in message field):");
-      console.log("- Product ID:", data.productId);
-      console.log("- Variant ID:", data.variantId);
-      console.log("- Issues:", data.issues);
+      // Step 2: Insert the issues
+      if (data.issues.length > 0) {
+        const issueRecords = data.issues.map(issue => ({
+          feedback_id: feedbackId,
+          issue: issue
+        }));
+        
+        const { error: issuesError } = await supabase
+          .from('feedback_issues')
+          .insert(issueRecords);
+        
+        if (issuesError) {
+          console.error('Error inserting issues:', issuesError);
+        }
+      }
+      
+      // Step 3: Insert image URLs if any
+      if (data.imageUrls && data.imageUrls.length > 0) {
+        const imageRecords = data.imageUrls.map(url => ({
+          feedback_id: feedbackId,
+          image_url: url
+        }));
+        
+        const { error: imagesError } = await supabase
+          .from('feedback_images')
+          .insert(imageRecords);
+        
+        if (imagesError) {
+          console.error('Error inserting images:', imagesError);
+        }
+      }
+      
+      // Step 4: Store coordinates data if available
       if (data.coordinates) {
-        console.log("- Coordinates:", data.coordinates);
+        console.log("Coordinates data available:", data.coordinates);
+        // We're storing this with the feedback record for now
+        // If we need to store it separately later, we can update this
       }
-      if (data.imageUrls) {
-        console.log("- Image URLs:", data.imageUrls);
-      }
+      
+      console.log("Feedback submission completed successfully");
       
       return {
-        id: insertedData.id,
+        id: feedbackId,
         submitted: true,
-        timestamp: insertedData.created_at,
+        timestamp: feedbackData.created_at,
         message: "Feedback submitted successfully"
       };
     } catch (error) {
@@ -97,6 +121,60 @@ export const FeedbackService = {
         id: '',
         submitted: false,
         timestamp: new Date().toISOString(),
+        message: errorMessage
+      };
+    }
+  },
+  
+  /**
+   * Submit customer contact information for rewards program
+   */
+  submitCustomerRewards: async (data: {
+    customerName?: string;
+    phone: string;
+    feedbackId?: string;
+    location?: string;
+    coordinates?: {
+      latitude: number;
+      longitude: number;
+    };
+  }): Promise<{ success: boolean; message: string }> => {
+    try {
+      console.log("Submitting customer rewards data:", data);
+      
+      const { error } = await supabase
+        .from('customer_rewards')
+        .insert({
+          customer_name: data.customerName || null,
+          phone: data.phone,
+          feedback_id: data.feedbackId || null,
+          location: data.location || null,
+          coordinates: data.coordinates || null
+        });
+      
+      if (error) {
+        console.error('Error submitting customer rewards:', error);
+        return {
+          success: false,
+          message: `Failed to join rewards program: ${error.message}`
+        };
+      }
+      
+      return {
+        success: true,
+        message: "Successfully joined rewards program"
+      };
+    } catch (error) {
+      console.error('Error in customer rewards submission:', error);
+      let errorMessage = "Failed to join rewards program";
+      if (error && typeof error === 'object' && 'message' in error) {
+        errorMessage = (error as { message: string }).message;
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+      
+      return {
+        success: false,
         message: errorMessage
       };
     }

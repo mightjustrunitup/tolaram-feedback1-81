@@ -8,6 +8,7 @@ import { StarRating } from "@/components/ui/star-rating";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { FeedbackService } from "@/services/feedbackService";
 import { 
   Dialog,
   DialogContent,
@@ -25,10 +26,14 @@ export default function ThankYou() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [showGiftDialog, setShowGiftDialog] = useState(false);
   const [submittedContact, setSubmittedContact] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Get the data from location state or set defaults if not available
   const customerName = location.state?.customerName || "Valued Customer";
   const productName = location.state?.productName || "our products";
+  const feedbackId = location.state?.feedbackId;
+  const locationName = location.state?.location;
+  const coordinates = location.state?.coordinates;
   
   // Show gift dialog immediately when the component mounts
   useEffect(() => {
@@ -50,19 +55,38 @@ export default function ThankYou() {
     setPhoneNumber(e.target.value);
   };
   
-  // Submit contact info
-  const handleContactSubmit = () => {
+  // Submit contact info to the customer_rewards table
+  const handleContactSubmit = async () => {
     if (!phoneNumber || phoneNumber.length < 10) {
       toast.error("Please enter a valid phone number");
       return;
     }
     
-    // Here you would send this to your database
-    console.log("Phone number submitted:", phoneNumber);
+    setIsSubmitting(true);
     
-    toast.success("Thank you! You're now entered into our customer rewards program!");
-    setSubmittedContact(true);
-    setShowGiftDialog(false);
+    try {
+      // Submit to the customer_rewards table
+      const result = await FeedbackService.submitCustomerRewards({
+        customerName: customerName !== "Valued Customer" ? customerName : undefined,
+        phone: phoneNumber,
+        feedbackId: feedbackId,
+        location: locationName,
+        coordinates: coordinates
+      });
+      
+      if (result.success) {
+        toast.success("Thank you! You're now entered into our customer rewards program!");
+        setSubmittedContact(true);
+        setShowGiftDialog(false);
+      } else {
+        toast.error(result.message || "Failed to join rewards program. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting contact info:", error);
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -171,6 +195,7 @@ export default function ThankYou() {
                   value={phoneNumber}
                   onChange={handlePhoneChange}
                   className="w-full border-indomie-yellow focus:border-indomie-red focus:ring-indomie-red"
+                  disabled={isSubmitting}
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   Your information will be kept confidential and only used for rewards.
@@ -179,15 +204,16 @@ export default function ThankYou() {
               
               <div className={`flex ${isMobile ? "flex-col" : "flex-row justify-end"} gap-3`}>
                 <DialogClose asChild>
-                  <Button variant="outline" className="transition-none hover:bg-transparent w-full">
+                  <Button variant="outline" className="transition-none hover:bg-transparent w-full" disabled={isSubmitting}>
                     Maybe Later
                   </Button>
                 </DialogClose>
                 <Button 
                   onClick={handleContactSubmit}
                   className="bg-indomie-red transition-none hover:bg-indomie-red w-full"
+                  disabled={isSubmitting}
                 >
-                  Join Rewards Program
+                  {isSubmitting ? "Submitting..." : "Join Rewards Program"}
                 </Button>
               </div>
             </div>

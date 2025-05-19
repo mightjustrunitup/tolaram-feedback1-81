@@ -15,6 +15,7 @@ import { RatingSection } from "./RatingSection";
 import { IssueSection } from "./IssueSection";
 import { CommentsSection } from "./CommentsSection";
 import { useGeolocation } from "@/hooks/useGeolocation";
+import { FeedbackService } from "@/services/feedbackService";
 
 export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormProps) => {
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -81,7 +82,7 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form before submission
@@ -92,33 +93,56 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
     
     setSubmitting(true);
     
-    // Compile the location data
-    let locationData = formData.location;
-    
-    // If user has granted permission and we have coordinates, use them
-    if (permissionGranted && latitude !== null && longitude !== null) {
-      locationData = locationName || `${latitude},${longitude}`;
-    }
-    
-    // Simulate submission - frontend only
-    setTimeout(() => {
-      setSubmitting(false);
-      toast.success("Feedback submitted successfully!");
+    try {
+      // Compile the location data
+      let locationData = formData.location;
       
-      // Pass data to parent component via callback
-      onSubmitSuccess({
-        ...formData,
-        isAnonymous,
-        selectedIssues,
-        date,
-        // Include the detected location in the form data
-        location: locationData,
-        // Include the raw coordinates for more precise location data
+      // If user has granted permission and we have coordinates, use them
+      if (permissionGranted && latitude !== null && longitude !== null) {
+        locationData = locationName || `${latitude},${longitude}`;
+      }
+      
+      // Prepare feedback data
+      const feedbackData = {
+        customerName: isAnonymous ? undefined : formData.customerName,
+        location: locationData || undefined,
+        productId: selectedProduct.id,
+        variantId: selectedProduct.variants[0]?.id || "default",
+        issues: selectedIssues,
+        comments: formData.comments || undefined,
         coordinates: permissionGranted && latitude !== null && longitude !== null 
           ? { latitude, longitude } 
           : undefined
-      });
-    }, 1500);
+      };
+      
+      // Submit feedback to the database
+      const response = await FeedbackService.submitFeedback(feedbackData);
+      
+      if (response.submitted) {
+        setSubmitting(false);
+        toast.success("Feedback submitted successfully!");
+        
+        // Pass the feedback ID and other data to the parent component
+        onSubmitSuccess({
+          ...formData,
+          isAnonymous,
+          selectedIssues,
+          date,
+          location: locationData,
+          coordinates: permissionGranted && latitude !== null && longitude !== null 
+            ? { latitude, longitude } 
+            : undefined,
+          feedbackId: response.id // Include the feedback ID from the response
+        });
+      } else {
+        setSubmitting(false);
+        toast.error(response.message || "Failed to submit feedback. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      setSubmitting(false);
+      toast.error("Something went wrong. Please try again.");
+    }
   };
 
   return (

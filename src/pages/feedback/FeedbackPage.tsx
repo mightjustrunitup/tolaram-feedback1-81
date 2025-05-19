@@ -52,10 +52,10 @@ export function FeedbackPage() {
               navigate("/thank-you", { 
                 state: { 
                   customerName: data.isAnonymous ? "Valued Customer" : data.customerName,
-                  email: data.email,
                   productName: selectedProduct?.name || "our products",
                   location: data.location,
-                  coordinates: data.coordinates
+                  coordinates: data.coordinates,
+                  feedbackId: data.feedbackId // Pass the feedback ID to the thank-you page
                 } 
               });
             }} 
