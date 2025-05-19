@@ -11,7 +11,6 @@ import { FeedbackFormData, FeedbackFormProps } from "./types";
 import { CustomerInfoSection } from "./CustomerInfoSection";
 import { ProductInfoSection } from "./ProductInfoSection";
 import { VisitDetailsSection } from "./VisitDetailsSection";
-import { RatingSection } from "./RatingSection";
 import { IssueSection } from "./IssueSection";
 import { CommentsSection } from "./CommentsSection";
 import { useGeolocation } from "@/hooks/useGeolocation";
@@ -29,10 +28,6 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
     customerName: "",
     email: "",
     location: "",
-    staffFriendliness: 4,
-    cleanliness: 4,
-    productAvailability: 4,
-    overallExperience: 4,
     comments: ""
   });
   
@@ -54,11 +49,6 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: "" }));
     }
-  };
-
-  const handleRatingChange = (name: string, value: number) => {
-    console.log(`Rating changed: ${name} = ${value}`);
-    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSelectChange = (name: string, value: string) => {
@@ -126,13 +116,6 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
         locationData = locationName || `${latitude},${longitude}`;
       }
       
-      console.log("Ratings data:", {
-        staffFriendliness: formData.staffFriendliness,
-        cleanliness: formData.cleanliness,
-        productAvailability: formData.productAvailability,
-        overallExperience: formData.overallExperience
-      });
-      
       // Log the images that will be uploaded - verify they are valid
       console.log("Images to upload:", uploadedImages);
       
@@ -145,12 +128,6 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
         issues: selectedIssues,
         comments: formData.comments || undefined,
         imageUrls: uploadedImages,
-        ratings: {
-          staffFriendliness: formData.staffFriendliness,
-          cleanliness: formData.cleanliness,
-          productAvailability: formData.productAvailability,
-          overallExperience: formData.overallExperience
-        },
         coordinates: permissionGranted && latitude !== null && longitude !== null 
           ? { latitude, longitude } 
           : undefined
@@ -241,17 +218,6 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
             locationLoading={locationLoading}
             locationError={locationError}
             permissionGranted={permissionGranted}
-          />
-
-          {/* Rating Scales */}
-          <RatingSection 
-            ratings={{
-              staffFriendliness: formData.staffFriendliness,
-              cleanliness: formData.cleanliness,
-              productAvailability: formData.productAvailability,
-              overallExperience: formData.overallExperience
-            }}
-            handleRatingChange={handleRatingChange}
           />
 
           {/* Issues Section */}

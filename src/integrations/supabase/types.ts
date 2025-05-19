@@ -159,45 +159,6 @@ export type Database = {
           },
         ]
       }
-      feedback_ratings: {
-        Row: {
-          category: string
-          created_at: string
-          feedback_id: string
-          id: string
-          score: number
-        }
-        Insert: {
-          category: string
-          created_at?: string
-          feedback_id: string
-          id?: string
-          score: number
-        }
-        Update: {
-          category?: string
-          created_at?: string
-          feedback_id?: string
-          id?: string
-          score?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "feedback_ratings_feedback_id_fkey"
-            columns: ["feedback_id"]
-            isOneToOne: false
-            referencedRelation: "complete_feedback"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "feedback_ratings_feedback_id_fkey"
-            columns: ["feedback_id"]
-            isOneToOne: false
-            referencedRelation: "feedback"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
     }
     Views: {
       complete_feedback: {
@@ -210,7 +171,6 @@ export type Database = {
           issues: string[] | null
           location: string | null
           product_id: string | null
-          ratings: Json | null
           updated_at: string | null
           variant_id: string | null
         }

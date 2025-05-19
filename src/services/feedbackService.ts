@@ -16,13 +16,6 @@ export interface FeedbackSubmission {
     latitude: number;
     longitude: number;
   };
-  ratings?: {
-    staffFriendliness: number;
-    cleanliness: number;
-    productAvailability: number;
-    overallExperience: number;
-    [key: string]: number;
-  };
 }
 
 export interface FeedbackResponse {
@@ -164,36 +157,7 @@ export const FeedbackService = {
         }
       }
       
-      // Step 4: Insert ratings if any
-      if (data.ratings && typeof data.ratings === 'object') {
-        console.log("Processing ratings:", data.ratings);
-        
-        // Filter out undefined or null values and ensure we have valid numbers
-        const ratingEntries = Object.entries(data.ratings)
-          .filter(([_, score]) => 
-            score !== undefined && score !== null && typeof score === 'number'
-          );
-        
-        if (ratingEntries.length > 0) {
-          const ratingRecords = ratingEntries.map(([category, score]) => ({
-            feedback_id: feedbackId,
-            category,
-            score
-          }));
-          
-          console.log("Rating records to insert:", ratingRecords);
-          
-          const { error: ratingsError } = await supabase
-            .from('feedback_ratings')
-            .insert(ratingRecords);
-          
-          if (ratingsError) {
-            console.error('Error inserting ratings:', ratingsError);
-          }
-        }
-      }
-      
-      // Step 5: Store coordinates data if available
+      // Step 4: Store coordinates data if available
       if (data.coordinates) {
         console.log("Coordinates data available:", data.coordinates);
         // We're storing this with the feedback record for now

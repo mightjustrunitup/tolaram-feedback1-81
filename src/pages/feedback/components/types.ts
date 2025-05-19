@@ -14,10 +14,6 @@ export interface FeedbackFormData {
     latitude: number;
     longitude: number;
   };
-  staffFriendliness: number;
-  cleanliness: number;
-  productAvailability: number;
-  overallExperience: number;
   comments: string;
   feedbackId?: string;
 }
@@ -62,12 +58,5 @@ export interface CompleteFeedback {
   variant_id: string;
   comments: string | null;
   issues: string[] | null;
-  ratings: {
-    staffFriendliness?: number;
-    cleanliness?: number;
-    productAvailability?: number;
-    overallExperience?: number;
-    [key: string]: number | undefined;
-  } | null;
   images: string[] | null;
 }
