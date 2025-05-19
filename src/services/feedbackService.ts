@@ -11,7 +11,7 @@ export interface FeedbackSubmission {
   variantId: string;
   issues: string[];
   comments?: string;
-  imageUrls?: string[];
+  imageFiles?: File[];
   coordinates?: {
     latitude: number;
     longitude: number;
@@ -47,11 +47,55 @@ export const FeedbackService = {
   },
 
   /**
+   * Upload images to Supabase storage and return their public URLs
+   */
+  uploadImages: async (files: File[], feedbackId: string): Promise<string[]> => {
+    if (!files || files.length === 0) return [];
+    
+    console.log(`Uploading ${files.length} images for feedback ${feedbackId}`);
+    const imageUrls: string[] = [];
+    
+    for (const file of files) {
+      try {
+        const filename = `${feedbackId}_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        
+        const { data, error } = await supabase.storage
+          .from('feedback-images')
+          .upload(filename, file);
+          
+        if (error) {
+          console.error("Error uploading file:", error);
+          continue;
+        }
+        
+        if (data) {
+          // Get the public URL
+          const { data: publicUrlData } = supabase.storage
+            .from('feedback-images')
+            .getPublicUrl(filename);
+          
+          if (publicUrlData && publicUrlData.publicUrl) {
+            imageUrls.push(publicUrlData.publicUrl);
+            console.log("Uploaded image URL:", publicUrlData.publicUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Error in file upload process:", error);
+      }
+    }
+    
+    return imageUrls;
+  },
+
+  /**
    * Submit feedback to the backend
    */
   submitFeedback: async (data: FeedbackSubmission): Promise<FeedbackResponse> => {
     try {
-      console.log("Submitting feedback (raw input):", data);
+      console.log("Submitting feedback (raw input):", {
+        ...data,
+        imageFiles: data.imageFiles ? `${data.imageFiles.length} files` : 'none'
+      });
       
       // Step 1: Insert the main feedback record
       const { data: feedbackData, error: feedbackError } = await supabase
@@ -95,17 +139,15 @@ export const FeedbackService = {
         }
       }
       
-      // Step 3: Insert image URLs if any
-      if (data.imageUrls && data.imageUrls.length > 0) {
-        // Ensure we have valid strings for image URLs
-        const validImageUrls = data.imageUrls.filter(url => 
-          typeof url === 'string' && url.trim() !== ''
-        );
+      // Step 3: Upload images and insert image URLs if any
+      let imageUrls: string[] = [];
+      if (data.imageFiles && data.imageFiles.length > 0) {
+        imageUrls = await FeedbackService.uploadImages(data.imageFiles, feedbackId);
         
-        console.log("Processing validated image URLs:", validImageUrls);
+        console.log("Processed image URLs:", imageUrls);
         
-        if (validImageUrls.length > 0) {
-          const imageRecords = validImageUrls.map(url => ({
+        if (imageUrls.length > 0) {
+          const imageRecords = imageUrls.map(url => ({
             feedback_id: feedbackId,
             image_url: url
           }));

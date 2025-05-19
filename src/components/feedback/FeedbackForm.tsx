@@ -18,17 +18,24 @@ export const FeedbackForm = () => {
     handleProductSelect,
     handleVariantSelect,
     handleIssueToggle,
-    handleSubmit
+    handleSubmit: formSubmit
   } = useFeedbackForm();
   
   const {
+    uploadedImageUrls,
     uploadedImages,
     isCameraActive,
     handleImageUpload,
     handleImageRemove,
     handleCameraCapture,
-    toggleCamera
+    toggleCamera,
+    uploadFilesToStorage
   } = useImageHandling();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    // Use the existing form submission handler but pass the actual image files
+    return formSubmit(e, uploadedImages);
+  };
 
   return (
     <ProductFeedbackForm
@@ -41,7 +48,7 @@ export const FeedbackForm = () => {
       location={formData.location}
       comments={formData.comments}
       selectedIssues={selectedIssues}
-      uploadedImages={uploadedImages}
+      uploadedImages={uploadedImageUrls}
       products={products}
       onInputChange={handleInputChange}
       handleProductSelect={handleProductSelect}

@@ -3,9 +3,43 @@ import { FeedbackPage } from "@/pages/feedback/FeedbackPage";
 import { useEffect } from "react";
 import { FeedbackService } from "@/services/feedbackService";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 
 export default function Feedback() {
   useEffect(() => {
+    // Create the storage bucket if it doesn't exist
+    const createStorageBucket = async () => {
+      try {
+        // Check if the bucket exists
+        const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+        
+        if (listError) {
+          console.error("Error checking buckets:", listError);
+          return;
+        }
+        
+        const bucketExists = buckets.some(bucket => bucket.name === 'feedback-images');
+        
+        if (!bucketExists) {
+          console.log("Creating feedback-images storage bucket");
+          const { data, error } = await supabase.storage.createBucket('feedback-images', {
+            public: true,
+            fileSizeLimit: 5242880, // 5MB
+          });
+          
+          if (error) {
+            console.error("Error creating storage bucket:", error);
+          } else {
+            console.log("Storage bucket created successfully:", data);
+          }
+        } else {
+          console.log("Feedback images bucket already exists");
+        }
+      } catch (error) {
+        console.error("Error with storage bucket setup:", error);
+      }
+    };
+    
     // Test the complete_feedback view to ensure it's working properly
     const testCompleteFeedback = async () => {
       try {
@@ -62,6 +96,7 @@ export default function Feedback() {
     };
     
     // Run tests
+    createStorageBucket();
     testCompleteFeedback();
     testAccessPermission();
   }, []);

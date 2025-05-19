@@ -89,19 +89,16 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           </Button>
         )}
         
-        {/* Only show Attach button on web (non-mobile) */}
-        {!isMobile && (
-          <Button
-            type="button"
-            variant="ghost" 
-            size="sm"
-            onClick={handleFileButtonClick}
-            className="bg-transparent hover:bg-gray-100 flex items-center"
-            title="Attach images to your feedback"
-          >
-            <Paperclip size={14} />
-          </Button>
-        )}
+        <Button
+          type="button"
+          variant="ghost" 
+          size="sm"
+          onClick={handleFileButtonClick}
+          className="bg-transparent hover:bg-gray-100 flex items-center"
+          title="Attach images to your feedback"
+        >
+          <Paperclip size={14} />
+        </Button>
       </div>
       
       {/* Display uploaded images with delete option */}
@@ -119,7 +116,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                 {onImageRemove && (
                   <button
                     type="button"
-                    className="absolute top-0 right-0 bg-black/60 p-1 rounded-bl md:hidden md:group-hover:block"
+                    className="absolute top-0 right-0 bg-black/60 p-1 rounded-bl md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                     onClick={() => onImageRemove(index)}
                     title="Remove image"
                   >

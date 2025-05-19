@@ -7,7 +7,6 @@ import { FeedbackService, FeedbackSubmission } from "@/services/feedbackService"
 // Import our smaller hooks
 import { useFormValidation } from "./useFormValidation";
 import { useProductSelection } from "./useProductSelection";
-import { useImageHandling } from "./useImageHandling";
 import { useFormData } from "./useFormData";
 import { useGeolocation } from "@/hooks/useGeolocation";
 
@@ -30,8 +29,6 @@ export function useFeedbackForm() {
     handleVariantSelect,
     handleIssueToggle
   } = useProductSelection();
-  
-  const { uploadedImages, handleImageUpload, handleImageRemove } = useImageHandling();
   
   const { errors, formValid, clearError, validateForm } = useFormValidation(
     selectedProduct,
@@ -67,7 +64,7 @@ export function useFeedbackForm() {
     clearError('issue');
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, imageFiles?: File[]) => {
     e.preventDefault();
     
     // Validate form before submission
@@ -93,14 +90,25 @@ export function useFeedbackForm() {
         variantId: selectedVariant || "",
         issues: selectedIssues,
         comments: formData.comments || undefined,
-        imageUrls: uploadedImages.length > 0 ? uploadedImages : undefined,
+        // Use the actual image files instead of URLs
+        imageFiles: imageFiles,
         // Add coordinates if we have them
         coordinates: permissionGranted && latitude !== null && longitude !== null
           ? { latitude, longitude }
-          : undefined
+          : undefined,
+        // Add ratings
+        ratings: {
+          staffFriendliness: formData.staffFriendliness || 4,
+          cleanliness: formData.cleanliness || 4,
+          productAvailability: formData.productAvailability || 4,
+          overallExperience: formData.overallExperience || 4
+        }
       };
       
-      console.log("Preparing to submit feedback:", feedbackData);
+      console.log("Preparing to submit feedback:", {
+        ...feedbackData,
+        imageFiles: feedbackData.imageFiles ? `${feedbackData.imageFiles.length} files` : 'none'
+      });
       
       // Submit to Supabase database
       const response = await FeedbackService.submitFeedback(feedbackData);
@@ -119,7 +127,8 @@ export function useFeedbackForm() {
             // Include coordinates if available
             coordinates: permissionGranted && latitude !== null && longitude !== null
               ? { latitude, longitude }
-              : undefined
+              : undefined,
+            feedbackId: response.id
           } 
         });
       } else {
@@ -143,7 +152,6 @@ export function useFeedbackForm() {
     formValid,
     formData,
     selectedIssues,
-    uploadedImages,
     // Add geolocation properties
     locationName,
     locationLoading,
@@ -154,8 +162,6 @@ export function useFeedbackForm() {
     handleProductSelect,
     handleVariantSelect: handleVariantSelectWithValidation,
     handleIssueToggle: handleIssueToggleWithValidation,
-    handleImageUpload,
-    handleImageRemove,
     handleSubmit
   };
 }
