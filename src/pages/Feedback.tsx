@@ -11,8 +11,19 @@ export default function Feedback() {
       try {
         const feedbackData = await FeedbackService.getCompleteFeedback();
         console.log("Complete feedback data:", feedbackData);
+        
+        // Check if there's valid data and log detailed information for debugging
         if (feedbackData.length > 0) {
           toast.success(`Successfully loaded ${feedbackData.length} feedback entries`);
+          
+          // Log details of first feedback entry to check if images and ratings are loaded
+          const firstEntry = feedbackData[0];
+          console.log("First feedback details:", {
+            id: firstEntry.id,
+            ratings: firstEntry.ratings,
+            images: firstEntry.images,
+            issues: firstEntry.issues
+          });
         } else {
           console.log("No feedback entries found yet");
         }
@@ -22,7 +33,7 @@ export default function Feedback() {
       }
     };
     
-    // Uncomment to test the view
+    // Test the view
     testCompleteFeedback();
   }, []);
   

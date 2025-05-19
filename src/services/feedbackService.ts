@@ -21,6 +21,7 @@ export interface FeedbackSubmission {
     cleanliness: number;
     productAvailability: number;
     overallExperience: number;
+    [key: string]: number;
   };
 }
 
@@ -85,13 +86,15 @@ export const FeedbackService = {
       }
       
       // Step 3: Insert image URLs if any
-      if (data.imageUrls && data.imageUrls.length > 0 && Array.isArray(data.imageUrls)) {
+      if (data.imageUrls && data.imageUrls.length > 0) {
         console.log("Processing image URLs:", data.imageUrls);
         
         const imageRecords = data.imageUrls.map(url => ({
           feedback_id: feedbackId,
           image_url: url
         }));
+        
+        console.log("Image records to insert:", imageRecords);
         
         const { error: imagesError } = await supabase
           .from('feedback_images')
@@ -106,19 +109,23 @@ export const FeedbackService = {
       if (data.ratings) {
         console.log("Processing ratings:", data.ratings);
         
-        const ratingEntries = Object.entries(data.ratings);
+        const ratingEntries = Object.entries(data.ratings).filter(([_, score]) => score !== undefined && score !== null);
         const ratingRecords = ratingEntries.map(([category, score]) => ({
           feedback_id: feedbackId,
           category,
           score
         }));
         
-        const { error: ratingsError } = await supabase
-          .from('feedback_ratings')
-          .insert(ratingRecords);
+        console.log("Rating records to insert:", ratingRecords);
         
-        if (ratingsError) {
-          console.error('Error inserting ratings:', ratingsError);
+        if (ratingRecords.length > 0) {
+          const { error: ratingsError } = await supabase
+            .from('feedback_ratings')
+            .insert(ratingRecords);
+          
+          if (ratingsError) {
+            console.error('Error inserting ratings:', ratingsError);
+          }
         }
       }
       

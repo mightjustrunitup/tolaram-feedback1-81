@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { toast } from "sonner";
 import { MapPin, Loader2 } from "lucide-react";
@@ -57,6 +56,7 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
   };
 
   const handleRatingChange = (name: string, value: number) => {
+    console.log(`Rating changed: ${name} = ${value}`);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -70,8 +70,10 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
 
   // Image handling functions
   const handleImageUpload = (files: FileList) => {
+    console.log("Image upload triggered with files:", files);
     if (files && files.length > 0) {
       const newImages = Array.from(files).map(file => URL.createObjectURL(file));
+      console.log("New images created:", newImages);
       setUploadedImages(prev => [...prev, ...newImages]);
     }
   };
@@ -79,6 +81,10 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
   const handleImageRemove = (index: number) => {
     setUploadedImages(prev => {
       const updated = [...prev];
+      // If the image URL starts with blob:, revoke object URL to prevent memory leaks
+      if (updated[index].startsWith('blob:')) {
+        URL.revokeObjectURL(updated[index]);
+      }
       updated.splice(index, 1);
       return updated;
     });
@@ -119,6 +125,15 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
         locationData = locationName || `${latitude},${longitude}`;
       }
       
+      console.log("Ratings data:", {
+        staffFriendliness: formData.staffFriendliness,
+        cleanliness: formData.cleanliness,
+        productAvailability: formData.productAvailability,
+        overallExperience: formData.overallExperience
+      });
+      
+      console.log("Images to upload:", uploadedImages);
+      
       // Prepare feedback data
       const feedbackData = {
         customerName: isAnonymous ? undefined : formData.customerName,
@@ -127,7 +142,7 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
         variantId: selectedProduct.variants[0]?.id || "default",
         issues: selectedIssues,
         comments: formData.comments || undefined,
-        imageUrls: uploadedImages,
+        imageUrls: uploadedImages.length > 0 ? uploadedImages : undefined,
         ratings: {
           staffFriendliness: formData.staffFriendliness,
           cleanliness: formData.cleanliness,
