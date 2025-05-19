@@ -15,6 +15,7 @@ import Logo from "@/components/layout/Logo";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 // Mock data for the admin dashboard (kept from original)
 const MOCK_FEEDBACK_DATA = [
@@ -55,6 +56,7 @@ export default function Admin() {
   const [selectedStore, setSelectedStore] = useState<string>("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState<any>(null);
 
   // Filter feedback data based on selected filters
   const filteredFeedback = MOCK_FEEDBACK_DATA.filter((feedback) => {
@@ -69,6 +71,16 @@ export default function Admin() {
   const handleExportExcel = () => {
     toast.success("Exporting data to Excel...");
     // In a real app, this would trigger an API call to generate and download an Excel file
+  };
+
+  // Add a function to view images for a feedback item
+  const handleViewImages = (feedback: any) => {
+    setSelectedFeedback(feedback);
+  };
+
+  // Add a function to close the image viewer
+  const handleCloseImageViewer = () => {
+    setSelectedFeedback(null);
   };
 
   return (
@@ -287,6 +299,7 @@ export default function Admin() {
                             <th className="px-2 md:px-6 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Products</th>
                             <th className="px-2 md:px-6 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Overall</th>
                             <th className="px-2 md:px-6 py-2 md:py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Comments</th>
+                            <th className="px-2 md:px-6 py-2 md:py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Images</th>
                           </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -336,6 +349,17 @@ export default function Admin() {
                                 </span>
                               </td>
                               <td className="px-2 md:px-6 py-2 md:py-4 text-xs md:text-sm text-gray-500 max-w-[6rem] sm:max-w-xs truncate">{feedback.comment}</td>
+                              <td className="px-2 md:px-6 py-2 md:py-4 text-center">
+                                {/* Add a button to view images */}
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleViewImages(feedback)}
+                                  className="text-xs"
+                                >
+                                  View Images
+                                </Button>
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -555,6 +579,47 @@ export default function Admin() {
           </Tabs>
         </div>
       </div>
+
+      {/* Image Viewer Dialog */}
+      {selectedFeedback && (
+        <Dialog open={!!selectedFeedback} onOpenChange={() => setSelectedFeedback(null)}>
+          <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Feedback Images</DialogTitle>
+              <DialogDescription>
+                Submitted by {selectedFeedback.customerName} on {selectedFeedback.date}
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="grid grid-cols-1 gap-4 my-4">
+              {/* Mock images for demonstration - in a real app, these would come from your Supabase storage */}
+              <div className="aspect-video rounded-lg overflow-hidden border border-gray-200">
+                <img
+                  src="https://yadcdvyzfnhjzognvqtb.supabase.co/storage/v1/object/public/feedback-images/61106a2a-3fe7-4bf7-8a44-30fe51c2dfa0_1747664157560_hot_and_spicy.jpg"
+                  alt="Feedback image"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <div className="aspect-video rounded-lg overflow-hidden border border-gray-200">
+                <img
+                  src="https://yadcdvyzfnhjzognvqtb.supabase.co/storage/v1/object/public/feedback-images/61106a2a-3fe7-4bf7-8a44-30fe51c2dfa0_1747664157560_hot_and_spicy.jpg" 
+                  alt="Feedback image"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button 
+                variant="outline" 
+                onClick={handleCloseImageViewer}
+              >
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
