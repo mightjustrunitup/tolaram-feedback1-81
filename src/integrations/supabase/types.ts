@@ -9,41 +9,11 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      contacts: {
-        Row: {
-          created_at: string
-          email: string
-          id: string
-          message: string
-          name: string
-          phone: string | null
-          subject: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          id?: string
-          message: string
-          name: string
-          phone?: string | null
-          subject: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          id?: string
-          message?: string
-          name?: string
-          phone?: string | null
-          subject?: string
-        }
-        Relationships: []
-      }
       customer_rewards: {
         Row: {
           coordinates: Json | null
+          created_at: string
           customer_name: string | null
-          enrolled_at: string
           feedback_id: string | null
           id: string
           location: string | null
@@ -51,8 +21,8 @@ export type Database = {
         }
         Insert: {
           coordinates?: Json | null
+          created_at?: string
           customer_name?: string | null
-          enrolled_at?: string
           feedback_id?: string | null
           id?: string
           location?: string | null
@@ -60,8 +30,8 @@ export type Database = {
         }
         Update: {
           coordinates?: Json | null
+          created_at?: string
           customer_name?: string | null
-          enrolled_at?: string
           feedback_id?: string | null
           id?: string
           location?: string | null

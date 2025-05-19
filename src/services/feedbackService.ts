@@ -230,7 +230,6 @@ export const FeedbackService = {
   getCompleteFeedback: async (): Promise<CompleteFeedback[]> => {
     try {
       // We're directly using the view that was created in the database
-      // TypeScript doesn't know about this view, so we need to cast it
       const { data, error } = await supabase
         .from('complete_feedback')
         .select('*') as { data: CompleteFeedback[] | null, error: any };
