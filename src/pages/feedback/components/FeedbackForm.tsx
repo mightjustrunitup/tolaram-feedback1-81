@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { toast } from "sonner";
 import { MapPin, Loader2 } from "lucide-react";
@@ -132,6 +133,7 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
         overallExperience: formData.overallExperience
       });
       
+      // Log the images that will be uploaded - verify they are valid
       console.log("Images to upload:", uploadedImages);
       
       // Prepare feedback data
@@ -142,7 +144,7 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
         variantId: selectedProduct.variants[0]?.id || "default",
         issues: selectedIssues,
         comments: formData.comments || undefined,
-        imageUrls: uploadedImages.length > 0 ? uploadedImages : undefined,
+        imageUrls: uploadedImages,
         ratings: {
           staffFriendliness: formData.staffFriendliness,
           cleanliness: formData.cleanliness,

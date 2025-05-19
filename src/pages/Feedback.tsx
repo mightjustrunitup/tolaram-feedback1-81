@@ -24,6 +24,19 @@ export default function Feedback() {
             images: firstEntry.images,
             issues: firstEntry.issues
           });
+          
+          // Specifically check if images and ratings are properly loaded
+          if (!firstEntry.images || firstEntry.images.length === 0) {
+            console.log("Warning: No images found in the loaded feedback");
+          } else {
+            console.log("Images found:", firstEntry.images);
+          }
+          
+          if (!firstEntry.ratings || Object.keys(firstEntry.ratings).length === 0) {
+            console.log("Warning: No ratings found in the loaded feedback");
+          } else {
+            console.log("Ratings found:", firstEntry.ratings);
+          }
         } else {
           console.log("No feedback entries found yet");
         }

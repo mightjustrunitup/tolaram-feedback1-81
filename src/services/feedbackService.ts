@@ -80,7 +80,7 @@ export const FeedbackService = {
       console.log("Feedback record created with ID:", feedbackId);
       
       // Step 2: Insert the issues
-      if (data.issues.length > 0) {
+      if (data.issues && data.issues.length > 0) {
         const issueRecords = data.issues.map(issue => ({
           feedback_id: feedbackId,
           issue: issue
@@ -97,38 +97,50 @@ export const FeedbackService = {
       
       // Step 3: Insert image URLs if any
       if (data.imageUrls && data.imageUrls.length > 0) {
-        console.log("Processing image URLs:", data.imageUrls);
+        // Ensure we have valid strings for image URLs
+        const validImageUrls = data.imageUrls.filter(url => 
+          typeof url === 'string' && url.trim() !== ''
+        );
         
-        const imageRecords = data.imageUrls.map(url => ({
-          feedback_id: feedbackId,
-          image_url: url
-        }));
+        console.log("Processing validated image URLs:", validImageUrls);
         
-        console.log("Image records to insert:", imageRecords);
-        
-        const { error: imagesError } = await supabase
-          .from('feedback_images')
-          .insert(imageRecords);
-        
-        if (imagesError) {
-          console.error('Error inserting images:', imagesError);
+        if (validImageUrls.length > 0) {
+          const imageRecords = validImageUrls.map(url => ({
+            feedback_id: feedbackId,
+            image_url: url
+          }));
+          
+          console.log("Image records to insert:", imageRecords);
+          
+          const { error: imagesError } = await supabase
+            .from('feedback_images')
+            .insert(imageRecords);
+          
+          if (imagesError) {
+            console.error('Error inserting images:', imagesError);
+          }
         }
       }
       
       // Step 4: Insert ratings if any
-      if (data.ratings) {
+      if (data.ratings && typeof data.ratings === 'object') {
         console.log("Processing ratings:", data.ratings);
         
-        const ratingEntries = Object.entries(data.ratings).filter(([_, score]) => score !== undefined && score !== null);
-        const ratingRecords = ratingEntries.map(([category, score]) => ({
-          feedback_id: feedbackId,
-          category,
-          score
-        }));
+        // Filter out undefined or null values and ensure we have valid numbers
+        const ratingEntries = Object.entries(data.ratings)
+          .filter(([_, score]) => 
+            score !== undefined && score !== null && typeof score === 'number'
+          );
         
-        console.log("Rating records to insert:", ratingRecords);
-        
-        if (ratingRecords.length > 0) {
+        if (ratingEntries.length > 0) {
+          const ratingRecords = ratingEntries.map(([category, score]) => ({
+            feedback_id: feedbackId,
+            category,
+            score
+          }));
+          
+          console.log("Rating records to insert:", ratingRecords);
+          
           const { error: ratingsError } = await supabase
             .from('feedback_ratings')
             .insert(ratingRecords);

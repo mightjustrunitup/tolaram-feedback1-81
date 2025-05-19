@@ -24,6 +24,7 @@ export function useImageHandling() {
       });
       
       if (newImages.length > 0) {
+        console.log("New images added:", newImages);
         setUploadedImages(prev => [...prev, ...newImages]);
         toast.success(`${newImages.length} image${newImages.length > 1 ? 's' : ''} uploaded`);
       }
@@ -32,6 +33,7 @@ export function useImageHandling() {
 
   // Handle taking a photo with device camera
   const handleCameraCapture = (imageData: string) => {
+    console.log("Camera capture: Image data received");
     setUploadedImages(prev => [...prev, imageData]);
     setIsCameraActive(false);
     toast.success("Photo captured successfully");
