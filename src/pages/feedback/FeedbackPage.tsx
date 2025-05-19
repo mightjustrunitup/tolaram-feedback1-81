@@ -48,14 +48,13 @@ export function FeedbackPage() {
                 console.log("No location coordinates provided");
               }
               
-              // We can now use data.coordinates and data.location in the navigation state
+              // Navigate to thank-you page with relevant data
               navigate("/thank-you", { 
                 state: { 
                   customerName: data.isAnonymous ? "Valued Customer" : data.customerName,
                   email: data.email,
                   productName: selectedProduct?.name || "our products",
                   location: data.location,
-                  // Include coordinates if available
                   coordinates: data.coordinates
                 } 
               });
