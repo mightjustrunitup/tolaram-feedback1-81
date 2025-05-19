@@ -39,39 +39,6 @@ export type Database = {
         }
         Relationships: []
       }
-      feedback: {
-        Row: {
-          comments: string | null
-          created_at: string
-          customer_name: string | null
-          id: string
-          issues: string[]
-          location: string | null
-          product_id: string
-          variant_id: string
-        }
-        Insert: {
-          comments?: string | null
-          created_at?: string
-          customer_name?: string | null
-          id?: string
-          issues: string[]
-          location?: string | null
-          product_id: string
-          variant_id: string
-        }
-        Update: {
-          comments?: string | null
-          created_at?: string
-          customer_name?: string | null
-          id?: string
-          issues?: string[]
-          location?: string | null
-          product_id?: string
-          variant_id?: string
-        }
-        Relationships: []
-      }
     }
     Views: {
       [_ in never]: never
