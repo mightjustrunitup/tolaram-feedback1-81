@@ -50,26 +50,19 @@ export default function Feedback() {
         if (feedbackData.length > 0) {
           toast.success(`Successfully loaded ${feedbackData.length} feedback entries`);
           
-          // Log details of first feedback entry to check if images and ratings are loaded
+          // Log details of first feedback entry to check if images are loaded
           const firstEntry = feedbackData[0];
           console.log("First feedback details:", {
             id: firstEntry.id,
-            ratings: firstEntry.ratings,
             images: firstEntry.images,
             issues: firstEntry.issues
           });
           
-          // Specifically check if images and ratings are properly loaded
+          // Specifically check if images are properly loaded
           if (!firstEntry.images || firstEntry.images.length === 0) {
             console.log("Warning: No images found in the loaded feedback");
           } else {
             console.log("Images found:", firstEntry.images);
-          }
-          
-          if (!firstEntry.ratings || Object.keys(firstEntry.ratings).length === 0) {
-            console.log("Warning: No ratings found in the loaded feedback");
-          } else {
-            console.log("Ratings found:", firstEntry.ratings);
           }
         } else {
           console.log("No feedback entries found yet");

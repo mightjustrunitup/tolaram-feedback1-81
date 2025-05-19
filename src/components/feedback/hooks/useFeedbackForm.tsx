@@ -95,14 +95,7 @@ export function useFeedbackForm() {
         // Add coordinates if we have them
         coordinates: permissionGranted && latitude !== null && longitude !== null
           ? { latitude, longitude }
-          : undefined,
-        // Add ratings
-        ratings: {
-          staffFriendliness: formData.staffFriendliness || 4,
-          cleanliness: formData.cleanliness || 4,
-          productAvailability: formData.productAvailability || 4,
-          overallExperience: formData.overallExperience || 4
-        }
+          : undefined
       };
       
       console.log("Preparing to submit feedback:", {
