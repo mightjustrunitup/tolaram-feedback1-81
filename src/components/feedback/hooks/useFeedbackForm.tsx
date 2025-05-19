@@ -9,6 +9,7 @@ import { useFormValidation } from "./useFormValidation";
 import { useProductSelection } from "./useProductSelection";
 import { useImageHandling } from "./useImageHandling";
 import { useFormData } from "./useFormData";
+import { useGeolocation } from "@/hooks/useGeolocation";
 
 /**
  * Main feedback form hook that composes smaller, focused hooks
@@ -38,6 +39,17 @@ export function useFeedbackForm() {
     selectedIssues,
     formData
   );
+  
+  // Add geolocation hook
+  const { 
+    latitude, 
+    longitude, 
+    locationName, 
+    loading: locationLoading,
+    error: locationError,
+    permissionGranted,
+    requestLocation 
+  } = useGeolocation();
 
   // Enhanced handlers with validation
   const handleInputWithValidation = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -67,15 +79,25 @@ export function useFeedbackForm() {
     setSubmitting(true);
     
     try {
+      // Prepare location data - use detected location if available
+      let locationData = formData.location;
+      if (permissionGranted && locationName) {
+        locationData = locationName;
+      }
+      
       // Prepare data to send to Supabase
       const feedbackData: FeedbackSubmission = {
         customerName: formData.customerName || undefined,
-        location: formData.location || undefined,
+        location: locationData || undefined,
         productId: selectedProduct?.id || "",
         variantId: selectedVariant || "",
         issues: selectedIssues,
         comments: formData.comments || undefined,
-        imageUrls: uploadedImages.length > 0 ? uploadedImages : undefined
+        imageUrls: uploadedImages.length > 0 ? uploadedImages : undefined,
+        // Add coordinates if we have them
+        coordinates: permissionGranted && latitude !== null && longitude !== null
+          ? { latitude, longitude }
+          : undefined
       };
       
       console.log("Preparing to submit feedback:", feedbackData);
@@ -92,7 +114,12 @@ export function useFeedbackForm() {
           state: { 
             customerName: formData.customerName || "Valued Customer",
             productName: selectedProduct?.name || "our product",
-            issues: selectedIssues
+            issues: selectedIssues,
+            location: locationData,
+            // Include coordinates if available
+            coordinates: permissionGranted && latitude !== null && longitude !== null
+              ? { latitude, longitude }
+              : undefined
           } 
         });
       } else {
@@ -117,6 +144,12 @@ export function useFeedbackForm() {
     formData,
     selectedIssues,
     uploadedImages,
+    // Add geolocation properties
+    locationName,
+    locationLoading,
+    locationError,
+    permissionGranted,
+    requestLocation,
     handleInputChange: handleInputWithValidation,
     handleProductSelect,
     handleVariantSelect: handleVariantSelectWithValidation,

@@ -10,6 +10,10 @@ export interface FeedbackFormData {
   selectedIssues: string[];
   date: Date;
   location: string;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
   staffFriendliness: number;
   cleanliness: number;
   productAvailability: number;

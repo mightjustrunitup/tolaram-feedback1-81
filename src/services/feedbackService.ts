@@ -1,3 +1,4 @@
+
 import { get, post } from "@/lib/api";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -10,6 +11,10 @@ export interface FeedbackSubmission {
   issues: string[];
   comments?: string;
   imageUrls?: string[];
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 export interface FeedbackResponse {
@@ -39,6 +44,8 @@ export const FeedbackService = {
         variant_id: string;
         issues: string[];
         comments: string | null;
+        latitude?: number;
+        longitude?: number;
         // image_urls would go here if the column existed and we were sending them
       } = {
         customer_name: data.customerName || null,
@@ -49,6 +56,12 @@ export const FeedbackService = {
         comments: data.comments || null,
       };
       
+      // Add coordinates if they exist
+      if (data.coordinates) {
+        submissionPayload.latitude = data.coordinates.latitude;
+        submissionPayload.longitude = data.coordinates.longitude;
+      }
+      
       // IMPORTANT: Image URLs are not being sent in this temporary fix.
       // To save images, add an 'image_urls' column (type text[]) to your 'feedback' table in Supabase,
       // and then update this code to include:
@@ -56,11 +69,11 @@ export const FeedbackService = {
       //   (submissionPayload as any).image_urls = data.imageUrls;
       // }
       
-      console.log("Cleaned submission data (image_urls temporarily excluded):", submissionPayload);
+      console.log("Cleaned submission data (with coordinates):", submissionPayload);
       
       const { data: insertedData, error } = await supabase
         .from('feedback')
-        .insert(submissionPayload) // Sending payload without image_urls
+        .insert(submissionPayload) // Sending payload with coordinates
         .select('id, created_at')
         .single();
       
@@ -70,13 +83,13 @@ export const FeedbackService = {
         throw error;
       }
       
-      console.log("Feedback submitted successfully (without images):", insertedData);
+      console.log("Feedback submitted successfully:", insertedData);
       
       return {
         id: insertedData.id,
         submitted: true,
         timestamp: insertedData.created_at,
-        message: "Feedback submitted successfully (images not saved)"
+        message: "Feedback submitted successfully"
       };
     } catch (error) {
       console.error('Error submitting feedback:', error);

@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
+import { MapPin, Loader2 } from "lucide-react";
 
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import { VisitDetailsSection } from "./VisitDetailsSection";
 import { RatingSection } from "./RatingSection";
 import { IssueSection } from "./IssueSection";
 import { CommentsSection } from "./CommentsSection";
+import { useGeolocation } from "@/hooks/useGeolocation";
 
 export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormProps) => {
   const [isAnonymous, setIsAnonymous] = useState(false);
@@ -31,6 +33,17 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
     overallExperience: 4,
     comments: ""
   });
+  
+  // Use our new geolocation hook
+  const { 
+    latitude, 
+    longitude, 
+    locationName, 
+    loading: locationLoading, 
+    error: locationError,
+    permissionGranted,
+    requestLocation 
+  } = useGeolocation();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -79,6 +92,14 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
     
     setSubmitting(true);
     
+    // Compile the location data
+    let locationData = formData.location;
+    
+    // If user has granted permission and we have coordinates, use them
+    if (permissionGranted && latitude !== null && longitude !== null) {
+      locationData = locationName || `${latitude},${longitude}`;
+    }
+    
     // Simulate submission - frontend only
     setTimeout(() => {
       setSubmitting(false);
@@ -89,7 +110,13 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
         ...formData,
         isAnonymous,
         selectedIssues,
-        date
+        date,
+        // Include the detected location in the form data
+        location: locationData,
+        // Include the raw coordinates for more precise location data
+        coordinates: permissionGranted && latitude !== null && longitude !== null 
+          ? { latitude, longitude } 
+          : undefined
       });
     }, 1500);
   };
@@ -142,6 +169,12 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
             setDate={setDate}
             location={formData.location}
             handleInputChange={handleInputChange}
+            // Add new props for location detection
+            detectLocation={requestLocation}
+            detectedLocation={locationName}
+            locationLoading={locationLoading}
+            locationError={locationError}
+            permissionGranted={permissionGranted}
           />
 
           {/* Rating Scales */}

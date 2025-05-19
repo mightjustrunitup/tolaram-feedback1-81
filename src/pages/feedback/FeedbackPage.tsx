@@ -38,11 +38,15 @@ export function FeedbackPage() {
           <FeedbackForm 
             selectedProduct={selectedProduct} 
             onSubmitSuccess={(data) => {
+              // We can now use data.coordinates and data.location in the navigation state
               navigate("/thank-you", { 
                 state: { 
                   customerName: data.isAnonymous ? "Valued Customer" : data.customerName,
                   email: data.email,
-                  productName: selectedProduct?.name || "our products"
+                  productName: selectedProduct?.name || "our products",
+                  location: data.location,
+                  // Include coordinates if available
+                  coordinates: data.coordinates
                 } 
               });
             }} 
