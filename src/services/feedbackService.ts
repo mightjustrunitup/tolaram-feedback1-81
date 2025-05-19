@@ -15,6 +15,12 @@ export interface FeedbackSubmission {
     latitude: number;
     longitude: number;
   };
+  ratings?: {
+    staffFriendliness: number;
+    cleanliness: number;
+    productAvailability: number;
+    overallExperience: number;
+  };
 }
 
 export interface FeedbackResponse {
@@ -78,7 +84,9 @@ export const FeedbackService = {
       }
       
       // Step 3: Insert image URLs if any
-      if (data.imageUrls && data.imageUrls.length > 0) {
+      if (data.imageUrls && data.imageUrls.length > 0 && Array.isArray(data.imageUrls)) {
+        console.log("Processing image URLs:", data.imageUrls);
+        
         const imageRecords = data.imageUrls.map(url => ({
           feedback_id: feedbackId,
           image_url: url
@@ -93,7 +101,27 @@ export const FeedbackService = {
         }
       }
       
-      // Step 4: Store coordinates data if available
+      // Step 4: Insert ratings if any
+      if (data.ratings) {
+        console.log("Processing ratings:", data.ratings);
+        
+        const ratingEntries = Object.entries(data.ratings);
+        const ratingRecords = ratingEntries.map(([category, score]) => ({
+          feedback_id: feedbackId,
+          category,
+          score
+        }));
+        
+        const { error: ratingsError } = await supabase
+          .from('feedback_ratings')
+          .insert(ratingRecords);
+        
+        if (ratingsError) {
+          console.error('Error inserting ratings:', ratingsError);
+        }
+      }
+      
+      // Step 5: Store coordinates data if available
       if (data.coordinates) {
         console.log("Coordinates data available:", data.coordinates);
         // We're storing this with the feedback record for now

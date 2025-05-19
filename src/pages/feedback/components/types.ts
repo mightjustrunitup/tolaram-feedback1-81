@@ -19,7 +19,7 @@ export interface FeedbackFormData {
   productAvailability: number;
   overallExperience: number;
   comments: string;
-  feedbackId?: string; // Add the feedback ID to the form data
+  feedbackId?: string;
 }
 
 export interface FeedbackFormProps {

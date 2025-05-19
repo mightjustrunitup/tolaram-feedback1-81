@@ -23,6 +23,7 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
   const [date, setDate] = useState<Date>(new Date());
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   
   const [formData, setFormData] = useState({
     customerName: "",
@@ -65,6 +66,22 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: "" }));
     }
+  };
+
+  // Image handling functions
+  const handleImageUpload = (files: FileList) => {
+    if (files && files.length > 0) {
+      const newImages = Array.from(files).map(file => URL.createObjectURL(file));
+      setUploadedImages(prev => [...prev, ...newImages]);
+    }
+  };
+  
+  const handleImageRemove = (index: number) => {
+    setUploadedImages(prev => {
+      const updated = [...prev];
+      updated.splice(index, 1);
+      return updated;
+    });
   };
 
   const validateForm = () => {
@@ -110,10 +127,19 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
         variantId: selectedProduct.variants[0]?.id || "default",
         issues: selectedIssues,
         comments: formData.comments || undefined,
+        imageUrls: uploadedImages,
+        ratings: {
+          staffFriendliness: formData.staffFriendliness,
+          cleanliness: formData.cleanliness,
+          productAvailability: formData.productAvailability,
+          overallExperience: formData.overallExperience
+        },
         coordinates: permissionGranted && latitude !== null && longitude !== null 
           ? { latitude, longitude } 
           : undefined
       };
+      
+      console.log("Preparing to submit feedback:", feedbackData);
       
       // Submit feedback to the database
       const response = await FeedbackService.submitFeedback(feedbackData);
@@ -193,7 +219,6 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
             setDate={setDate}
             location={formData.location}
             handleInputChange={handleInputChange}
-            // Add new props for location detection
             detectLocation={requestLocation}
             detectedLocation={locationName}
             locationLoading={locationLoading}
@@ -212,10 +237,13 @@ export const FeedbackForm = ({ selectedProduct, onSubmitSuccess }: FeedbackFormP
             handleRatingChange={handleRatingChange}
           />
 
-          {/* Issues Section - Updated to use multiple selections */}
+          {/* Issues Section */}
           <IssueSection 
             selectedIssues={selectedIssues}
             setSelectedIssues={setSelectedIssues}
+            uploadedImages={uploadedImages}
+            handleImageUpload={handleImageUpload}
+            handleImageRemove={handleImageRemove}
           />
 
           {/* Comments Section */}
