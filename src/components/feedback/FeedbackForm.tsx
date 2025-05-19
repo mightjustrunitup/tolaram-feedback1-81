@@ -2,8 +2,7 @@
 import { ProductFeedbackForm } from "@/components/feedback/ProductFeedbackForm";
 import { useFeedbackForm } from "@/components/feedback/hooks/useFeedbackForm";
 import { useImageHandling } from "@/components/feedback/hooks/useImageHandling";
-import { products, PRODUCT_ISSUES } from "@/components/feedback/data/productData";
-import { useState } from "react";
+import { products } from "@/components/feedback/data/productData";
 
 export const FeedbackForm = () => {
   const {
@@ -25,6 +24,7 @@ export const FeedbackForm = () => {
     uploadedImageUrls,
     uploadedImages,
     isCameraActive,
+    isUploading,
     handleImageUpload,
     handleImageRemove,
     handleCameraCapture,
@@ -41,7 +41,7 @@ export const FeedbackForm = () => {
     <ProductFeedbackForm
       selectedProduct={selectedProduct}
       selectedVariant={selectedVariant}
-      submitting={submitting}
+      submitting={submitting || isUploading}
       formValid={formValid}
       errors={errors}
       customerName={formData.customerName}
@@ -60,6 +60,7 @@ export const FeedbackForm = () => {
       onCameraCapture={handleCameraCapture}
       onToggleCamera={toggleCamera}
       onSubmit={handleSubmit}
+      isUploading={isUploading}
     />
   );
 };

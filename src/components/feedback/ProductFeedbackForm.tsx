@@ -39,6 +39,7 @@ interface ProductFeedbackFormProps {
   onCameraCapture?: (imageData: string) => void;
   onToggleCamera?: () => void;
   onSubmit: (e: React.FormEvent) => void;
+  isUploading?: boolean;
 }
 
 export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
@@ -62,7 +63,8 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
   isCameraActive,
   onCameraCapture,
   onToggleCamera,
-  onSubmit
+  onSubmit,
+  isUploading = false
 }) => {
   return (
     <Card className="shadow-lg animate-fade-in border-t-4 border-t-indomie-red relative overflow-hidden">
@@ -108,6 +110,7 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
               isCameraActive={isCameraActive}
               onCameraCapture={onCameraCapture}
               onToggleCamera={onToggleCamera}
+              isUploading={isUploading}
             />
           )}
           
@@ -121,7 +124,9 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
                 backgroundColor: formValid ? "#ea384c" : undefined
               }}
             >
-              {submitting ? "Submitting..." : "Submit Feedback"}
+              {submitting ? (
+                isUploading ? "Uploading Images..." : "Submitting..."
+              ) : "Submit Feedback"}
             </Button>
           </CardFooter>
         </form>

@@ -7,6 +7,7 @@ export function useImageHandling() {
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [isCameraActive, setIsCameraActive] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   // Handle image uploads
   const handleImageUpload = (files: FileList) => {
@@ -31,7 +32,7 @@ export function useImageHandling() {
         console.log("New images added:", newFiles.map(file => file.name));
         setUploadedImages(prev => [...prev, ...newFiles]);
         setUploadedImageUrls(prev => [...prev, ...newImageUrls]);
-        toast.success(`${newFiles.length} image${newFiles.length > 1 ? 's' : ''} uploaded`);
+        toast.success(`${newFiles.length} image${newFiles.length > 1 ? 's' : ''} added`);
       }
     }
   };
@@ -88,14 +89,16 @@ export function useImageHandling() {
     if (uploadedImages.length === 0) return [];
     
     console.log(`Uploading ${uploadedImages.length} files to storage for feedback ${feedbackId}`);
+    setIsUploading(true);
     
     const imageUrls: string[] = [];
     
-    for (const file of uploadedImages) {
-      try {
+    try {
+      for (const file of uploadedImages) {
         const filename = `${feedbackId}_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
         
-        // Create the bucket if it doesn't exist (happens automatically in Supabase)
+        console.log(`Uploading ${filename} to feedback-images bucket`);
+        
         const { data: uploadData, error: uploadError } = await supabase.storage
           .from('feedback-images')
           .upload(filename, file);
@@ -117,18 +120,27 @@ export function useImageHandling() {
             console.log("Uploaded image URL:", publicUrlData.publicUrl);
           }
         }
-      } catch (error) {
-        console.error("Error in file upload process:", error);
       }
+      
+      if (imageUrls.length > 0) {
+        toast.success(`Successfully uploaded ${imageUrls.length} image${imageUrls.length > 1 ? 's' : ''}`);
+      }
+      
+      return imageUrls;
+    } catch (error) {
+      console.error("Error in file upload process:", error);
+      toast.error("Error uploading images. Please try again.");
+      return [];
+    } finally {
+      setIsUploading(false);
     }
-    
-    return imageUrls;
   };
 
   return {
     uploadedImages,
     uploadedImageUrls,
     isCameraActive,
+    isUploading,
     handleImageUpload,
     handleImageRemove,
     handleCameraCapture,

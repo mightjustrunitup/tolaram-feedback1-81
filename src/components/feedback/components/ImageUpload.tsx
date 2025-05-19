@@ -1,7 +1,7 @@
 
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Paperclip, X, Camera } from "lucide-react";
+import { Paperclip, X, Camera, Loader2 } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ImageUploadProps {
@@ -10,6 +10,7 @@ interface ImageUploadProps {
   uploadedImages: string[];
   onToggleCamera?: () => void;
   hasCamera: boolean;
+  isUploading?: boolean;
 }
 
 export const ImageUpload: React.FC<ImageUploadProps> = ({
@@ -17,7 +18,8 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
   onImageRemove,
   uploadedImages,
   onToggleCamera,
-  hasCamera
+  hasCamera,
+  isUploading = false
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useIsMobile();
@@ -60,6 +62,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           ref={fileInputRef}
           onChange={handleFileChange}
           onClick={(e) => isAttaching ? e.stopPropagation() : null}
+          disabled={isUploading}
         />
         
         {isMobile && isAttaching && (
@@ -70,6 +73,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             onClick={handleCancelAttach}
             className="bg-gray-100 hover:bg-gray-200 flex items-center"
             title="Cancel image attachment"
+            disabled={isUploading}
           >
             <X size={14} />
           </Button>
@@ -84,6 +88,7 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
             onClick={onToggleCamera}
             className="bg-transparent hover:bg-gray-100 flex items-center"
             title="Take a photo"
+            disabled={isUploading}
           >
             <Camera size={14} />
           </Button>
@@ -96,8 +101,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           onClick={handleFileButtonClick}
           className="bg-transparent hover:bg-gray-100 flex items-center"
           title="Attach images to your feedback"
+          disabled={isUploading}
         >
-          <Paperclip size={14} />
+          {isUploading ? <Loader2 size={14} className="animate-spin" /> : <Paperclip size={14} />}
         </Button>
       </div>
       
@@ -113,12 +119,13 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
                   alt={`Uploaded image ${index + 1}`} 
                   className="w-full h-full object-cover" 
                 />
-                {onImageRemove && (
+                {onImageRemove && !isUploading && (
                   <button
                     type="button"
                     className="absolute top-0 right-0 bg-black/60 p-1 rounded-bl md:opacity-0 md:group-hover:opacity-100 transition-opacity"
                     onClick={() => onImageRemove(index)}
                     title="Remove image"
+                    disabled={isUploading}
                   >
                     <X size={12} className="text-white" />
                   </button>

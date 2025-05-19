@@ -20,6 +20,7 @@ interface IssueSelectionProps {
   isCameraActive?: boolean;
   onCameraCapture?: (imageData: string) => void;
   onToggleCamera?: () => void;
+  isUploading?: boolean;
 }
 
 export const IssueSelection: React.FC<IssueSelectionProps> = ({
@@ -34,7 +35,8 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
   onImageRemove,
   isCameraActive = false,
   onCameraCapture,
-  onToggleCamera
+  onToggleCamera,
+  isUploading = false
 }) => {
   const isMobile = useIsMobile();
   const [hasCamera, setHasCamera] = useState(false);
@@ -90,6 +92,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
             className="min-h-[100px] text-sm"
             value={comments}
             onChange={onInputChange}
+            disabled={isUploading}
           />
           
           {onImageUpload && (
@@ -99,6 +102,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
               uploadedImages={uploadedImages}
               onToggleCamera={onToggleCamera}
               hasCamera={hasCamera}
+              isUploading={isUploading}
             />
           )}
         </div>

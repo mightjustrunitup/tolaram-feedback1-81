@@ -7,10 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 
 export default function Feedback() {
   useEffect(() => {
-    // Create the storage bucket if it doesn't exist
-    const createStorageBucket = async () => {
+    // Check if the storage bucket exists
+    const checkStorageBucket = async () => {
       try {
-        // Check if the bucket exists
         const { data: buckets, error: listError } = await supabase.storage.listBuckets();
         
         if (listError) {
@@ -20,20 +19,22 @@ export default function Feedback() {
         
         const bucketExists = buckets.some(bucket => bucket.name === 'feedback-images');
         
-        if (!bucketExists) {
-          console.log("Creating feedback-images storage bucket");
-          const { data, error } = await supabase.storage.createBucket('feedback-images', {
-            public: true,
-            fileSizeLimit: 5242880, // 5MB
-          });
+        if (bucketExists) {
+          console.log("Feedback images bucket exists");
           
-          if (error) {
-            console.error("Error creating storage bucket:", error);
+          // Test the bucket by listing its contents
+          const { data: objects, error: objectsError } = await supabase.storage
+            .from('feedback-images')
+            .list();
+            
+          if (objectsError) {
+            console.error("Error listing objects in bucket:", objectsError);
           } else {
-            console.log("Storage bucket created successfully:", data);
+            console.log(`Found ${objects.length} objects in feedback-images bucket`);
           }
         } else {
-          console.log("Feedback images bucket already exists");
+          console.error("Feedback images bucket does not exist!");
+          toast.error("Storage bucket configuration issue");
         }
       } catch (error) {
         console.error("Error with storage bucket setup:", error);
@@ -89,7 +90,7 @@ export default function Feedback() {
     };
     
     // Run tests
-    createStorageBucket();
+    checkStorageBucket();
     testCompleteFeedback();
     testAccessPermission();
   }, []);
