@@ -72,6 +72,13 @@ export type Database = {
             foreignKeyName: "customer_rewards_feedback_id_fkey"
             columns: ["feedback_id"]
             isOneToOne: false
+            referencedRelation: "complete_feedback"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "customer_rewards_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
             referencedRelation: "feedback"
             referencedColumns: ["id"]
           },
@@ -134,6 +141,13 @@ export type Database = {
             foreignKeyName: "feedback_images_feedback_id_fkey"
             columns: ["feedback_id"]
             isOneToOne: false
+            referencedRelation: "complete_feedback"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_images_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
             referencedRelation: "feedback"
             referencedColumns: ["id"]
           },
@@ -159,6 +173,13 @@ export type Database = {
           issue?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "feedback_issues_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
+            referencedRelation: "complete_feedback"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "feedback_issues_feedback_id_fkey"
             columns: ["feedback_id"]
@@ -195,6 +216,13 @@ export type Database = {
             foreignKeyName: "feedback_ratings_feedback_id_fkey"
             columns: ["feedback_id"]
             isOneToOne: false
+            referencedRelation: "complete_feedback"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feedback_ratings_feedback_id_fkey"
+            columns: ["feedback_id"]
+            isOneToOne: false
             referencedRelation: "feedback"
             referencedColumns: ["id"]
           },
@@ -202,7 +230,22 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      complete_feedback: {
+        Row: {
+          comments: string | null
+          created_at: string | null
+          customer_name: string | null
+          id: string | null
+          images: string[] | null
+          issues: string[] | null
+          location: string | null
+          product_id: string | null
+          ratings: Json | null
+          updated_at: string | null
+          variant_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
