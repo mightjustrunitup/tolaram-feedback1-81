@@ -37,6 +37,16 @@ export interface FeedbackResponse {
  */
 export const FeedbackService = {
   /**
+   * Test if we can access the feedback table (checks if RLS policies are working)
+   */
+  testTableAccess: async () => {
+    return await supabase
+      .from('feedback')
+      .select('*')
+      .limit(1);
+  },
+
+  /**
    * Submit feedback to the backend
    */
   submitFeedback: async (data: FeedbackSubmission): Promise<FeedbackResponse> => {

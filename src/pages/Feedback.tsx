@@ -33,8 +33,24 @@ export default function Feedback() {
       }
     };
     
-    // Test the view
+    // Test if RLS policies are working properly by attempting to access the feedback table
+    const testAccessPermission = async () => {
+      try {
+        const { data, error } = await FeedbackService.testTableAccess();
+        if (error) {
+          console.error("Error accessing feedback table:", error);
+          toast.error("Permission issue: Cannot access feedback data");
+        } else {
+          console.log("Successfully accessed feedback table:", data);
+        }
+      } catch (error) {
+        console.error("Error testing table access:", error);
+      }
+    };
+    
+    // Run tests
     testCompleteFeedback();
+    testAccessPermission();
   }, []);
   
   return <FeedbackPage />;
