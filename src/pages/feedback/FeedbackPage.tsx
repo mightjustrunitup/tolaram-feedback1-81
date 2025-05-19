@@ -38,6 +38,16 @@ export function FeedbackPage() {
           <FeedbackForm 
             selectedProduct={selectedProduct} 
             onSubmitSuccess={(data) => {
+              console.log("Form submitted successfully with data:", data);
+              
+              // Log location data specifically to verify it's working
+              if (data.coordinates) {
+                console.log("Location coordinates captured:", data.coordinates);
+                console.log("Location name:", data.location);
+              } else {
+                console.log("No location coordinates provided");
+              }
+              
               // We can now use data.coordinates and data.location in the navigation state
               navigate("/thank-you", { 
                 state: { 
