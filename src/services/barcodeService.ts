@@ -31,13 +31,17 @@ export class BarcodeService {
       // Clean up the barcode data (remove non-numeric characters for standard barcodes)
       const cleanBarcode = barcodeData.replace(/\D/g, '');
       
-      // Validate barcode exists in our system
-      const isValid = await this.validateProduct(cleanBarcode);
+      // Basic validation - barcode should be at least 8 digits
+      const isValid = cleanBarcode.length >= 8;
       
       return {
         productId: cleanBarcode,
         isValid,
-        productInfo: { barcode: cleanBarcode }
+        productInfo: { 
+          barcode: cleanBarcode,
+          originalData: barcodeData,
+          type: this.identifyBarcodeType(cleanBarcode)
+        }
       };
     } catch (error) {
       console.error("Error processing barcode:", error);
@@ -49,25 +53,14 @@ export class BarcodeService {
   }
 
   /**
-   * Check if product exists based on barcode
+   * Identify barcode type based on length and format
    */
-  static async validateProduct(barcodeData: string): Promise<boolean> {
-    try {
-      // In a real implementation, you would check against your products database
-      // For now, we'll validate against known barcode patterns
-      const validBarcodes = [
-        '8992388101015', // Example Indomie barcode
-        '8992388101022',
-        '8992388101039',
-        '8992388101046',
-        '8992388101053'
-      ];
-      
-      return validBarcodes.includes(barcodeData) || barcodeData.startsWith('899238810');
-    } catch (error) {
-      console.error("Error validating product:", error);
-      return false;
-    }
+  static identifyBarcodeType(barcode: string): string {
+    if (barcode.length === 12) return 'UPC-A';
+    if (barcode.length === 13) return 'EAN-13';
+    if (barcode.length === 8) return 'EAN-8';
+    if (barcode.length >= 14) return 'ITF-14';
+    return 'Unknown';
   }
 
   /**
@@ -122,27 +115,31 @@ export class BarcodeService {
     try {
       console.log("Saving scanned product to Supabase:", data);
       
-      const { data: insertData, error } = await supabase
+      const insertData = {
+        product_id: data.product_id,
+        user_id: data.user_id || null,
+        image_url: data.image_url || null,
+        barcode_data: data.barcode_data
+      };
+      
+      console.log("Insert data:", insertData);
+      
+      const { data: insertResult, error } = await supabase
         .from('scanned_products')
-        .insert([{
-          product_id: data.product_id,
-          user_id: data.user_id || null,
-          image_url: data.image_url || null,
-          barcode_data: data.barcode_data
-        }])
+        .insert([insertData])
         .select()
         .single();
       
       if (error) {
-        console.error("Error saving scanned product:", error);
+        console.error("Supabase error saving scanned product:", error);
         return { success: false, error: error.message };
       }
       
-      console.log("Scanned product saved successfully:", insertData);
-      return { success: true, id: insertData.id };
+      console.log("Scanned product saved successfully:", insertResult);
+      return { success: true, id: insertResult.id };
     } catch (error) {
       console.error("Error in saveScannedProduct:", error);
-      return { success: false, error: "Failed to save scanned product" };
+      return { success: false, error: "Failed to save scanned product: " + (error as Error).message };
     }
   }
 
@@ -153,21 +150,35 @@ export class BarcodeService {
     try {
       console.log("Performing OCR on image for barcode recognition:", imageFile.name);
       
-      // Use Tesseract.js to perform OCR
+      // Use Tesseract.js to perform OCR with specific settings for barcode detection
       const { data: { text, confidence } } = await Tesseract.recognize(
         imageFile,
         'eng',
         {
-          logger: m => console.log('OCR Progress:', m)
+          logger: m => console.log('OCR Progress:', m),
+          tessedit_char_whitelist: '0123456789' // Only recognize numbers for barcodes
         }
       );
       
       console.log("OCR Result:", { text, confidence });
       
       // Extract potential barcode numbers from the OCR text
-      const barcodePattern = /\b\d{8,14}\b/g;
+      // Look for sequences of 8 or more digits
+      const barcodePattern = /\b\d{8,}\b/g;
       const matches = text.match(barcodePattern);
-      const extractedBarcode = matches ? matches[0] : text.replace(/\D/g, '');
+      
+      // Get the longest sequence of digits as it's likely the barcode
+      let extractedBarcode = '';
+      if (matches && matches.length > 0) {
+        extractedBarcode = matches.reduce((longest, current) => 
+          current.length > longest.length ? current : longest
+        );
+      } else {
+        // Fallback: extract all digits
+        extractedBarcode = text.replace(/\D/g, '');
+      }
+      
+      console.log("Extracted barcode:", extractedBarcode);
       
       return {
         text: extractedBarcode,
@@ -193,7 +204,7 @@ export class BarcodeService {
     try {
       const ocrResult = await this.performOCR(imageFile);
       
-      if (ocrResult.text && ocrResult.confidence > 0.5) {
+      if (ocrResult.text && ocrResult.text.length >= 8) {
         const processResult = await this.processBarcodeData(ocrResult.text);
         
         return {
