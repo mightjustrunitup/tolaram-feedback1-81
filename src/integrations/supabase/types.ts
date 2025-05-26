@@ -159,6 +159,33 @@ export type Database = {
           },
         ]
       }
+      scanned_products: {
+        Row: {
+          created_at: string
+          id: string
+          image_url: string | null
+          product_id: string
+          qr_data: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          product_id: string
+          qr_data: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          product_id?: string
+          qr_data?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       complete_feedback: {
