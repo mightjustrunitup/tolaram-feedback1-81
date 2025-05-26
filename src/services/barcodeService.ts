@@ -31,8 +31,8 @@ export class BarcodeService {
       // Clean up the barcode data (remove non-numeric characters for standard barcodes)
       const cleanBarcode = barcodeData.replace(/\D/g, '');
       
-      // Basic validation - barcode should be at least 8 digits
-      const isValid = cleanBarcode.length >= 8;
+      // Basic validation - barcode should be at least 6 digits (reduced from 8)
+      const isValid = cleanBarcode.length >= 6;
       
       return {
         productId: cleanBarcode,
@@ -60,6 +60,7 @@ export class BarcodeService {
     if (barcode.length === 13) return 'EAN-13';
     if (barcode.length === 8) return 'EAN-8';
     if (barcode.length >= 14) return 'ITF-14';
+    if (barcode.length >= 6) return 'Code-128';
     return 'Unknown';
   }
 
@@ -163,8 +164,8 @@ export class BarcodeService {
       console.log("OCR Result:", { text, confidence });
       
       // Extract potential barcode numbers from the OCR text
-      // Look for sequences of 8 or more digits
-      const barcodePattern = /\b\d{8,}\b/g;
+      // Look for sequences of 6 or more digits (reduced from 8)
+      const barcodePattern = /\b\d{6,}\b/g;
       const matches = text.match(barcodePattern);
       
       // Get the longest sequence of digits as it's likely the barcode
@@ -174,8 +175,11 @@ export class BarcodeService {
           current.length > longest.length ? current : longest
         );
       } else {
-        // Fallback: extract all digits
-        extractedBarcode = text.replace(/\D/g, '');
+        // Fallback: extract all digits if they form a reasonable barcode
+        const allDigits = text.replace(/\D/g, '');
+        if (allDigits.length >= 6) {
+          extractedBarcode = allDigits;
+        }
       }
       
       console.log("Extracted barcode:", extractedBarcode);
@@ -204,7 +208,7 @@ export class BarcodeService {
     try {
       const ocrResult = await this.performOCR(imageFile);
       
-      if (ocrResult.text && ocrResult.text.length >= 8) {
+      if (ocrResult.text && ocrResult.text.length >= 6) {
         const processResult = await this.processBarcodeData(ocrResult.text);
         
         return {

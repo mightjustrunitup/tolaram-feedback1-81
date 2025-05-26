@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -64,25 +63,23 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       console.log("Processing barcode data:", barcodeText);
       setIsProcessing(true);
       
-      // Clean the barcode data - remove any non-numeric characters for standard barcodes
-      const cleanBarcode = barcodeText.replace(/\D/g, '');
+      // Clean the barcode data - keep original if it's already clean, otherwise extract digits
+      let cleanBarcode = barcodeText.trim();
+      if (!/^\d+$/.test(cleanBarcode)) {
+        // If not all digits, extract digits
+        cleanBarcode = barcodeText.replace(/\D/g, '');
+      }
       
-      if (!cleanBarcode || cleanBarcode.length < 8) {
-        toast.error("Invalid barcode format. Please try again.");
+      console.log("Cleaned barcode:", cleanBarcode);
+      
+      if (!cleanBarcode || cleanBarcode.length < 6) {
+        toast.error("Invalid barcode format. Barcode too short.");
         setIsProcessing(false);
         return false;
       }
       
-      // Check for duplicate submissions
-      const duplicateCheck = await BarcodeService.checkDuplicateSubmission(cleanBarcode);
-      
-      if (duplicateCheck.isDuplicate) {
-        toast.error("This product has already been scanned. Duplicate submissions are not allowed.");
-        setIsProcessing(false);
-        return false;
-      }
-      
-      // Save the scanned product to backend
+      // Save the scanned product to backend first (removed duplicate check for now)
+      console.log("Saving to database...");
       const saveResult = await BarcodeService.saveScannedProduct({
         product_id: cleanBarcode,
         barcode_data: barcodeText
@@ -98,13 +95,13 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         return true;
       } else {
         console.error("Failed to save barcode data:", saveResult.error);
-        toast.error("Failed to save scanned product data: " + (saveResult.error || "Unknown error"));
+        toast.error("Failed to save scanned product: " + (saveResult.error || "Unknown error"));
         setIsProcessing(false);
         return false;
       }
     } catch (error) {
       console.error("Error processing barcode:", error);
-      toast.error("Error processing barcode. Please try again.");
+      toast.error("Error processing barcode: " + (error as Error).message);
       setIsProcessing(false);
       return false;
     }
@@ -143,10 +140,13 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       
       try {
         // Extract barcode from image using OCR
+        console.log("Starting OCR extraction...");
         const result = await BarcodeService.extractBarcodeFromImage(file);
         
-        if (result.barcode && result.barcode.length >= 8) {
-          console.log("Barcode extracted from image:", result.barcode);
+        console.log("OCR result:", result);
+        
+        if (result.barcode && result.barcode.length >= 6) {
+          console.log("Valid barcode extracted:", result.barcode);
           setScanResult(result.barcode);
           setIsScanning(false);
           
@@ -165,7 +165,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         }
       } catch (error) {
         console.error("Error processing barcode:", error);
-        toast.error("Error processing barcode. Please try again.");
+        toast.error("Error processing barcode: " + (error as Error).message);
         setIsProcessing(false);
       }
     }, 'image/jpeg', 0.8);
@@ -180,10 +180,13 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     
     try {
       // Extract barcode from uploaded image
+      console.log("Processing uploaded image...");
       const result = await BarcodeService.extractBarcodeFromImage(file);
       
-      if (result.barcode && result.barcode.length >= 8) {
-        console.log("Barcode extracted from uploaded image:", result.barcode);
+      console.log("Upload OCR result:", result);
+      
+      if (result.barcode && result.barcode.length >= 6) {
+        console.log("Valid barcode extracted from upload:", result.barcode);
         setScanResult(result.barcode);
         setIsScanning(false);
         
@@ -202,7 +205,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       }
     } catch (error) {
       console.error("Error processing barcode:", error);
-      toast.error("Error processing barcode. Please try again.");
+      toast.error("Error processing barcode: " + (error as Error).message);
       setIsProcessing(false);
     }
   };
