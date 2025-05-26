@@ -8,6 +8,8 @@ export function useImageHandling() {
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [scannedQRData, setScannedQRData] = useState<string | null>(null);
+  const [scannedProductInfo, setScannedProductInfo] = useState<any>(null);
   
   // Handle image uploads
   const handleImageUpload = (files: FileList) => {
@@ -55,6 +57,14 @@ export function useImageHandling() {
       console.error("Error converting camera image:", error);
       toast.error("Failed to process camera image");
     }
+  };
+
+  // Handle QR code scanning
+  const handleQRCodeScanned = (qrData: string, productInfo?: any) => {
+    console.log("QR code scanned:", qrData, productInfo);
+    setScannedQRData(qrData);
+    setScannedProductInfo(productInfo);
+    toast.success("Product QR code scanned successfully!");
   };
 
   // Toggle camera on/off
@@ -153,9 +163,12 @@ export function useImageHandling() {
     uploadedImageUrls,
     isCameraActive,
     isUploading,
+    scannedQRData,
+    scannedProductInfo,
     handleImageUpload,
     handleImageRemove,
     handleCameraCapture,
+    handleQRCodeScanned,
     toggleCamera,
     uploadFilesToStorage
   };
