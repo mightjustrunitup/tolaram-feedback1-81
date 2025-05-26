@@ -31,7 +31,7 @@ export class BarcodeService {
       // Clean up the barcode data (remove non-numeric characters for standard barcodes)
       const cleanBarcode = barcodeData.replace(/\D/g, '');
       
-      // Basic validation - barcode should be at least 6 digits (reduced from 8)
+      // Basic validation - barcode should be at least 6 digits
       const isValid = cleanBarcode.length >= 6;
       
       return {
@@ -151,14 +151,12 @@ export class BarcodeService {
     try {
       console.log("Performing OCR on image for barcode recognition:", imageFile.name);
       
-      // Use Tesseract.js to perform OCR with specific settings for barcode detection
+      // Use Tesseract.js to perform OCR with basic configuration
       const { data: { text, confidence } } = await Tesseract.recognize(
         imageFile,
         'eng',
         {
-          logger: m => console.log('OCR Progress:', m),
-          tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK,
-          tessedit_ocr_engine_mode: Tesseract.OEM.LSTM_ONLY,
+          logger: m => console.log('OCR Progress:', m)
         }
       );
       
