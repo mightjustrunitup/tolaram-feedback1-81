@@ -7,7 +7,6 @@ import { CameraControls } from "./CameraControls";
 import { CameraModal } from "./CameraModal";
 import { BarcodeScanner } from "./BarcodeScanner";
 import { useCamera } from "./hooks/useCamera";
-import { BarcodeService } from "@/services/barcodeService";
 
 interface CameraCaptureProps {
   isCameraActive: boolean;
@@ -62,49 +61,18 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
     setIsBarcodeScanMode(true);
   };
 
-  const handleBarcodeDetected = async (barcodeData: string) => {
-    console.log("Barcode detected:", barcodeData);
+  const handleBarcodeDetected = (barcodeData: string) => {
+    console.log("Barcode detected and processed:", barcodeData);
     
-    try {
-      // Process the barcode data
-      const result = await BarcodeService.processBarcodeData(barcodeData);
-      
-      if (result.isValid) {
-        // Check for duplicate submissions
-        const duplicateCheck = await BarcodeService.checkDuplicateSubmission(result.productId);
-        
-        if (duplicateCheck.isDuplicate) {
-          toast.error("This product has already been scanned. Duplicate submissions are not allowed.");
-          return;
-        }
-        
-        // Save the scanned product
-        const saveResult = await BarcodeService.saveScannedProduct({
-          product_id: result.productId,
-          barcode_data: barcodeData
-        });
-        
-        if (saveResult.success) {
-          toast.success("Product barcode verified successfully!");
-          
-          // Notify parent component
-          if (onBarcodeScanned) {
-            onBarcodeScanned(barcodeData, result.productInfo);
-          }
-          
-          // Close the camera
-          setIsBarcodeScanMode(false);
-          onToggleCamera();
-        } else {
-          toast.error("Failed to save scanned product data");
-        }
-      } else {
-        toast.error("Invalid product barcode. Please scan a valid product barcode.");
-      }
-    } catch (error) {
-      console.error("Error processing barcode:", error);
-      toast.error("Error processing barcode. Please try again.");
+    // Since the BarcodeScanner now handles the full processing flow,
+    // we just need to notify the parent component
+    if (onBarcodeScanned) {
+      onBarcodeScanned(barcodeData, { barcode: barcodeData });
     }
+    
+    // Close the camera and barcode scanner
+    setIsBarcodeScanMode(false);
+    onToggleCamera();
   };
 
   const handleCloseBarcodeScanner = () => {

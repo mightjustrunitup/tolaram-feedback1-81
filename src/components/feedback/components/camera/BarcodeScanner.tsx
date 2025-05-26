@@ -58,6 +58,54 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     setIsScanning(false);
   };
 
+  const processBarcodeData = async (barcodeText: string) => {
+    try {
+      console.log("Processing barcode data:", barcodeText);
+      
+      // Process the barcode data through the service
+      const result = await BarcodeService.processBarcodeData(barcodeText);
+      
+      if (result.isValid) {
+        console.log("Valid barcode detected:", result);
+        
+        // Check for duplicate submissions
+        const duplicateCheck = await BarcodeService.checkDuplicateSubmission(result.productId);
+        
+        if (duplicateCheck.isDuplicate) {
+          toast.error("This product has already been scanned. Duplicate submissions are not allowed.");
+          return false;
+        }
+        
+        // Save the scanned product to backend
+        const saveResult = await BarcodeService.saveScannedProduct({
+          product_id: result.productId,
+          barcode_data: barcodeText
+        });
+        
+        if (saveResult.success) {
+          console.log("Barcode data saved successfully:", saveResult);
+          toast.success("Product barcode verified and saved successfully!");
+          
+          // Trigger the callback with the barcode data
+          onBarcodeDetected(barcodeText);
+          return true;
+        } else {
+          console.error("Failed to save barcode data:", saveResult.error);
+          toast.error("Failed to save scanned product data");
+          return false;
+        }
+      } else {
+        console.log("Invalid barcode:", barcodeText);
+        toast.error("Invalid product barcode. Please scan a valid product barcode.");
+        return false;
+      }
+    } catch (error) {
+      console.error("Error processing barcode:", error);
+      toast.error("Error processing barcode. Please try again.");
+      return false;
+    }
+  };
+
   const captureAndProcessImage = async () => {
     if (!videoRef.current || !canvasRef.current) return;
 
@@ -82,15 +130,26 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       
       try {
         toast.info("Processing barcode...");
+        
+        // Extract barcode from image using OCR
         const result = await BarcodeService.extractBarcodeFromImage(file);
         
         if (result.barcode && result.confidence > 0.5) {
+          console.log("Barcode extracted from image:", result.barcode);
           setScanResult(result.barcode);
           setIsScanning(false);
-          onBarcodeDetected(result.barcode);
-          toast.success("Barcode detected successfully!");
+          
+          // Process the extracted barcode data
+          const success = await processBarcodeData(result.barcode);
+          
+          if (success) {
+            // Close the scanner after successful processing
+            setTimeout(() => {
+              onClose();
+            }, 1500);
+          }
         } else {
-          toast.error("No barcode detected. Please try again.");
+          toast.error("No barcode detected. Please try again with a clearer image.");
         }
       } catch (error) {
         console.error("Error processing barcode:", error);
@@ -105,13 +164,24 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
     try {
       toast.info("Processing barcode from image...");
+      
+      // Extract barcode from uploaded image
       const result = await BarcodeService.extractBarcodeFromImage(file);
       
       if (result.barcode && result.confidence > 0.5) {
+        console.log("Barcode extracted from uploaded image:", result.barcode);
         setScanResult(result.barcode);
         setIsScanning(false);
-        onBarcodeDetected(result.barcode);
-        toast.success("Barcode detected successfully!");
+        
+        // Process the extracted barcode data
+        const success = await processBarcodeData(result.barcode);
+        
+        if (success) {
+          // Close the scanner after successful processing
+          setTimeout(() => {
+            onClose();
+          }, 1500);
+        }
       } else {
         toast.error("No barcode detected in the image. Please try a clearer image.");
       }
@@ -189,7 +259,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           {scanResult && (
             <div className="bg-green-600/90 backdrop-blur-sm mx-4 p-3 rounded-lg">
               <CheckCircle className="mx-auto mb-2 text-white" size={24} />
-              <p className="text-white text-sm font-medium">Barcode Detected!</p>
+              <p className="text-white text-sm font-medium">Barcode Detected & Saved!</p>
               <p className="text-white/80 text-xs mt-1 truncate">{scanResult}</p>
             </div>
           )}
