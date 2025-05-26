@@ -13,12 +13,12 @@ interface Product {
 
 interface FeedbackHeaderProps {
   selectedProduct: Product | null;
-  scannedQRData?: string | null;
+  scannedBarcodeData?: string | null;
 }
 
 export const FeedbackHeader: React.FC<FeedbackHeaderProps> = ({ 
   selectedProduct, 
-  scannedQRData 
+  scannedBarcodeData 
 }) => {
   return (
     <>
@@ -28,13 +28,13 @@ export const FeedbackHeader: React.FC<FeedbackHeaderProps> = ({
           Your opinion matters to us, and we're committed to making our products better with your input.
         </CardDescription>
         
-        {scannedQRData && (
+        {scannedBarcodeData && (
           <Badge 
             className="mt-3 px-3 py-1 bg-green-100 text-green-800 border border-green-300 flex items-center gap-2"
             variant="outline"
           >
             <CheckCircle size={16} />
-            Product QR Code Verified
+            Product Barcode Verified
           </Badge>
         )}
       </div>

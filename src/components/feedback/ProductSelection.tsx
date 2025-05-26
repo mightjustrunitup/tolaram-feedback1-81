@@ -24,7 +24,7 @@ interface ProductSelectionProps {
   errors: { [key: string]: string };
   handleProductSelect: (productId: string) => void;
   handleVariantSelect: (variantId: string) => void;
-  scannedQRData?: string | null;
+  scannedBarcodeData?: string | null;
   scannedProductInfo?: any;
 }
 
@@ -35,7 +35,7 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
   errors,
   handleProductSelect,
   handleVariantSelect,
-  scannedQRData,
+  scannedBarcodeData,
   scannedProductInfo,
 }) => {
   return (
@@ -46,13 +46,13 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
           <span className="text-red-500">*</span>
         </Label>
         
-        {scannedQRData && (
+        {scannedBarcodeData && (
           <div className="p-3 bg-green-50 border border-green-200 rounded-lg mb-4">
             <p className="text-sm text-green-800 font-medium">
-              ✓ Product auto-selected from QR scan
+              ✓ Product auto-selected from barcode scan
             </p>
             <p className="text-xs text-green-600 mt-1">
-              QR Data: {scannedQRData}
+              Barcode: {scannedBarcodeData}
             </p>
           </div>
         )}
