@@ -157,14 +157,15 @@ export class BarcodeService {
         'eng',
         {
           logger: m => console.log('OCR Progress:', m),
-          tessedit_char_whitelist: '0123456789' // Only recognize numbers for barcodes
+          tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK,
+          tessedit_ocr_engine_mode: Tesseract.OEM.LSTM_ONLY,
         }
       );
       
       console.log("OCR Result:", { text, confidence });
       
       // Extract potential barcode numbers from the OCR text
-      // Look for sequences of 6 or more digits (reduced from 8)
+      // Look for sequences of 6 or more digits
       const barcodePattern = /\b\d{6,}\b/g;
       const matches = text.match(barcodePattern);
       
