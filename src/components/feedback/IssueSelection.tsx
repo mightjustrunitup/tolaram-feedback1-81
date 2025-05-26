@@ -19,6 +19,7 @@ interface IssueSelectionProps {
   onImageRemove?: (index: number) => void;
   isCameraActive?: boolean;
   onCameraCapture?: (imageData: string) => void;
+  onQRCodeScanned?: (qrData: string, productInfo?: any) => void;
   onToggleCamera?: () => void;
   isUploading?: boolean;
 }
@@ -35,6 +36,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
   onImageRemove,
   isCameraActive = false,
   onCameraCapture,
+  onQRCodeScanned,
   onToggleCamera,
   isUploading = false
 }) => {
@@ -117,6 +119,7 @@ export const IssueSelection: React.FC<IssueSelectionProps> = ({
           onToggleCamera={onToggleCamera}
           onCameraCapture={onCameraCapture}
           onImageUpload={onImageUpload}
+          onQRCodeScanned={onQRCodeScanned}
         />
       )}
     </>

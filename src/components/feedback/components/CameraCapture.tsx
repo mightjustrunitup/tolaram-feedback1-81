@@ -1,3 +1,2 @@
 
-import { CameraCapture } from "./camera/CameraCapture";
-export { CameraCapture };
+export { CameraCapture } from "./camera/CameraCapture";

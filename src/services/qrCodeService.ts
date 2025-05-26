@@ -1,6 +1,4 @@
 
-import { supabase } from "@/integrations/supabase/client";
-
 export interface ScannedProduct {
   id: string;
   product_id: string;
@@ -80,7 +78,7 @@ export class QRCodeService {
   }
 
   /**
-   * Check if user has already scanned this product
+   * Check if user has already scanned this product using localStorage
    */
   static async checkDuplicateSubmission(productId: string, userId?: string): Promise<{
     isDuplicate: boolean;
@@ -89,27 +87,21 @@ export class QRCodeService {
     try {
       console.log("Checking for duplicate submission:", { productId, userId });
       
-      let query = supabase
-        .from('scanned_products')
-        .select('*')
-        .eq('product_id', productId);
+      // Get scanned products from localStorage
+      const scannedProductsJson = localStorage.getItem('scanned_products');
+      const scannedProducts: ScannedProduct[] = scannedProductsJson 
+        ? JSON.parse(scannedProductsJson) 
+        : [];
       
-      if (userId) {
-        query = query.eq('user_id', userId);
-      }
-      
-      const { data, error } = await query;
-      
-      if (error) {
-        console.error("Error checking duplicate submission:", error);
-        return { isDuplicate: false };
-      }
-      
-      const isDuplicate = data && data.length > 0;
+      // Check for duplicates
+      const existingSubmission = scannedProducts.find(
+        product => product.product_id === productId && 
+                  (!userId || product.user_id === userId)
+      );
       
       return {
-        isDuplicate,
-        existingSubmission: isDuplicate ? data[0] : undefined
+        isDuplicate: !!existingSubmission,
+        existingSubmission
       };
     } catch (error) {
       console.error("Error in checkDuplicateSubmission:", error);
@@ -118,7 +110,7 @@ export class QRCodeService {
   }
 
   /**
-   * Save scanned product to database
+   * Save scanned product to localStorage
    */
   static async saveScannedProduct(data: {
     product_id: string;
@@ -129,24 +121,28 @@ export class QRCodeService {
     try {
       console.log("Saving scanned product:", data);
       
-      const { data: result, error } = await supabase
-        .from('scanned_products')
-        .insert([{
-          product_id: data.product_id,
-          user_id: data.user_id,
-          image_url: data.image_url,
-          qr_data: data.qr_data
-        }])
-        .select()
-        .single();
+      // Get existing scanned products from localStorage
+      const scannedProductsJson = localStorage.getItem('scanned_products');
+      const scannedProducts: ScannedProduct[] = scannedProductsJson 
+        ? JSON.parse(scannedProductsJson) 
+        : [];
       
-      if (error) {
-        console.error("Error saving scanned product:", error);
-        return { success: false, error: error.message };
-      }
+      // Create new scanned product entry
+      const newScannedProduct: ScannedProduct = {
+        id: `scanned_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        product_id: data.product_id,
+        user_id: data.user_id,
+        image_url: data.image_url,
+        qr_data: data.qr_data,
+        created_at: new Date().toISOString()
+      };
       
-      console.log("Scanned product saved successfully:", result);
-      return { success: true, id: result.id };
+      // Add to array and save back to localStorage
+      scannedProducts.push(newScannedProduct);
+      localStorage.setItem('scanned_products', JSON.stringify(scannedProducts));
+      
+      console.log("Scanned product saved successfully:", newScannedProduct);
+      return { success: true, id: newScannedProduct.id };
     } catch (error) {
       console.error("Error in saveScannedProduct:", error);
       return { success: false, error: "Failed to save scanned product" };
