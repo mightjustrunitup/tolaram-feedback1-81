@@ -161,27 +161,27 @@ export type Database = {
       }
       scanned_products: {
         Row: {
+          barcode_data: string
           created_at: string
           id: string
           image_url: string | null
           product_id: string
-          qr_data: string
           user_id: string | null
         }
         Insert: {
+          barcode_data: string
           created_at?: string
           id?: string
           image_url?: string | null
           product_id: string
-          qr_data: string
           user_id?: string | null
         }
         Update: {
+          barcode_data?: string
           created_at?: string
           id?: string
           image_url?: string | null
           product_id?: string
-          qr_data?: string
           user_id?: string | null
         }
         Relationships: []

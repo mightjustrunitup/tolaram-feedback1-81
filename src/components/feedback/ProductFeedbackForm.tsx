@@ -29,7 +29,7 @@ interface ProductFeedbackFormProps {
   selectedIssues: string[];
   uploadedImages: string[];
   products: Product[];
-  scannedQRData?: string | null;
+  scannedBarcodeData?: string | null;
   scannedProductInfo?: any;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleProductSelect: (productId: string) => void;
@@ -39,7 +39,7 @@ interface ProductFeedbackFormProps {
   onImageRemove: (index: number) => void;
   isCameraActive?: boolean;
   onCameraCapture?: (imageData: string) => void;
-  onQRCodeScanned?: (qrData: string, productInfo?: any) => void;
+  onBarcodeScanned?: (barcodeData: string, productInfo?: any) => void;
   onToggleCamera?: () => void;
   onSubmit: (e: React.FormEvent) => void;
   isUploading?: boolean;
@@ -57,7 +57,7 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
   selectedIssues,
   uploadedImages,
   products,
-  scannedQRData,
+  scannedBarcodeData,
   scannedProductInfo,
   onInputChange,
   handleProductSelect,
@@ -67,7 +67,7 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
   onImageRemove,
   isCameraActive,
   onCameraCapture,
-  onQRCodeScanned,
+  onBarcodeScanned,
   onToggleCamera,
   onSubmit,
   isUploading = false
@@ -78,7 +78,7 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
       <div className="absolute -left-16 -bottom-16 w-32 h-32 rounded-full bg-green-100/30 blur-xl"></div>
       
       <CardHeader className="relative z-10">
-        <FeedbackHeader selectedProduct={selectedProduct} scannedQRData={scannedQRData} />
+        <FeedbackHeader selectedProduct={selectedProduct} scannedBarcodeData={scannedBarcodeData} />
       </CardHeader>
       
       <CardContent className="relative z-10">
@@ -99,7 +99,7 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
             errors={errors}
             handleProductSelect={handleProductSelect}
             handleVariantSelect={handleVariantSelect}
-            scannedQRData={scannedQRData}
+            scannedBarcodeData={scannedBarcodeData}
             scannedProductInfo={scannedProductInfo}
           />
 
@@ -117,7 +117,7 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
               onImageRemove={onImageRemove}
               isCameraActive={isCameraActive}
               onCameraCapture={onCameraCapture}
-              onQRCodeScanned={onQRCodeScanned}
+              onBarcodeScanned={onBarcodeScanned}
               onToggleCamera={onToggleCamera}
               isUploading={isUploading}
             />

@@ -5,16 +5,16 @@ import { CameraViewport } from "./CameraViewport";
 import { CameraErrorState } from "./CameraErrorState";
 import { CameraControls } from "./CameraControls";
 import { CameraModal } from "./CameraModal";
-import { QRScanner } from "./QRScanner";
+import { BarcodeScanner } from "./BarcodeScanner";
 import { useCamera } from "./hooks/useCamera";
-import { QRCodeService } from "@/services/qrCodeService";
+import { BarcodeService } from "@/services/barcodeService";
 
 interface CameraCaptureProps {
   isCameraActive: boolean;
   onToggleCamera: () => void;
   onCameraCapture: (imageData: string) => void;
   onImageUpload?: (files: FileList) => void;
-  onQRCodeScanned?: (qrData: string, productInfo: any) => void;
+  onBarcodeScanned?: (barcodeData: string, productInfo: any) => void;
 }
 
 export const CameraCapture: React.FC<CameraCaptureProps> = ({
@@ -22,10 +22,10 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
   onToggleCamera,
   onCameraCapture,
   onImageUpload,
-  onQRCodeScanned
+  onBarcodeScanned
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isQRScanMode, setIsQRScanMode] = useState(false);
+  const [isBarcodeScanMode, setIsBarcodeScanMode] = useState(false);
   
   const { 
     videoRef, 
@@ -33,7 +33,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
     cameraError, 
     streamActive,
     capturePhoto 
-  } = useCamera({ isCameraActive: isCameraActive && !isQRScanMode });
+  } = useCamera({ isCameraActive: isCameraActive && !isBarcodeScanMode });
 
   const handleCaptureClick = () => {
     const imageData = capturePhoto();
@@ -57,21 +57,21 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
     }
   };
 
-  const handleQRScanClick = () => {
-    console.log("Switching to QR scan mode");
-    setIsQRScanMode(true);
+  const handleBarcodeScanClick = () => {
+    console.log("Switching to barcode scan mode");
+    setIsBarcodeScanMode(true);
   };
 
-  const handleQRDetected = async (qrData: string) => {
-    console.log("QR code detected:", qrData);
+  const handleBarcodeDetected = async (barcodeData: string) => {
+    console.log("Barcode detected:", barcodeData);
     
     try {
-      // Process the QR code data
-      const result = await QRCodeService.processQRCode(qrData);
+      // Process the barcode data
+      const result = await BarcodeService.processBarcodeData(barcodeData);
       
       if (result.isValid) {
         // Check for duplicate submissions
-        const duplicateCheck = await QRCodeService.checkDuplicateSubmission(result.productId);
+        const duplicateCheck = await BarcodeService.checkDuplicateSubmission(result.productId);
         
         if (duplicateCheck.isDuplicate) {
           toast.error("This product has already been scanned. Duplicate submissions are not allowed.");
@@ -79,51 +79,51 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
         }
         
         // Save the scanned product
-        const saveResult = await QRCodeService.saveScannedProduct({
+        const saveResult = await BarcodeService.saveScannedProduct({
           product_id: result.productId,
-          qr_data: qrData
+          barcode_data: barcodeData
         });
         
         if (saveResult.success) {
-          toast.success("Product QR code verified successfully!");
+          toast.success("Product barcode verified successfully!");
           
           // Notify parent component
-          if (onQRCodeScanned) {
-            onQRCodeScanned(qrData, result.productInfo);
+          if (onBarcodeScanned) {
+            onBarcodeScanned(barcodeData, result.productInfo);
           }
           
           // Close the camera
-          setIsQRScanMode(false);
+          setIsBarcodeScanMode(false);
           onToggleCamera();
         } else {
           toast.error("Failed to save scanned product data");
         }
       } else {
-        toast.error("Invalid product QR code. Please scan a valid product code.");
+        toast.error("Invalid product barcode. Please scan a valid product barcode.");
       }
     } catch (error) {
-      console.error("Error processing QR code:", error);
-      toast.error("Error processing QR code. Please try again.");
+      console.error("Error processing barcode:", error);
+      toast.error("Error processing barcode. Please try again.");
     }
   };
 
-  const handleCloseQRScanner = () => {
-    setIsQRScanMode(false);
+  const handleCloseBarcodeScanner = () => {
+    setIsBarcodeScanMode(false);
   };
 
   return (
     <CameraModal isOpen={isCameraActive} onClose={onToggleCamera}>
-      {/* QR Scanner Mode */}
-      {isQRScanMode && (
-        <QRScanner
-          isActive={isQRScanMode}
-          onQRDetected={handleQRDetected}
-          onClose={handleCloseQRScanner}
+      {/* Barcode Scanner Mode */}
+      {isBarcodeScanMode && (
+        <BarcodeScanner
+          isActive={isBarcodeScanMode}
+          onBarcodeDetected={handleBarcodeDetected}
+          onClose={handleCloseBarcodeScanner}
         />
       )}
       
       {/* Regular Camera Mode */}
-      {!isQRScanMode && (
+      {!isBarcodeScanMode && (
         <>
           {/* Camera viewport */}
           <div className="relative w-full aspect-[3/4] bg-black overflow-hidden">
@@ -147,7 +147,7 @@ export const CameraCapture: React.FC<CameraCaptureProps> = ({
           <CameraControls 
             onCaptureClick={handleCaptureClick}
             onGalleryClick={handleFileSelect}
-            onQRScanClick={onQRCodeScanned ? handleQRScanClick : undefined}
+            onBarcodeScanClick={onBarcodeScanned ? handleBarcodeScanClick : undefined}
             disabled={cameraError || !streamActive}
           />
         </>

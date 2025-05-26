@@ -1,86 +1,64 @@
 
-import React, { useState } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { Camera, FileImage, QrCode, ChevronUp, ChevronDown } from "lucide-react";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { Camera, Upload, Barcode } from "lucide-react";
 
 interface CameraControlsProps {
   onCaptureClick: () => void;
   onGalleryClick: () => void;
-  onQRScanClick?: () => void;
-  disabled: boolean;
+  onBarcodeScanClick?: () => void;
+  disabled?: boolean;
 }
 
 export const CameraControls: React.FC<CameraControlsProps> = ({
   onCaptureClick,
   onGalleryClick,
-  onQRScanClick,
-  disabled
+  onBarcodeScanClick,
+  disabled = false
 }) => {
-  const isMobile = useIsMobile();
-  const [showQROptions, setShowQROptions] = useState(false);
-
-  const toggleQROptions = () => {
-    setShowQROptions(!showQROptions);
-  };
-
   return (
-    <div className="w-full p-4 bg-gradient-to-t from-black to-black/80">
-      {/* QR Scan Options - Show only on mobile */}
-      {isMobile && showQROptions && onQRScanClick && (
-        <div className="mb-4 p-3 bg-white/10 backdrop-blur-sm rounded-lg border border-white/20">
-          <div className="flex flex-col gap-2">
-            <p className="text-white text-sm font-medium mb-2">Scan Options</p>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onQRScanClick}
-              className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
-              disabled={disabled}
-            >
-              <QrCode size={16} className="mr-2" />
-              Scan Product QR Code
-            </Button>
-            <p className="text-white/70 text-xs">
-              Scan the QR code on your product to prevent duplicate submissions
-            </p>
-          </div>
-        </div>
-      )}
-
-      <div className="flex justify-between items-center gap-4 w-full">
+    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+      <div className="flex justify-center items-center gap-4">
+        {/* Gallery button */}
         <Button
-          type="button"
-          variant="outline"
+          variant="ghost"
+          size="icon"
           onClick={onGalleryClick}
-          className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20"
+          disabled={disabled}
+          className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 disabled:opacity-50"
         >
-          <FileImage size={16} className="mr-2" />
-          Select Photos
+          <Upload size={20} />
         </Button>
-        
-        {/* QR Toggle Button - Mobile only */}
-        {isMobile && onQRScanClick && (
+
+        {/* Capture button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onCaptureClick}
+          disabled={disabled}
+          className="w-16 h-16 rounded-full bg-white text-black hover:bg-white/90 disabled:opacity-50"
+        >
+          <Camera size={24} />
+        </Button>
+
+        {/* Barcode scan button */}
+        {onBarcodeScanClick && (
           <Button
-            type="button"
-            variant="outline"
-            onClick={toggleQROptions}
-            className="bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 px-3"
+            variant="ghost"
+            size="icon"
+            onClick={onBarcodeScanClick}
+            disabled={disabled}
+            className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 disabled:opacity-50"
           >
-            <QrCode size={16} />
-            {showQROptions ? <ChevronDown size={14} className="ml-1" /> : <ChevronUp size={14} className="ml-1" />}
+            <Barcode size={20} />
           </Button>
         )}
-        
-        <Button 
-          type="button" 
-          onClick={onCaptureClick}
-          className="flex-1 bg-indomie-yellow text-black hover:bg-indomie-yellow/90 font-medium"
-          disabled={disabled}
-        >
-          <Camera size={16} className="mr-2" />
-          Capture
-        </Button>
+      </div>
+      
+      <div className="text-center mt-2">
+        <p className="text-white/80 text-xs">
+          {onBarcodeScanClick ? "Tap camera to capture or barcode to scan" : "Tap to capture or upload from gallery"}
+        </p>
       </div>
     </div>
   );

@@ -1,12 +1,13 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import Tesseract from 'tesseract.js';
 
 export interface ScannedProduct {
   id: string;
   product_id: string;
   user_id?: string;
   image_url?: string;
-  qr_data: string;
+  barcode_data: string;
   created_at: string;
 }
 
@@ -15,64 +16,54 @@ export interface OCRResult {
   confidence: number;
 }
 
-export class QRCodeService {
+export class BarcodeService {
   /**
-   * Process QR code data and extract product information
+   * Process barcode data and extract product information
    */
-  static async processQRCode(qrData: string): Promise<{
+  static async processBarcodeData(barcodeData: string): Promise<{
     productId: string;
     isValid: boolean;
     productInfo?: any;
   }> {
-    console.log("Processing QR code data:", qrData);
+    console.log("Processing barcode data:", barcodeData);
     
     try {
-      // Try to parse QR data as JSON first
-      let productId = qrData;
-      let productInfo = null;
+      // Clean up the barcode data (remove non-numeric characters for standard barcodes)
+      const cleanBarcode = barcodeData.replace(/\D/g, '');
       
-      try {
-        const parsedData = JSON.parse(qrData);
-        productId = parsedData.product_id || parsedData.id || qrData;
-        productInfo = parsedData;
-      } catch {
-        // If not JSON, treat as plain product ID
-        productId = qrData;
-      }
-      
-      // Validate product exists in our system
-      const isValid = await this.validateProduct(productId);
+      // Validate barcode exists in our system
+      const isValid = await this.validateProduct(cleanBarcode);
       
       return {
-        productId,
+        productId: cleanBarcode,
         isValid,
-        productInfo
+        productInfo: { barcode: cleanBarcode }
       };
     } catch (error) {
-      console.error("Error processing QR code:", error);
+      console.error("Error processing barcode:", error);
       return {
-        productId: qrData,
+        productId: barcodeData,
         isValid: false
       };
     }
   }
 
   /**
-   * Check if product exists and if user has already scanned it
+   * Check if product exists based on barcode
    */
-  static async validateProduct(productId: string): Promise<boolean> {
+  static async validateProduct(barcodeData: string): Promise<boolean> {
     try {
       // In a real implementation, you would check against your products database
-      // For now, we'll validate against known product IDs
-      const validProductIds = [
-        'indomie',
-        'indomie-chicken',
-        'indomie-beef',
-        'indomie-curry',
-        'indomie-vegetable'
+      // For now, we'll validate against known barcode patterns
+      const validBarcodes = [
+        '8992388101015', // Example Indomie barcode
+        '8992388101022',
+        '8992388101039',
+        '8992388101046',
+        '8992388101053'
       ];
       
-      return validProductIds.includes(productId) || productId.startsWith('indomie');
+      return validBarcodes.includes(barcodeData) || barcodeData.startsWith('899238810');
     } catch (error) {
       console.error("Error validating product:", error);
       return false;
@@ -126,7 +117,7 @@ export class QRCodeService {
     product_id: string;
     user_id?: string;
     image_url?: string;
-    qr_data: string;
+    barcode_data: string;
   }): Promise<{ success: boolean; id?: string; error?: string }> {
     try {
       console.log("Saving scanned product to Supabase:", data);
@@ -137,7 +128,7 @@ export class QRCodeService {
           product_id: data.product_id,
           user_id: data.user_id || null,
           image_url: data.image_url || null,
-          qr_data: data.qr_data
+          barcode_data: data.barcode_data
         }])
         .select()
         .single();
@@ -156,55 +147,73 @@ export class QRCodeService {
   }
 
   /**
-   * Perform OCR on image to extract text
+   * Perform OCR on image to extract barcode text
    */
   static async performOCR(imageFile: File): Promise<OCRResult> {
     try {
-      console.log("Performing OCR on image:", imageFile.name);
+      console.log("Performing OCR on image for barcode recognition:", imageFile.name);
       
-      // Create a canvas to process the image
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
+      // Use Tesseract.js to perform OCR
+      const { data: { text, confidence } } = await Tesseract.recognize(
+        imageFile,
+        'eng',
+        {
+          logger: m => console.log('OCR Progress:', m)
+        }
+      );
       
-      if (!ctx) {
-        throw new Error("Could not get canvas context");
-      }
+      console.log("OCR Result:", { text, confidence });
       
-      // Load image
-      const img = new Image();
-      const imageUrl = URL.createObjectURL(imageFile);
+      // Extract potential barcode numbers from the OCR text
+      const barcodePattern = /\b\d{8,14}\b/g;
+      const matches = text.match(barcodePattern);
+      const extractedBarcode = matches ? matches[0] : text.replace(/\D/g, '');
       
-      return new Promise((resolve, reject) => {
-        img.onload = () => {
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.drawImage(img, 0, 0);
-          
-          // For now, return a placeholder OCR result
-          // In a real implementation, you would use a service like Tesseract.js
-          // or send to a backend OCR service
-          console.log("OCR processing complete (placeholder)");
-          
-          URL.revokeObjectURL(imageUrl);
-          
-          resolve({
-            text: "OCR text extraction placeholder",
-            confidence: 0.8
-          });
-        };
-        
-        img.onerror = () => {
-          URL.revokeObjectURL(imageUrl);
-          reject(new Error("Failed to load image for OCR"));
-        };
-        
-        img.src = imageUrl;
-      });
+      return {
+        text: extractedBarcode,
+        confidence: confidence / 100 // Convert to 0-1 range
+      };
     } catch (error) {
       console.error("Error performing OCR:", error);
       return {
         text: "",
         confidence: 0
+      };
+    }
+  }
+
+  /**
+   * Process image to extract barcode using OCR
+   */
+  static async extractBarcodeFromImage(imageFile: File): Promise<{
+    barcode: string;
+    confidence: number;
+    isValid: boolean;
+  }> {
+    try {
+      const ocrResult = await this.performOCR(imageFile);
+      
+      if (ocrResult.text && ocrResult.confidence > 0.5) {
+        const processResult = await this.processBarcodeData(ocrResult.text);
+        
+        return {
+          barcode: ocrResult.text,
+          confidence: ocrResult.confidence,
+          isValid: processResult.isValid
+        };
+      }
+      
+      return {
+        barcode: "",
+        confidence: 0,
+        isValid: false
+      };
+    } catch (error) {
+      console.error("Error extracting barcode from image:", error);
+      return {
+        barcode: "",
+        confidence: 0,
+        isValid: false
       };
     }
   }

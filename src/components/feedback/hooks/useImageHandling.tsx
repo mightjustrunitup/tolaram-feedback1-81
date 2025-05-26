@@ -8,7 +8,7 @@ export function useImageHandling() {
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [scannedQRData, setScannedQRData] = useState<string | null>(null);
+  const [scannedBarcodeData, setScannedBarcodeData] = useState<string | null>(null);
   const [scannedProductInfo, setScannedProductInfo] = useState<any>(null);
   
   // Handle image uploads
@@ -59,12 +59,12 @@ export function useImageHandling() {
     }
   };
 
-  // Handle QR code scanning
-  const handleQRCodeScanned = (qrData: string, productInfo?: any) => {
-    console.log("QR code scanned:", qrData, productInfo);
-    setScannedQRData(qrData);
+  // Handle barcode scanning
+  const handleBarcodeScanned = (barcodeData: string, productInfo?: any) => {
+    console.log("Barcode scanned:", barcodeData, productInfo);
+    setScannedBarcodeData(barcodeData);
     setScannedProductInfo(productInfo);
-    toast.success("Product QR code scanned successfully!");
+    toast.success("Product barcode scanned successfully!");
   };
 
   // Toggle camera on/off
@@ -163,12 +163,12 @@ export function useImageHandling() {
     uploadedImageUrls,
     isCameraActive,
     isUploading,
-    scannedQRData,
+    scannedBarcodeData,
     scannedProductInfo,
     handleImageUpload,
     handleImageRemove,
     handleCameraCapture,
-    handleQRCodeScanned,
+    handleBarcodeScanned,
     toggleCamera,
     uploadFilesToStorage
   };

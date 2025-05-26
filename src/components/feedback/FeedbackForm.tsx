@@ -26,12 +26,12 @@ export const FeedbackForm = () => {
     uploadedImages,
     isCameraActive,
     isUploading,
-    scannedQRData,
+    scannedBarcodeData,
     scannedProductInfo,
     handleImageUpload,
     handleImageRemove,
     handleCameraCapture,
-    handleQRCodeScanned,
+    handleBarcodeScanned,
     toggleCamera,
     uploadFilesToStorage
   } = useImageHandling();
@@ -43,13 +43,13 @@ export const FeedbackForm = () => {
     }
   }, [uploadedImageUrls]);
 
-  // Auto-select product when QR code is scanned
+  // Auto-select product when barcode is scanned
   useEffect(() => {
-    if (scannedQRData && scannedProductInfo) {
-      console.log("QR code scanned, auto-selecting product:", scannedProductInfo);
+    if (scannedBarcodeData && scannedProductInfo) {
+      console.log("Barcode scanned, auto-selecting product:", scannedProductInfo);
       
       // Try to find and select the product based on scanned data
-      const productId = scannedProductInfo?.product_id || scannedQRData;
+      const productId = scannedProductInfo?.product_id || scannedBarcodeData;
       const product = products.find(p => p.id === productId);
       
       if (product) {
@@ -59,7 +59,7 @@ export const FeedbackForm = () => {
         }
       }
     }
-  }, [scannedQRData, scannedProductInfo, handleProductSelect, handleVariantSelect]);
+  }, [scannedBarcodeData, scannedProductInfo, handleProductSelect, handleVariantSelect]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     // Use the existing form submission handler but pass the actual image files
@@ -79,7 +79,7 @@ export const FeedbackForm = () => {
       selectedIssues={selectedIssues}
       uploadedImages={uploadedImageUrls}
       products={products}
-      scannedQRData={scannedQRData}
+      scannedBarcodeData={scannedBarcodeData}
       scannedProductInfo={scannedProductInfo}
       onInputChange={handleInputChange}
       handleProductSelect={handleProductSelect}
@@ -89,7 +89,7 @@ export const FeedbackForm = () => {
       onImageRemove={handleImageRemove}
       isCameraActive={isCameraActive}
       onCameraCapture={handleCameraCapture}
-      onQRCodeScanned={handleQRCodeScanned}
+      onBarcodeScanned={handleBarcodeScanned}
       onToggleCamera={toggleCamera}
       onSubmit={handleSubmit}
       isUploading={isUploading}
