@@ -152,15 +152,17 @@ export class BarcodeService {
       console.log("Performing OCR on image for barcode recognition:", imageFile.name);
       
       // Use Tesseract.js with enhanced configuration for better number recognition
-      const { data: { text, confidence } } = await Tesseract.recognize(
-        imageFile,
-        'eng',
-        {
-          logger: m => console.log('OCR Progress:', m),
-          tessedit_char_whitelist: '0123456789', // Only recognize digits
-          tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK, // Treat as single block of text
-        }
-      );
+      const worker = await Tesseract.createWorker('eng');
+      
+      // Set parameters for better digit recognition
+      await worker.setParameters({
+        tessedit_char_whitelist: '0123456789',
+        tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK,
+      });
+      
+      const { data: { text, confidence } } = await worker.recognize(imageFile);
+      
+      await worker.terminate();
       
       console.log("Raw OCR Result:", { text, confidence });
       
