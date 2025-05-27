@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -170,10 +169,10 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           const success = await processBarcodeData(result.barcode, result.confidence);
           
           if (success) {
-            // Close the scanner after successful processing
+            // Close the scanner after successful processing with 10 second delay
             setTimeout(() => {
               onClose();
-            }, 3000); // Give user 3 seconds to see the result
+            }, 10000); // Extended to 10 seconds for user to see the result
           }
         } else {
           toast.error("No valid barcode detected. Please try again with a clearer image.");
@@ -210,10 +209,10 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         const success = await processBarcodeData(result.barcode, result.confidence);
         
         if (success) {
-          // Close the scanner after successful processing
+          // Close the scanner after successful processing with 10 second delay
           setTimeout(() => {
             onClose();
-          }, 3000); // Give user 3 seconds to see the result
+          }, 10000); // Extended to 10 seconds for user to see the result
         }
       } else {
         toast.error("No valid barcode detected in the image. Please try a clearer image.");
