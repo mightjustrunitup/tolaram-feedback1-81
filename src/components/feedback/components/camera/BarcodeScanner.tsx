@@ -130,26 +130,33 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             canvas.height = videoRef.current.videoHeight;
             context.drawImage(videoRef.current, 0, 0);
             
-            // Try to decode from the canvas using the correct ZXing method
-            codeReader.decodeFromImageElement(canvas)
-              .then((result) => {
-                if (result && result.getText()) {
-                  console.log("Barcode detected:", result.getText());
-                  handleBarcodeDetected(result.getText());
-                }
-              })
-              .catch((error) => {
-                // Ignore NotFoundException as it's expected when no barcode is present
-                if (!(error instanceof NotFoundException)) {
-                  console.debug("Scanning error:", error.message);
-                }
-              });
+            // Convert canvas to data URL and create image element
+            const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+            const img = new Image();
+            
+            img.onload = () => {
+              codeReader.decodeFromImageElement(img)
+                .then((result) => {
+                  if (result && result.getText()) {
+                    console.log("Barcode detected:", result.getText());
+                    handleBarcodeDetected(result.getText());
+                  }
+                })
+                .catch((error) => {
+                  // Ignore NotFoundException as it's expected when no barcode is present
+                  if (!(error instanceof NotFoundException)) {
+                    console.debug("Scanning error:", error.message);
+                  }
+                });
+            };
+            
+            img.src = dataURL;
           }
         } catch (error) {
           console.debug("Frame scan error:", error);
         }
       }
-    }, 150); // Scan every 150ms for good balance of speed and performance
+    }, 100); // Reduced to 100ms for even faster scanning
   };
 
   const cleanup = () => {
@@ -361,7 +368,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             <div className="bg-black/60 backdrop-blur-sm mx-4 p-3 rounded-lg">
               <Barcode className="mx-auto mb-2 text-indomie-yellow animate-pulse" size={24} />
               <p className="text-white text-sm">Scanning for barcode...</p>
-              <p className="text-white/80 text-xs mt-1">Fast detection enabled</p>
+              <p className="text-white/80 text-xs mt-1">Ultra-fast detection enabled</p>
             </div>
           )}
         </div>
@@ -390,7 +397,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         ) : (
           <div className="text-center">
             <p className="text-white/80 text-sm">
-              {isProcessing ? "Processing & saving..." : "Rapid scanning active..."}
+              {isProcessing ? "Processing & saving..." : "Ultra-fast scanning active..."}
             </p>
           </div>
         )}
