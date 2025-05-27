@@ -1,8 +1,10 @@
+
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Barcode, X, CheckCircle, Camera, Copy } from "lucide-react";
+import { Barcode, X, CheckCircle, Copy } from "lucide-react";
 import { BarcodeService } from "@/services/barcodeService";
+import { BrowserMultiFormatReader, NotFoundException } from '@zxing/library';
 
 interface BarcodeScannerProps {
   isActive: boolean;
@@ -16,9 +18,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   onClose
 }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<string | null>(null);
   const [scanDetails, setScanDetails] = useState<{
     barcode: string;
@@ -27,51 +26,105 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   } | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [reader, setReader] = useState<BrowserMultiFormatReader | null>(null);
 
   useEffect(() => {
     if (isActive) {
-      startCamera();
+      initializeScanner();
     }
 
     return () => {
-      stopCamera();
+      cleanup();
     };
   }, [isActive]);
 
-  const startCamera = async () => {
+  const initializeScanner = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: 'environment' }
-      });
+      console.log("Initializing ZXing barcode scanner...");
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        setStream(mediaStream);
-        setIsScanning(true);
+      const codeReader = new BrowserMultiFormatReader();
+      setReader(codeReader);
+      
+      // Get video devices
+      const videoInputDevices = await codeReader.listVideoInputDevices();
+      console.log("Available video devices:", videoInputDevices);
+      
+      // Try to use back camera if available
+      const backCamera = videoInputDevices.find(device => 
+        device.label.toLowerCase().includes('back') || 
+        device.label.toLowerCase().includes('rear') ||
+        device.label.toLowerCase().includes('environment')
+      );
+      
+      const selectedDeviceId = backCamera ? backCamera.deviceId : videoInputDevices[0]?.deviceId;
+      
+      if (!selectedDeviceId) {
+        toast.error("No camera devices found");
+        return;
       }
+
+      console.log("Starting barcode detection with device:", selectedDeviceId);
+      
+      // Start decoding from video device
+      codeReader.decodeFromVideoDevice(selectedDeviceId, videoRef.current!, (result, error) => {
+        if (result) {
+          console.log("Barcode detected:", result.getText());
+          handleBarcodeDetected(result.getText());
+        }
+        if (error && !(error instanceof NotFoundException)) {
+          console.error("Barcode scanning error:", error);
+        }
+      });
+
+      // Also get the stream for display purposes
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { 
+          deviceId: selectedDeviceId,
+          facingMode: 'environment'
+        }
+      });
+      setStream(mediaStream);
+      
+      toast.success("Barcode scanner initialized. Point camera at barcode.");
+      
     } catch (error) {
-      console.error("Error starting camera:", error);
+      console.error("Error initializing barcode scanner:", error);
       toast.error("Could not access camera for barcode scanning");
     }
   };
 
-  const stopCamera = () => {
+  const cleanup = () => {
+    console.log("Cleaning up barcode scanner...");
+    
+    if (reader) {
+      try {
+        reader.reset();
+      } catch (error) {
+        console.error("Error resetting reader:", error);
+      }
+    }
+    
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
       setStream(null);
     }
-    setIsScanning(false);
+    
+    setReader(null);
   };
 
-  const processBarcodeData = async (barcodeText: string, confidence: number = 0) => {
+  const handleBarcodeDetected = async (barcodeText: string) => {
+    if (isProcessing || scanResult) return; // Prevent multiple detections
+    
     try {
-      console.log("Processing barcode data:", barcodeText);
+      console.log("Processing detected barcode:", barcodeText);
       setIsProcessing(true);
       
-      // Clean the barcode data - keep original if it's already clean, otherwise extract digits
+      // Stop the scanner immediately
+      cleanup();
+      
+      // Clean the barcode data
       let cleanBarcode = barcodeText.trim();
       if (!/^\d+$/.test(cleanBarcode)) {
-        // If not all digits, extract digits
         cleanBarcode = barcodeText.replace(/\D/g, '');
       }
       
@@ -80,7 +133,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       if (!cleanBarcode || cleanBarcode.length < 6) {
         toast.error("Invalid barcode format. Barcode too short.");
         setIsProcessing(false);
-        return false;
+        return;
       }
       
       // Process the barcode to get type information
@@ -90,10 +143,12 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       setScanDetails({
         barcode: cleanBarcode,
         type: processResult.productInfo?.type || 'Unknown',
-        confidence: confidence
+        confidence: 1.0 // ZXing provides high confidence when it detects
       });
       
-      // Save the scanned product to backend first (removed duplicate check for now)
+      setScanResult(cleanBarcode);
+      
+      // Save the scanned product to backend
       console.log("Saving to database...");
       const saveResult = await BarcodeService.saveScannedProduct({
         product_id: cleanBarcode,
@@ -102,140 +157,25 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       
       if (saveResult.success) {
         console.log("Barcode data saved successfully:", saveResult);
-        toast.success("Product barcode scanned and saved successfully!");
+        toast.success("Barcode scanned and saved successfully!");
         
         // Trigger the callback with the barcode data
         onBarcodeDetected(cleanBarcode);
-        setIsProcessing(false);
-        return true;
+        
+        // Close the scanner after 3 seconds
+        setTimeout(() => {
+          onClose();
+        }, 3000);
       } else {
         console.error("Failed to save barcode data:", saveResult.error);
         toast.error("Failed to save scanned product: " + (saveResult.error || "Unknown error"));
-        setIsProcessing(false);
-        return false;
       }
+      
+      setIsProcessing(false);
     } catch (error) {
       console.error("Error processing barcode:", error);
       toast.error("Error processing barcode: " + (error as Error).message);
       setIsProcessing(false);
-      return false;
-    }
-  };
-
-  const captureAndProcessImage = async () => {
-    if (!videoRef.current || !canvasRef.current || isProcessing) return;
-
-    setIsProcessing(true);
-    toast.info("Scanning for barcode...");
-
-    const canvas = canvasRef.current;
-    const video = videoRef.current;
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-      setIsProcessing(false);
-      return;
-    }
-
-    // Set canvas dimensions to match video
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    // Draw the current video frame to canvas
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    // Convert canvas to blob
-    canvas.toBlob(async (blob) => {
-      if (!blob) {
-        setIsProcessing(false);
-        return;
-      }
-
-      const file = new File([blob], 'barcode_scan.jpg', { type: 'image/jpeg' });
-      
-      try {
-        // Extract barcode from image using OCR
-        console.log("Starting OCR extraction...");
-        const result = await BarcodeService.extractBarcodeFromImage(file);
-        
-        console.log("OCR result:", result);
-        
-        if (result.barcode && result.barcode.length >= 6) {
-          console.log("Valid barcode extracted:", result.barcode);
-          setScanResult(result.barcode);
-          setIsScanning(false);
-          
-          // Process the extracted barcode data
-          const success = await processBarcodeData(result.barcode, result.confidence);
-          
-          if (success) {
-            // Close the scanner after successful processing with 10 second delay
-            setTimeout(() => {
-              onClose();
-            }, 10000); // Extended to 10 seconds for user to see the result
-          }
-        } else {
-          toast.error("No valid barcode detected. Please try again with a clearer image.");
-          setIsProcessing(false);
-        }
-      } catch (error) {
-        console.error("Error processing barcode:", error);
-        toast.error("Error processing barcode: " + (error as Error).message);
-        setIsProcessing(false);
-      }
-    }, 'image/jpeg', 0.8);
-  };
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || isProcessing) return;
-
-    setIsProcessing(true);
-    toast.info("Processing barcode from image...");
-    
-    try {
-      // Extract barcode from uploaded image
-      console.log("Processing uploaded image...");
-      const result = await BarcodeService.extractBarcodeFromImage(file);
-      
-      console.log("Upload OCR result:", result);
-      
-      if (result.barcode && result.barcode.length >= 6) {
-        console.log("Valid barcode extracted from upload:", result.barcode);
-        setScanResult(result.barcode);
-        setIsScanning(false);
-        
-        // Process the extracted barcode data
-        const success = await processBarcodeData(result.barcode, result.confidence);
-        
-        if (success) {
-          // Close the scanner after successful processing with 10 second delay
-          setTimeout(() => {
-            onClose();
-          }, 10000); // Extended to 10 seconds for user to see the result
-        }
-      } else {
-        toast.error("No valid barcode detected in the image. Please try a clearer image.");
-        setIsProcessing(false);
-      }
-    } catch (error) {
-      console.error("Error processing barcode:", error);
-      toast.error("Error processing barcode: " + (error as Error).message);
-      setIsProcessing(false);
-    }
-  };
-
-  const handleRescan = () => {
-    setScanResult(null);
-    setScanDetails(null);
-    setIsScanning(true);
-    setIsProcessing(false);
-    startCamera();
-  };
-
-  const handleUploadClick = () => {
-    if (!isProcessing) {
-      fileInputRef.current?.click();
     }
   };
 
@@ -249,6 +189,13 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         toast.error("Failed to copy barcode");
       }
     }
+  };
+
+  const handleRescan = () => {
+    setScanResult(null);
+    setScanDetails(null);
+    setIsProcessing(false);
+    initializeScanner();
   };
 
   if (!isActive) return null;
@@ -276,17 +223,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           autoPlay
         />
         
-        <canvas ref={canvasRef} className="hidden" />
-        
-        {/* Hidden file input */}
-        <input
-          type="file"
-          ref={fileInputRef}
-          accept="image/*"
-          className="hidden"
-          onChange={handleFileUpload}
-        />
-        
         {/* Scanning overlay */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-4 border-2 border-white/50 rounded-lg">
@@ -295,6 +231,13 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-indomie-yellow rounded-bl-lg"></div>
             <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-indomie-yellow rounded-br-lg"></div>
           </div>
+          
+          {/* Center scanning line animation */}
+          {!scanResult && !isProcessing && (
+            <div className="absolute inset-4 flex items-center justify-center">
+              <div className="w-full h-0.5 bg-indomie-yellow animate-pulse"></div>
+            </div>
+          )}
         </div>
 
         {/* Barcode scan result display */}
@@ -326,8 +269,8 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
                   <div className="font-medium">{scanDetails.type}</div>
                 </div>
                 <div>
-                  <span className="text-white/80">Confidence:</span>
-                  <div className="font-medium">{Math.round(scanDetails.confidence * 100)}%</div>
+                  <span className="text-white/80">Status:</span>
+                  <div className="font-medium">Detected</div>
                 </div>
               </div>
             </div>
@@ -343,11 +286,11 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             </div>
           )}
           
-          {isScanning && !scanResult && !isProcessing && (
+          {!scanResult && !isProcessing && (
             <div className="bg-black/60 backdrop-blur-sm mx-4 p-3 rounded-lg">
-              <Barcode className="mx-auto mb-2 text-indomie-yellow" size={24} />
-              <p className="text-white text-sm">Position barcode within the frame</p>
-              <p className="text-white/80 text-xs mt-1">Tap the camera button to scan</p>
+              <Barcode className="mx-auto mb-2 text-indomie-yellow animate-pulse" size={24} />
+              <p className="text-white text-sm">Point camera at barcode</p>
+              <p className="text-white/80 text-xs mt-1">Detection is automatic</p>
             </div>
           )}
         </div>
@@ -374,23 +317,10 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             </Button>
           </div>
         ) : (
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={handleUploadClick}
-              disabled={isProcessing}
-              className="flex-1 bg-white/10 backdrop-blur-sm border-white/20 text-white hover:bg-white/20 disabled:opacity-50"
-            >
-              Upload Image
-            </Button>
-            <Button
-              onClick={captureAndProcessImage}
-              disabled={!isScanning || isProcessing}
-              className="flex-1 bg-indomie-yellow text-black hover:bg-indomie-yellow/90 disabled:opacity-50"
-            >
-              <Camera size={16} className="mr-2" />
-              {isProcessing ? "Processing..." : "Scan Barcode"}
-            </Button>
+          <div className="text-center">
+            <p className="text-white/80 text-sm">
+              {isProcessing ? "Processing..." : "Scanning for barcode..."}
+            </p>
           </div>
         )}
       </div>

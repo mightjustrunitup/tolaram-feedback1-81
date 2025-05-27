@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import Tesseract from 'tesseract.js';
 
 export interface ScannedProduct {
   id: string;
@@ -9,11 +8,6 @@ export interface ScannedProduct {
   image_url?: string;
   barcode_data: string;
   created_at: string;
-}
-
-export interface OCRResult {
-  text: string;
-  confidence: number;
 }
 
 export class BarcodeService {
@@ -141,105 +135,6 @@ export class BarcodeService {
     } catch (error) {
       console.error("Error in saveScannedProduct:", error);
       return { success: false, error: "Failed to save scanned product: " + (error as Error).message };
-    }
-  }
-
-  /**
-   * Perform OCR on image to extract barcode text
-   */
-  static async performOCR(imageFile: File): Promise<OCRResult> {
-    try {
-      console.log("Performing OCR on image for barcode recognition:", imageFile.name);
-      
-      // Use Tesseract.js with enhanced configuration for better number recognition
-      const worker = await Tesseract.createWorker('eng');
-      
-      // Set parameters for better digit recognition
-      await worker.setParameters({
-        tessedit_char_whitelist: '0123456789',
-        tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK,
-      });
-      
-      const { data: { text, confidence } } = await worker.recognize(imageFile);
-      
-      await worker.terminate();
-      
-      console.log("Raw OCR Result:", { text, confidence });
-      
-      // Clean the text - remove all non-digit characters and whitespace
-      let cleanedText = text.replace(/\D/g, '');
-      
-      console.log("Cleaned OCR text (digits only):", cleanedText);
-      
-      // If we didn't get enough digits, try alternative extraction methods
-      if (cleanedText.length < 8) {
-        console.log("Not enough digits found, trying alternative extraction...");
-        
-        // Try to extract longer sequences by looking for digit patterns
-        const digitPatterns = text.match(/\d+/g);
-        if (digitPatterns && digitPatterns.length > 0) {
-          // Join all found digit sequences
-          cleanedText = digitPatterns.join('');
-          console.log("Alternative extraction result:", cleanedText);
-        }
-      }
-      
-      // Final validation - ensure we have a reasonable barcode length
-      if (cleanedText.length >= 6) {
-        console.log("Final extracted barcode:", cleanedText);
-        return {
-          text: cleanedText,
-          confidence: confidence / 100 // Convert to 0-1 range
-        };
-      } else {
-        console.log("Insufficient digits extracted for valid barcode");
-        return {
-          text: "",
-          confidence: 0
-        };
-      }
-    } catch (error) {
-      console.error("Error performing OCR:", error);
-      return {
-        text: "",
-        confidence: 0
-      };
-    }
-  }
-
-  /**
-   * Process image to extract barcode using OCR
-   */
-  static async extractBarcodeFromImage(imageFile: File): Promise<{
-    barcode: string;
-    confidence: number;
-    isValid: boolean;
-  }> {
-    try {
-      const ocrResult = await this.performOCR(imageFile);
-      
-      if (ocrResult.text && ocrResult.text.length >= 6) {
-        const processResult = await this.processBarcodeData(ocrResult.text);
-        
-        return {
-          barcode: ocrResult.text,
-          confidence: ocrResult.confidence,
-          isValid: processResult.isValid
-        };
-      }
-      
-      return {
-        barcode: "",
-        confidence: 0,
-        isValid: false
-      };
-    } catch (error) {
-      console.error("Error extracting barcode from image:", error);
-      return {
-        barcode: "",
-        confidence: 0,
-        isValid: false
-      };
     }
   }
 }
