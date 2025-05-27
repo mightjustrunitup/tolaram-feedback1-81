@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Paperclip, X, Camera, Loader2, Maximize2, Minimize2 } from "lucide-react";
@@ -105,17 +104,20 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({
           </Button>
         )}
         
-        <Button
-          type="button"
-          variant="ghost" 
-          size="sm"
-          onClick={handleFileButtonClick}
-          className="bg-transparent hover:bg-gray-100 flex items-center"
-          title="Attach images to your feedback"
-          disabled={isUploading}
-        >
-          {isUploading ? <Loader2 size={14} className="animate-spin" /> : <Paperclip size={14} />}
-        </Button>
+        {/* Hide attach button on mobile, show on desktop */}
+        {!isMobile && (
+          <Button
+            type="button"
+            variant="ghost" 
+            size="sm"
+            onClick={handleFileButtonClick}
+            className="bg-transparent hover:bg-gray-100 flex items-center"
+            title="Attach images to your feedback"
+            disabled={isUploading}
+          >
+            {isUploading ? <Loader2 size={14} className="animate-spin" /> : <Paperclip size={14} />}
+          </Button>
+        )}
       </div>
       
       {/* Display uploaded images with delete option */}
