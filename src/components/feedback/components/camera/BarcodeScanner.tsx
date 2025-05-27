@@ -130,11 +130,8 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             canvas.height = videoRef.current.videoHeight;
             context.drawImage(videoRef.current, 0, 0);
             
-            // Convert canvas to ImageData for ZXing
-            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
-            
-            // Try to decode from the ImageData
-            codeReader.decodeFromImageData(imageData)
+            // Try to decode from the canvas using the correct ZXing method
+            codeReader.decodeFromImageElement(canvas)
               .then((result) => {
                 if (result && result.getText()) {
                   console.log("Barcode detected:", result.getText());
