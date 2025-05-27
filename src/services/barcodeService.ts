@@ -99,42 +99,100 @@ export class BarcodeService {
   }
 
   /**
-   * Save scanned product to Supabase
+   * Save scanned product to Supabase with retry logic for reliability
    */
   static async saveScannedProduct(data: {
     product_id: string;
     user_id?: string;
     image_url?: string;
     barcode_data: string;
-  }): Promise<{ success: boolean; id?: string; error?: string }> {
+  }, retryCount: number = 3): Promise<{ success: boolean; id?: string; error?: string }> {
+    for (let attempt = 1; attempt <= retryCount; attempt++) {
+      try {
+        console.log(`Saving scanned product to Supabase (attempt ${attempt}):`, data);
+        
+        const insertData = {
+          product_id: data.product_id,
+          user_id: data.user_id || null,
+          image_url: data.image_url || null,
+          barcode_data: data.barcode_data
+        };
+        
+        console.log("Insert data:", insertData);
+        
+        const { data: insertResult, error } = await supabase
+          .from('scanned_products')
+          .insert([insertData])
+          .select()
+          .single();
+        
+        if (error) {
+          console.error(`Supabase error saving scanned product (attempt ${attempt}):`, error);
+          
+          // If this is the last attempt, return the error
+          if (attempt === retryCount) {
+            return { success: false, error: error.message };
+          }
+          
+          // Wait before retrying (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+          continue;
+        }
+        
+        console.log("Barcode data saved successfully:", insertResult);
+        
+        // Verify the save by checking if the record exists
+        const { data: verifyData, error: verifyError } = await supabase
+          .from('scanned_products')
+          .select('id, product_id, created_at')
+          .eq('id', insertResult.id)
+          .single();
+        
+        if (verifyError || !verifyData) {
+          console.error("Verification failed:", verifyError);
+          if (attempt === retryCount) {
+            return { success: false, error: "Save verification failed" };
+          }
+          continue;
+        }
+        
+        console.log("Save verified successfully:", verifyData);
+        return { success: true, id: insertResult.id };
+        
+      } catch (error) {
+        console.error(`Error in saveScannedProduct (attempt ${attempt}):`, error);
+        
+        if (attempt === retryCount) {
+          return { success: false, error: "Failed to save scanned product: " + (error as Error).message };
+        }
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, Math.pow(2, attempt) * 1000));
+      }
+    }
+    
+    return { success: false, error: "Maximum retry attempts exceeded" };
+  }
+
+  /**
+   * Get all scanned products from Supabase
+   */
+  static async getScannedProducts(): Promise<ScannedProduct[]> {
     try {
-      console.log("Saving scanned product to Supabase:", data);
-      
-      const insertData = {
-        product_id: data.product_id,
-        user_id: data.user_id || null,
-        image_url: data.image_url || null,
-        barcode_data: data.barcode_data
-      };
-      
-      console.log("Insert data:", insertData);
-      
-      const { data: insertResult, error } = await supabase
+      const { data, error } = await supabase
         .from('scanned_products')
-        .insert([insertData])
-        .select()
-        .single();
+        .select('*')
+        .order('created_at', { ascending: false });
       
       if (error) {
-        console.error("Supabase error saving scanned product:", error);
-        return { success: false, error: error.message };
+        console.error("Error fetching scanned products:", error);
+        return [];
       }
       
-      console.log("Scanned product saved successfully:", insertResult);
-      return { success: true, id: insertResult.id };
+      return data as ScannedProduct[];
     } catch (error) {
-      console.error("Error in saveScannedProduct:", error);
-      return { success: false, error: "Failed to save scanned product: " + (error as Error).message };
+      console.error("Error in getScannedProducts:", error);
+      return [];
     }
   }
 }
