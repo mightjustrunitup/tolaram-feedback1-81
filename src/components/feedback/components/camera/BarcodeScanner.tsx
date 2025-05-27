@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -119,7 +118,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       clearInterval(scanIntervalRef.current);
     }
     
-    // Start rapid scanning every 100ms for faster detection
+    // Start rapid scanning every 150ms for faster detection
     scanIntervalRef.current = window.setInterval(() => {
       if (videoRef.current && !isProcessing && !scanResult) {
         try {
@@ -131,8 +130,11 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             canvas.height = videoRef.current.videoHeight;
             context.drawImage(videoRef.current, 0, 0);
             
-            // Try to decode from the canvas
-            codeReader.decodeFromCanvas(canvas)
+            // Convert canvas to ImageData for ZXing
+            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+            
+            // Try to decode from the ImageData
+            codeReader.decodeFromImageData(imageData)
               .then((result) => {
                 if (result && result.getText()) {
                   console.log("Barcode detected:", result.getText());
@@ -150,7 +152,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           console.debug("Frame scan error:", error);
         }
       }
-    }, 100); // Scan every 100ms for fast detection
+    }, 150); // Scan every 150ms for good balance of speed and performance
   };
 
   const cleanup = () => {
@@ -228,7 +230,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         // Trigger the callback with the barcode data
         onBarcodeDetected(cleanBarcode);
         
-        // Close the scanner after 2 seconds (faster than before)
+        // Close the scanner after 2 seconds
         setTimeout(() => {
           onClose();
         }, 2000);
