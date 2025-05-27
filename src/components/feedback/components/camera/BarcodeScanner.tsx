@@ -1,7 +1,8 @@
+
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Barcode, X, CheckCircle, Camera } from "lucide-react";
+import { Barcode, X, CheckCircle, Camera, Copy } from "lucide-react";
 import { BarcodeService } from "@/services/barcodeService";
 
 interface BarcodeScannerProps {
@@ -20,6 +21,11 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState<string | null>(null);
+  const [scanDetails, setScanDetails] = useState<{
+    barcode: string;
+    type: string;
+    confidence: number;
+  } | null>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -58,7 +64,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     setIsScanning(false);
   };
 
-  const processBarcodeData = async (barcodeText: string) => {
+  const processBarcodeData = async (barcodeText: string, confidence: number = 0) => {
     try {
       console.log("Processing barcode data:", barcodeText);
       setIsProcessing(true);
@@ -77,6 +83,16 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         setIsProcessing(false);
         return false;
       }
+      
+      // Process the barcode to get type information
+      const processResult = await BarcodeService.processBarcodeData(cleanBarcode);
+      
+      // Set scan details for display
+      setScanDetails({
+        barcode: cleanBarcode,
+        type: processResult.productInfo?.type || 'Unknown',
+        confidence: confidence
+      });
       
       // Save the scanned product to backend first (removed duplicate check for now)
       console.log("Saving to database...");
@@ -151,13 +167,13 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           setIsScanning(false);
           
           // Process the extracted barcode data
-          const success = await processBarcodeData(result.barcode);
+          const success = await processBarcodeData(result.barcode, result.confidence);
           
           if (success) {
             // Close the scanner after successful processing
             setTimeout(() => {
               onClose();
-            }, 2000);
+            }, 3000); // Give user 3 seconds to see the result
           }
         } else {
           toast.error("No valid barcode detected. Please try again with a clearer image.");
@@ -191,13 +207,13 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         setIsScanning(false);
         
         // Process the extracted barcode data
-        const success = await processBarcodeData(result.barcode);
+        const success = await processBarcodeData(result.barcode, result.confidence);
         
         if (success) {
           // Close the scanner after successful processing
           setTimeout(() => {
             onClose();
-          }, 2000);
+          }, 3000); // Give user 3 seconds to see the result
         }
       } else {
         toast.error("No valid barcode detected in the image. Please try a clearer image.");
@@ -212,6 +228,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
   const handleRescan = () => {
     setScanResult(null);
+    setScanDetails(null);
     setIsScanning(true);
     setIsProcessing(false);
     startCamera();
@@ -220,6 +237,18 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   const handleUploadClick = () => {
     if (!isProcessing) {
       fileInputRef.current?.click();
+    }
+  };
+
+  const copyBarcodeToClipboard = async () => {
+    if (scanResult) {
+      try {
+        await navigator.clipboard.writeText(scanResult);
+        toast.success("Barcode copied to clipboard!");
+      } catch (error) {
+        console.error("Failed to copy to clipboard:", error);
+        toast.error("Failed to copy barcode");
+      }
     }
   };
 
@@ -269,6 +298,43 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           </div>
         </div>
 
+        {/* Barcode scan result display */}
+        {scanResult && scanDetails && (
+          <div className="absolute top-20 left-4 right-4 bg-green-600/95 backdrop-blur-sm p-4 rounded-lg border border-green-400/30">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <CheckCircle className="text-white" size={20} />
+                <h3 className="text-white font-semibold">Barcode Detected!</h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={copyBarcodeToClipboard}
+                className="text-white hover:bg-white/20 p-1"
+              >
+                <Copy size={16} />
+              </Button>
+            </div>
+            
+            <div className="space-y-2 text-white">
+              <div className="bg-white/20 p-3 rounded font-mono text-lg tracking-wider">
+                {scanDetails.barcode}
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-white/80">Type:</span>
+                  <div className="font-medium">{scanDetails.type}</div>
+                </div>
+                <div>
+                  <span className="text-white/80">Confidence:</span>
+                  <div className="font-medium">{Math.round(scanDetails.confidence * 100)}%</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Scanning status */}
         <div className="absolute bottom-32 left-0 right-0 text-center">
           {isProcessing && (
@@ -283,14 +349,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
               <Barcode className="mx-auto mb-2 text-indomie-yellow" size={24} />
               <p className="text-white text-sm">Position barcode within the frame</p>
               <p className="text-white/80 text-xs mt-1">Tap the camera button to scan</p>
-            </div>
-          )}
-          
-          {scanResult && (
-            <div className="bg-green-600/90 backdrop-blur-sm mx-4 p-3 rounded-lg">
-              <CheckCircle className="mx-auto mb-2 text-white" size={24} />
-              <p className="text-white text-sm font-medium">Barcode Scanned Successfully!</p>
-              <p className="text-white/80 text-xs mt-1 truncate">{scanResult}</p>
             </div>
           )}
         </div>
