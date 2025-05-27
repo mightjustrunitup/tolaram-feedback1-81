@@ -151,42 +151,51 @@ export class BarcodeService {
     try {
       console.log("Performing OCR on image for barcode recognition:", imageFile.name);
       
-      // Use Tesseract.js to perform OCR with basic configuration
+      // Use Tesseract.js with enhanced configuration for better number recognition
       const { data: { text, confidence } } = await Tesseract.recognize(
         imageFile,
         'eng',
         {
-          logger: m => console.log('OCR Progress:', m)
+          logger: m => console.log('OCR Progress:', m),
+          tessedit_char_whitelist: '0123456789', // Only recognize digits
+          tessedit_pageseg_mode: Tesseract.PSM.SINGLE_BLOCK, // Treat as single block of text
         }
       );
       
-      console.log("OCR Result:", { text, confidence });
+      console.log("Raw OCR Result:", { text, confidence });
       
-      // Extract potential barcode numbers from the OCR text
-      // Look for sequences of 6 or more digits
-      const barcodePattern = /\b\d{6,}\b/g;
-      const matches = text.match(barcodePattern);
+      // Clean the text - remove all non-digit characters and whitespace
+      let cleanedText = text.replace(/\D/g, '');
       
-      // Get the longest sequence of digits as it's likely the barcode
-      let extractedBarcode = '';
-      if (matches && matches.length > 0) {
-        extractedBarcode = matches.reduce((longest, current) => 
-          current.length > longest.length ? current : longest
-        );
-      } else {
-        // Fallback: extract all digits if they form a reasonable barcode
-        const allDigits = text.replace(/\D/g, '');
-        if (allDigits.length >= 6) {
-          extractedBarcode = allDigits;
+      console.log("Cleaned OCR text (digits only):", cleanedText);
+      
+      // If we didn't get enough digits, try alternative extraction methods
+      if (cleanedText.length < 8) {
+        console.log("Not enough digits found, trying alternative extraction...");
+        
+        // Try to extract longer sequences by looking for digit patterns
+        const digitPatterns = text.match(/\d+/g);
+        if (digitPatterns && digitPatterns.length > 0) {
+          // Join all found digit sequences
+          cleanedText = digitPatterns.join('');
+          console.log("Alternative extraction result:", cleanedText);
         }
       }
       
-      console.log("Extracted barcode:", extractedBarcode);
-      
-      return {
-        text: extractedBarcode,
-        confidence: confidence / 100 // Convert to 0-1 range
-      };
+      // Final validation - ensure we have a reasonable barcode length
+      if (cleanedText.length >= 6) {
+        console.log("Final extracted barcode:", cleanedText);
+        return {
+          text: cleanedText,
+          confidence: confidence / 100 // Convert to 0-1 range
+        };
+      } else {
+        console.log("Insufficient digits extracted for valid barcode");
+        return {
+          text: "",
+          confidence: 0
+        };
+      }
     } catch (error) {
       console.error("Error performing OCR:", error);
       return {
