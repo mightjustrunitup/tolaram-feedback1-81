@@ -28,13 +28,15 @@ export const FeedbackForm = () => {
     isUploading,
     scannedBarcodeData,
     scannedProductInfo,
+    scannedBarcodes,
     handleImageUpload,
     handleImageRemove,
     handleCameraCapture,
     handleBarcodeScanned,
     toggleCamera,
     uploadFilesToStorage,
-    clearBarcodeData // Add this to clear barcode data
+    clearBarcodeData,
+    removeBarcodeByIndex
   } = useImageHandling();
 
   // Log when images change to verify they're being processed correctly
@@ -44,7 +46,7 @@ export const FeedbackForm = () => {
     }
   }, [uploadedImageUrls]);
 
-  // Auto-select product when barcode is scanned
+  // Auto-select product when barcode is scanned (only for the first barcode for backward compatibility)
   useEffect(() => {
     if (scannedBarcodeData && scannedProductInfo) {
       console.log("Barcode scanned, auto-selecting product:", scannedProductInfo);
@@ -64,10 +66,10 @@ export const FeedbackForm = () => {
 
   // Enhanced product select handler that clears barcode data when manually selecting a different product
   const handleProductSelectWithBarcodeReset = (productId: string) => {
-    // If there's existing barcode data and user is selecting a different product, clear the barcode
-    if (scannedBarcodeData && selectedProduct?.id !== productId) {
+    // If there are existing barcodes and user is selecting a different product, clear the barcodes
+    if (scannedBarcodes.length > 0 && selectedProduct?.id !== productId) {
       clearBarcodeData();
-      console.log("Clearing barcode data due to manual product selection");
+      console.log("Clearing all barcode data due to manual product selection");
     }
     handleProductSelect(productId);
   };
@@ -92,6 +94,7 @@ export const FeedbackForm = () => {
       products={products}
       scannedBarcodeData={scannedBarcodeData}
       scannedProductInfo={scannedProductInfo}
+      scannedBarcodes={scannedBarcodes}
       onInputChange={handleInputChange}
       handleProductSelect={handleProductSelectWithBarcodeReset}
       handleVariantSelect={handleVariantSelect}
@@ -104,6 +107,7 @@ export const FeedbackForm = () => {
       onToggleCamera={toggleCamera}
       onSubmit={handleSubmit}
       isUploading={isUploading}
+      removeBarcodeByIndex={removeBarcodeByIndex}
     />
   );
 };

@@ -2,6 +2,8 @@
 import React from "react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { X } from "lucide-react";
 import { FeedbackHeader } from "@/components/feedback/FeedbackHeader";
 import { CustomerInfoForm } from "@/components/feedback/CustomerInfoForm";
 import { ProductSelection } from "@/components/feedback/ProductSelection";
@@ -31,6 +33,11 @@ interface ProductFeedbackFormProps {
   products: Product[];
   scannedBarcodeData?: string | null;
   scannedProductInfo?: any;
+  scannedBarcodes?: Array<{
+    barcodeData: string;
+    productInfo: any;
+    timestamp: number;
+  }>;
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleProductSelect: (productId: string) => void;
   handleVariantSelect: (variantId: string) => void;
@@ -43,6 +50,7 @@ interface ProductFeedbackFormProps {
   onToggleCamera?: () => void;
   onSubmit: (e: React.FormEvent) => void;
   isUploading?: boolean;
+  removeBarcodeByIndex?: (index: number) => void;
 }
 
 export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
@@ -59,6 +67,7 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
   products,
   scannedBarcodeData,
   scannedProductInfo,
+  scannedBarcodes = [],
   onInputChange,
   handleProductSelect,
   handleVariantSelect,
@@ -70,7 +79,8 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
   onBarcodeScanned,
   onToggleCamera,
   onSubmit,
-  isUploading = false
+  isUploading = false,
+  removeBarcodeByIndex
 }) => {
   return (
     <Card className="shadow-lg animate-fade-in border-t-4 border-t-indomie-red relative overflow-hidden">
@@ -91,7 +101,7 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
             errors={errors}
           />
 
-          {/* Product Selection - Remove barcode display from here */}
+          {/* Product Selection */}
           <ProductSelection
             products={products}
             selectedProduct={selectedProduct}
@@ -121,15 +131,33 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
             />
           )}
 
-          {/* Barcode Information Display - Show below comments */}
-          {scannedBarcodeData && (
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-sm text-green-800 font-medium">
-                ✓ Barcode scanned and saved
-              </p>
-              <p className="text-xs text-green-600 mt-1">
-                Barcode: {scannedBarcodeData}
-              </p>
+          {/* Multiple Barcodes Information Display - Show below comments */}
+          {scannedBarcodes.length > 0 && (
+            <div className="space-y-3">
+              <h4 className="font-medium text-gray-700">Scanned Barcodes ({scannedBarcodes.length})</h4>
+              {scannedBarcodes.map((barcode, index) => (
+                <div key={`${barcode.barcodeData}-${barcode.timestamp}`} className="p-3 bg-green-50 border border-green-200 rounded-lg flex items-center justify-between">
+                  <div>
+                    <p className="text-sm text-green-800 font-medium">
+                      ✓ Barcode {index + 1} scanned and saved
+                    </p>
+                    <p className="text-xs text-green-600 mt-1 font-mono">
+                      {barcode.barcodeData}
+                    </p>
+                  </div>
+                  {removeBarcodeByIndex && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => removeBarcodeByIndex(index)}
+                      className="text-green-700 hover:text-red-600 hover:bg-red-50"
+                    >
+                      <X size={16} />
+                    </Button>
+                  )}
+                </div>
+              ))}
             </div>
           )}
           

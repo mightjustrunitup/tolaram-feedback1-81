@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -8,8 +7,15 @@ export function useImageHandling() {
   const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
   const [isCameraActive, setIsCameraActive] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [scannedBarcodeData, setScannedBarcodeData] = useState<string | null>(null);
-  const [scannedProductInfo, setScannedProductInfo] = useState<any>(null);
+  const [scannedBarcodes, setScannedBarcodes] = useState<Array<{
+    barcodeData: string;
+    productInfo: any;
+    timestamp: number;
+  }>>([]);
+  
+  // Keep backward compatibility - return the first scanned barcode
+  const scannedBarcodeData = scannedBarcodes.length > 0 ? scannedBarcodes[0].barcodeData : null;
+  const scannedProductInfo = scannedBarcodes.length > 0 ? scannedBarcodes[0].productInfo : null;
   
   // Handle image uploads
   const handleImageUpload = (files: FileList) => {
@@ -59,18 +65,41 @@ export function useImageHandling() {
     }
   };
 
-  // Handle barcode scanning
+  // Handle barcode scanning with duplicate detection
   const handleBarcodeScanned = (barcodeData: string, productInfo?: any) => {
     console.log("Barcode scanned:", barcodeData, productInfo);
-    setScannedBarcodeData(barcodeData);
-    setScannedProductInfo(productInfo);
-    toast.success("Product barcode scanned successfully!");
+    
+    // Check for duplicates in current session
+    const isDuplicate = scannedBarcodes.some(scanned => scanned.barcodeData === barcodeData);
+    
+    if (isDuplicate) {
+      toast.error("This barcode has already been scanned in this session");
+      return;
+    }
+    
+    const newBarcode = {
+      barcodeData,
+      productInfo: productInfo || { barcode: barcodeData },
+      timestamp: Date.now()
+    };
+    
+    setScannedBarcodes(prev => [...prev, newBarcode]);
+    toast.success(`Barcode ${scannedBarcodes.length + 1} scanned successfully!`);
   };
 
-  // Clear barcode data
+  // Clear all barcode data
   const clearBarcodeData = () => {
-    setScannedBarcodeData(null);
-    setScannedProductInfo(null);
+    setScannedBarcodes([]);
+  };
+
+  // Remove a specific barcode by index
+  const removeBarcodeByIndex = (index: number) => {
+    setScannedBarcodes(prev => {
+      const updated = [...prev];
+      updated.splice(index, 1);
+      toast.info("Barcode removed");
+      return updated;
+    });
   };
 
   // Toggle camera on/off
@@ -169,14 +198,16 @@ export function useImageHandling() {
     uploadedImageUrls,
     isCameraActive,
     isUploading,
-    scannedBarcodeData,
-    scannedProductInfo,
+    scannedBarcodeData, // Backward compatibility
+    scannedProductInfo, // Backward compatibility
+    scannedBarcodes, // New: array of all scanned barcodes
     handleImageUpload,
     handleImageRemove,
     handleCameraCapture,
     handleBarcodeScanned,
     toggleCamera,
     uploadFilesToStorage,
-    clearBarcodeData
+    clearBarcodeData,
+    removeBarcodeByIndex // New: remove specific barcode
   };
 }
