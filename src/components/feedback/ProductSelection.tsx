@@ -24,8 +24,6 @@ interface ProductSelectionProps {
   errors: { [key: string]: string };
   handleProductSelect: (productId: string) => void;
   handleVariantSelect: (variantId: string) => void;
-  scannedBarcodeData?: string | null;
-  scannedProductInfo?: any;
 }
 
 export const ProductSelection: React.FC<ProductSelectionProps> = ({
@@ -35,8 +33,6 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
   errors,
   handleProductSelect,
   handleVariantSelect,
-  scannedBarcodeData,
-  scannedProductInfo,
 }) => {
   return (
     <>
@@ -45,17 +41,6 @@ export const ProductSelection: React.FC<ProductSelectionProps> = ({
           <span>Select Product</span>
           <span className="text-red-500">*</span>
         </Label>
-        
-        {scannedBarcodeData && (
-          <div className="p-3 bg-green-50 border border-green-200 rounded-lg mb-4">
-            <p className="text-sm text-green-800 font-medium">
-              ✓ Product auto-selected from barcode scan
-            </p>
-            <p className="text-xs text-green-600 mt-1">
-              Barcode: {scannedBarcodeData}
-            </p>
-          </div>
-        )}
         
         <Tabs 
           value={selectedProduct?.id || ""}

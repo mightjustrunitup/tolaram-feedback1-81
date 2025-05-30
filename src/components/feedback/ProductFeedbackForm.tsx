@@ -78,7 +78,7 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
       <div className="absolute -left-16 -bottom-16 w-32 h-32 rounded-full bg-green-100/30 blur-xl"></div>
       
       <CardHeader className="relative z-10">
-        <FeedbackHeader selectedProduct={selectedProduct} scannedBarcodeData={scannedBarcodeData} />
+        <FeedbackHeader selectedProduct={selectedProduct} />
       </CardHeader>
       
       <CardContent className="relative z-10">
@@ -91,7 +91,7 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
             errors={errors}
           />
 
-          {/* Product Selection */}
+          {/* Product Selection - Remove barcode display from here */}
           <ProductSelection
             products={products}
             selectedProduct={selectedProduct}
@@ -99,8 +99,6 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
             errors={errors}
             handleProductSelect={handleProductSelect}
             handleVariantSelect={handleVariantSelect}
-            scannedBarcodeData={scannedBarcodeData}
-            scannedProductInfo={scannedProductInfo}
           />
 
           {/* Product Issues - Only display if a variant is selected */}
@@ -121,6 +119,18 @@ export const ProductFeedbackForm: React.FC<ProductFeedbackFormProps> = ({
               onToggleCamera={onToggleCamera}
               isUploading={isUploading}
             />
+          )}
+
+          {/* Barcode Information Display - Show below comments */}
+          {scannedBarcodeData && (
+            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-sm text-green-800 font-medium">
+                ✓ Barcode scanned and saved
+              </p>
+              <p className="text-xs text-green-600 mt-1">
+                Barcode: {scannedBarcodeData}
+              </p>
+            </div>
           )}
           
           <CardFooter className="flex justify-end items-center pt-4 px-0">

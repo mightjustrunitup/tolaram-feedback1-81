@@ -64,6 +64,15 @@ export function useFeedbackForm() {
     clearError('issue');
   };
 
+  // Add a new handler for product selection that can clear barcode data
+  const handleProductSelectWithBarcodeReset = (productId: string, clearBarcodeCallback?: () => void) => {
+    handleProductSelect(productId);
+    // If a callback is provided to clear barcode data, call it
+    if (clearBarcodeCallback) {
+      clearBarcodeCallback();
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent, imageFiles?: File[]) => {
     e.preventDefault();
     
@@ -152,7 +161,7 @@ export function useFeedbackForm() {
     permissionGranted,
     requestLocation,
     handleInputChange: handleInputWithValidation,
-    handleProductSelect,
+    handleProductSelect: handleProductSelectWithBarcodeReset,
     handleVariantSelect: handleVariantSelectWithValidation,
     handleIssueToggle: handleIssueToggleWithValidation,
     handleSubmit

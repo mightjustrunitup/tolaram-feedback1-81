@@ -33,7 +33,8 @@ export const FeedbackForm = () => {
     handleCameraCapture,
     handleBarcodeScanned,
     toggleCamera,
-    uploadFilesToStorage
+    uploadFilesToStorage,
+    clearBarcodeData // Add this to clear barcode data
   } = useImageHandling();
 
   // Log when images change to verify they're being processed correctly
@@ -61,6 +62,16 @@ export const FeedbackForm = () => {
     }
   }, [scannedBarcodeData, scannedProductInfo, handleProductSelect, handleVariantSelect]);
 
+  // Enhanced product select handler that clears barcode data when manually selecting a different product
+  const handleProductSelectWithBarcodeReset = (productId: string) => {
+    // If there's existing barcode data and user is selecting a different product, clear the barcode
+    if (scannedBarcodeData && selectedProduct?.id !== productId) {
+      clearBarcodeData();
+      console.log("Clearing barcode data due to manual product selection");
+    }
+    handleProductSelect(productId);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     // Use the existing form submission handler but pass the actual image files
     return formSubmit(e, uploadedImages);
@@ -82,7 +93,7 @@ export const FeedbackForm = () => {
       scannedBarcodeData={scannedBarcodeData}
       scannedProductInfo={scannedProductInfo}
       onInputChange={handleInputChange}
-      handleProductSelect={handleProductSelect}
+      handleProductSelect={handleProductSelectWithBarcodeReset}
       handleVariantSelect={handleVariantSelect}
       handleIssueToggle={handleIssueToggle}
       onImageUpload={handleImageUpload}
