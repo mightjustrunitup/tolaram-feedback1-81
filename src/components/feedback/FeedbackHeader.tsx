@@ -1,8 +1,6 @@
 
 import React from "react";
 import { CardTitle, CardDescription } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle } from "lucide-react";
 
 interface Product {
   id: string;
@@ -27,16 +25,6 @@ export const FeedbackHeader: React.FC<FeedbackHeaderProps> = ({
         <CardDescription className="mt-2 max-w-md">
           Your opinion matters to us, and we're committed to making our products better with your input.
         </CardDescription>
-        
-        {scannedBarcodeData && (
-          <Badge 
-            className="mt-3 px-3 py-1 bg-green-100 text-green-800 border border-green-300 flex items-center gap-2"
-            variant="outline"
-          >
-            <CheckCircle size={16} />
-            Product Barcode Verified
-          </Badge>
-        )}
       </div>
     </>
   );
