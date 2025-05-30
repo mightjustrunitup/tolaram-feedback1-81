@@ -67,6 +67,12 @@ export function useImageHandling() {
     toast.success("Product barcode scanned successfully!");
   };
 
+  // Clear barcode data
+  const clearBarcodeData = () => {
+    setScannedBarcodeData(null);
+    setScannedProductInfo(null);
+  };
+
   // Toggle camera on/off
   const toggleCamera = () => {
     setIsCameraActive(prev => !prev);
@@ -170,6 +176,7 @@ export function useImageHandling() {
     handleCameraCapture,
     handleBarcodeScanned,
     toggleCamera,
-    uploadFilesToStorage
+    uploadFilesToStorage,
+    clearBarcodeData
   };
 }
