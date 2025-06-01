@@ -1,7 +1,7 @@
 
 /**
  * Development proxy for handling CORS during local development
- * This file is only used during local development and not in production
+ * Updated for WAMP server compatibility
  */
 
 const DEV_MODE = import.meta.env.DEV;
@@ -33,7 +33,7 @@ export const devProxyFetch = async (url: string, options: RequestInit = {}): Pro
 };
 
 /**
- * Check if we're running in a local development environment through Live Server
+ * Check if we're running in a local development environment
  */
 export const isLocalLiveServer = (): boolean => {
   return window.location.hostname === '127.0.0.1' || 
@@ -42,10 +42,21 @@ export const isLocalLiveServer = (): boolean => {
 };
 
 /**
+ * Check if we're running on WAMP server
+ */
+export const isWampServer = (): boolean => {
+  return window.location.hostname === 'localhost' && 
+         (window.location.port === '80' || window.location.port === '' || !window.location.port);
+};
+
+/**
  * Returns the appropriate API base URL based on environment
  */
 export const getApiBaseUrl = (): string => {
-  if (isLocalLiveServer()) {
+  if (isWampServer()) {
+    // When running on WAMP server
+    return '/api';
+  } else if (isLocalLiveServer()) {
     // When running on Live Server locally
     return 'http://localhost:8000/api';
   } else if (DEV_MODE) {
