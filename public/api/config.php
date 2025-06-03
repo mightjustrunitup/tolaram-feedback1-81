@@ -16,14 +16,37 @@ define('DB_NAME', 'feedback_app');
 define('DB_USER', 'root');
 define('DB_PASS', ''); // Default WAMP MySQL password is empty
 
+// Auto-setup check - run setup if not completed
+function checkAndRunSetup() {
+    if (!file_exists(__DIR__ . '/setup_complete.txt')) {
+        // Include and run setup
+        $setupResult = include_once 'setup.php';
+        // Give a moment for setup to complete
+        usleep(500000); // 0.5 seconds
+    }
+}
+
 // Create database connection
 function getDbConnection() {
+    // Check if setup is needed
+    checkAndRunSetup();
+    
     try {
         $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8", DB_USER, DB_PASS);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $pdo;
     } catch(PDOException $e) {
-        throw new Exception("Database connection failed: " . $e->getMessage());
+        // If connection fails, try to run setup again
+        checkAndRunSetup();
+        
+        // Try connection again
+        try {
+            $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8", DB_USER, DB_PASS);
+            $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return $pdo;
+        } catch(PDOException $e2) {
+            throw new Exception("Database connection failed even after setup: " . $e2->getMessage());
+        }
     }
 }
 
@@ -59,6 +82,14 @@ switch ($path) {
     case '/feedback/test':
         if ($method === 'GET') {
             require_once 'feedback/test.php';
+        } else {
+            handleError('Method not allowed', 405);
+        }
+        break;
+    
+    case '/setup':
+        if ($method === 'GET') {
+            require_once 'setup.php';
         } else {
             handleError('Method not allowed', 405);
         }
