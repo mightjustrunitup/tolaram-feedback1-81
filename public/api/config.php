@@ -1,5 +1,9 @@
 
 <?php
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Set proper headers first
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
@@ -23,7 +27,7 @@ function checkAndRunSetup() {
     if (!file_exists(__DIR__ . '/setup_complete.txt')) {
         try {
             // Include and run setup
-            $setupResult = include_once __DIR__ . '/setup.php';
+            include_once __DIR__ . '/setup.php';
             // Give a moment for setup to complete
             usleep(500000); // 0.5 seconds
         } catch (Exception $e) {
@@ -79,14 +83,22 @@ function handleError($message, $status = 500) {
     sendResponse(['error' => true, 'message' => $message], $status);
 }
 
-// Get request method and path
+// Get request method and determine the path
 $method = $_SERVER['REQUEST_METHOD'];
 $requestUri = $_SERVER['REQUEST_URI'];
-$path = parse_url($requestUri, PHP_URL_PATH);
 
-// Remove /api prefix if present
-if (strpos($path, '/api') === 0) {
-    $path = substr($path, 4);
+// Parse the path from query parameter or URI
+$path = '';
+if (isset($_GET['path'])) {
+    $path = '/' . ltrim($_GET['path'], '/');
+} else {
+    $parsedPath = parse_url($requestUri, PHP_URL_PATH);
+    // Remove /api prefix if present
+    if (strpos($parsedPath, '/api') === 0) {
+        $path = substr($parsedPath, 4);
+    } else {
+        $path = $parsedPath;
+    }
 }
 
 // Ensure path starts with /
@@ -94,9 +106,21 @@ if (empty($path) || $path[0] !== '/') {
     $path = '/' . $path;
 }
 
+// Log the request for debugging
+error_log("API Request - Method: $method, Path: $path, URI: $requestUri");
+
 // Route the request
 try {
     switch ($path) {
+        case '/':
+        case '/setup':
+            if ($method === 'GET') {
+                require_once __DIR__ . '/setup.php';
+            } else {
+                handleError('Method not allowed', 405);
+            }
+            break;
+        
         case '/feedback':
             if ($method === 'POST') {
                 require_once __DIR__ . '/feedback/submit.php';
@@ -110,14 +134,6 @@ try {
         case '/feedback/test':
             if ($method === 'GET') {
                 require_once __DIR__ . '/feedback/test.php';
-            } else {
-                handleError('Method not allowed', 405);
-            }
-            break;
-        
-        case '/setup':
-            if ($method === 'GET') {
-                require_once __DIR__ . '/setup.php';
             } else {
                 handleError('Method not allowed', 405);
             }

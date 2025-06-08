@@ -19,21 +19,20 @@ RewriteEngine On
 RewriteCond %{REQUEST_METHOD} OPTIONS
 RewriteRule ^(.*)$ $1 [R=200,L]
 
-# Handle API requests first (before React Router)
-RewriteCond %{REQUEST_URI} ^/api/
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^api/(.*)$ api/config.php [QSA,L]
-
-# Serve static files directly
-RewriteCond %{REQUEST_FILENAME} -f
+# Serve static files directly (CSS, JS, images)
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule ^.*$ - [L]
 
-# Handle React Router (client-side routing) for all other requests
+# Handle API requests
+RewriteCond %{REQUEST_URI} ^/api/
+RewriteRule ^api/(.*)$ api/config.php?path=$1 [QSA,L]
+
+# Handle React Router (client-side routing) - redirect all other requests to index.html
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/api/
-RewriteRule ^.*$ /index.html [L]
+RewriteRule ^(.*)$ index.html [L,QSA]
 
 # Set proper MIME types
 <IfModule mod_mime.c>
@@ -41,6 +40,7 @@ RewriteRule ^.*$ /index.html [L]
     AddType text/css .css
     AddType text/html .html
     AddType application/json .json
+    AddType image/svg+xml .svg
 </IfModule>
 
 # Cache static assets
