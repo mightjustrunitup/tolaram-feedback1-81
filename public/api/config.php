@@ -4,7 +4,7 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// Set proper headers first
+// Set proper headers first - must be before any output
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -36,12 +36,21 @@ function checkAndRunSetup() {
     }
 }
 
-// Create database connection
+// Create database connection with better error handling
 function getDbConnection() {
     // Check if setup is needed
     checkAndRunSetup();
     
     try {
+        // First try to connect to MySQL without database
+        $pdo_test = new PDO("mysql:host=" . DB_HOST . ";charset=utf8", DB_USER, DB_PASS);
+        $pdo_test->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Create database if it doesn't exist
+        $pdo_test->exec("CREATE DATABASE IF NOT EXISTS " . DB_NAME);
+        $pdo_test = null; // Close connection
+        
+        // Now connect to the specific database
         $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
         $pdo = new PDO($dsn, DB_USER, DB_PASS, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -50,22 +59,8 @@ function getDbConnection() {
         ]);
         return $pdo;
     } catch(PDOException $e) {
-        // If connection fails, try to run setup again
-        checkAndRunSetup();
-        
-        // Try connection again
-        try {
-            $dsn = "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4";
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            ]);
-            return $pdo;
-        } catch(PDOException $e2) {
-            error_log("Database connection failed: " . $e2->getMessage());
-            throw new Exception("Database connection failed: " . $e2->getMessage());
-        }
+        error_log("Database connection failed: " . $e->getMessage());
+        throw new Exception("Database connection failed: " . $e->getMessage());
     }
 }
 
@@ -87,7 +82,7 @@ function handleError($message, $status = 500) {
 $method = $_SERVER['REQUEST_METHOD'];
 $requestUri = $_SERVER['REQUEST_URI'];
 
-// Parse the path from query parameter or URI
+// Parse the path - handle both direct access and .htaccess rewrite
 $path = '';
 if (isset($_GET['path'])) {
     $path = '/' . ltrim($_GET['path'], '/');

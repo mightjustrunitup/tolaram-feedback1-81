@@ -1,0 +1,16 @@
+
+# Apache configuration for React app
+RewriteEngine On
+
+# Handle API requests - redirect to api folder
+RewriteRule ^api/(.*)$ api/$1 [L]
+
+# Handle all other requests (React Router)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.html [L]
+
+# Set security headers
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
