@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -326,7 +325,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <CheckCircle className="text-white" size={20} />
-                <h3 className="text-white font-semibold">Ultra-Fast Detection!</h3>
+                <h3 className="text-white font-semibold">Barcode Detected!</h3>
               </div>
               <Button
                 variant="ghost"
@@ -350,7 +349,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
                 </div>
                 <div>
                   <span className="text-white/80">Status:</span>
-                  <div className="font-medium text-green-300">Ultra-Fast ⚡</div>
+                  <div className="font-medium text-green-300">Scanned ✓</div>
                 </div>
               </div>
             </div>
@@ -362,15 +361,14 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           {isProcessing && (
             <div className="bg-blue-600/90 backdrop-blur-sm mx-4 p-3 rounded-lg">
               <div className="animate-spin mx-auto mb-2 w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
-              <p className="text-white text-sm font-medium">Ultra-fast processing...</p>
+              <p className="text-white text-sm font-medium">Processing barcode...</p>
             </div>
           )}
           
           {!scanResult && !isProcessing && (
             <div className="bg-black/60 backdrop-blur-sm mx-4 p-3 rounded-lg">
               <Barcode className="mx-auto mb-2 text-green-400 animate-pulse" size={24} />
-              <p className="text-white text-sm font-bold">Ultra-Fast Scanning Active</p>
-              <p className="text-green-300 text-xs mt-1">⚡ 50ms detection intervals</p>
+              <p className="text-white text-sm font-bold">Scanning for barcodes...</p>
             </div>
           )}
         </div>
@@ -393,13 +391,13 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
               disabled={isProcessing}
               className="flex-1 bg-green-500 text-black hover:bg-green-400 disabled:opacity-50 font-semibold"
             >
-              Continue ⚡
+              Continue
             </Button>
           </div>
         ) : (
           <div className="text-center">
             <p className="text-white/80 text-sm">
-              {isProcessing ? "Ultra-fast processing..." : "⚡ Ultra-fast scanning active..."}
+              {isProcessing ? "Processing barcode..." : "Point camera at barcode to scan"}
             </p>
           </div>
         )}
