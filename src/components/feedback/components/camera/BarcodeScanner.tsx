@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -40,11 +41,11 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
 
   const initializeScanner = async () => {
     try {
-      console.log("Initializing optimized ZXing barcode scanner...");
+      console.log("Initializing ultra-fast ZXing barcode scanner...");
       
       const codeReader = new BrowserMultiFormatReader();
       
-      // Configure hints for faster scanning
+      // Configure hints for maximum speed and accuracy
       const hints = new Map();
       hints.set(2, true); // PURE_BARCODE
       hints.set(3, true); // TRY_HARDER
@@ -56,7 +57,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       const videoInputDevices = await codeReader.listVideoInputDevices();
       console.log("Available video devices:", videoInputDevices);
       
-      // Try to use back camera if available
+      // Prioritize back camera for better barcode scanning
       const backCamera = videoInputDevices.find(device => 
         device.label.toLowerCase().includes('back') || 
         device.label.toLowerCase().includes('rear') ||
@@ -70,16 +71,16 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         return;
       }
 
-      console.log("Starting optimized barcode detection with device:", selectedDeviceId);
+      console.log("Starting ultra-fast barcode detection with device:", selectedDeviceId);
       
-      // Get the stream with optimized settings
+      // Get optimized stream for barcode scanning
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: { 
           deviceId: selectedDeviceId,
           facingMode: 'environment',
-          width: { ideal: 1280, min: 640 },
-          height: { ideal: 720, min: 480 },
-          frameRate: { ideal: 30, min: 15 }
+          width: { ideal: 1920, min: 640 }, // Higher resolution for better scanning
+          height: { ideal: 1080, min: 480 },
+          frameRate: { ideal: 60, min: 30 } // Higher framerate for faster detection
         }
       });
       
@@ -89,12 +90,12 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         videoRef.current.srcObject = mediaStream;
         
         videoRef.current.onloadedmetadata = () => {
-          console.log("Video metadata loaded, starting continuous scanning");
+          console.log("Video metadata loaded, starting ultra-fast continuous scanning");
           if (videoRef.current) {
             videoRef.current.play()
               .then(() => {
-                console.log("Video playing successfully");
-                startContinuousScanning(codeReader);
+                console.log("Video playing successfully - ultra-fast mode enabled");
+                startUltraFastScanning(codeReader);
               })
               .catch(err => {
                 console.error("Error playing video:", err);
@@ -104,7 +105,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
         };
       }
       
-      toast.success("Barcode scanner ready. Point camera at barcode.");
+      toast.success("Ultra-fast barcode scanner ready!");
       
     } catch (error) {
       console.error("Error initializing barcode scanner:", error);
@@ -112,13 +113,13 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     }
   };
 
-  const startContinuousScanning = (codeReader: BrowserMultiFormatReader) => {
+  const startUltraFastScanning = (codeReader: BrowserMultiFormatReader) => {
     // Clear any existing interval
     if (scanIntervalRef.current) {
       clearInterval(scanIntervalRef.current);
     }
     
-    // Start rapid scanning every 150ms for faster detection
+    // Ultra-fast scanning every 50ms for maximum responsiveness
     scanIntervalRef.current = window.setInterval(() => {
       if (videoRef.current && !isProcessing && !scanResult) {
         try {
@@ -126,24 +127,25 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           const context = canvas.getContext('2d');
           
           if (context && videoRef.current.videoWidth > 0) {
+            // Use full resolution for better accuracy
             canvas.width = videoRef.current.videoWidth;
             canvas.height = videoRef.current.videoHeight;
             context.drawImage(videoRef.current, 0, 0);
             
-            // Convert canvas to data URL and create image element
-            const dataURL = canvas.toDataURL('image/jpeg', 0.8);
+            // Convert to high-quality image for scanning
+            const dataURL = canvas.toDataURL('image/jpeg', 0.95);
             const img = new Image();
             
             img.onload = () => {
               codeReader.decodeFromImageElement(img)
                 .then((result) => {
                   if (result && result.getText()) {
-                    console.log("Barcode detected:", result.getText());
+                    console.log("Ultra-fast barcode detected:", result.getText());
                     handleBarcodeDetected(result.getText());
                   }
                 })
                 .catch((error) => {
-                  // Ignore NotFoundException as it's expected when no barcode is present
+                  // Silently ignore NotFoundException - it's normal when no barcode is present
                   if (!(error instanceof NotFoundException)) {
                     console.debug("Scanning error:", error.message);
                   }
@@ -156,11 +158,11 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           console.debug("Frame scan error:", error);
         }
       }
-    }, 100); // Reduced to 100ms for even faster scanning
+    }, 50); // Ultra-fast 50ms intervals for instant detection
   };
 
   const cleanup = () => {
-    console.log("Cleaning up barcode scanner...");
+    console.log("Cleaning up ultra-fast barcode scanner...");
     
     // Clear scanning interval
     if (scanIntervalRef.current) {
@@ -188,13 +190,13 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
     if (isProcessing || scanResult) return; // Prevent multiple detections
     
     try {
-      console.log("Processing detected barcode:", barcodeText);
+      console.log("Processing ultra-fast detected barcode:", barcodeText);
       setIsProcessing(true);
       
-      // Stop the scanner immediately
+      // Stop the scanner immediately for faster processing
       cleanup();
       
-      // Clean the barcode data
+      // Clean and validate barcode
       let cleanBarcode = barcodeText.trim();
       if (!/^\d+$/.test(cleanBarcode)) {
         cleanBarcode = barcodeText.replace(/\D/g, '');
@@ -220,33 +222,33 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       
       setScanResult(cleanBarcode);
       
-      // Save the scanned product to backend with retry logic
-      console.log("Saving to database...");
+      // Save with ultra-fast processing
+      console.log("Ultra-fast saving to database...");
       const saveResult = await BarcodeService.saveScannedProduct({
         product_id: cleanBarcode,
         barcode_data: barcodeText
       });
       
       if (saveResult.success) {
-        console.log("Barcode data saved successfully to Supabase:", saveResult);
-        toast.success("Barcode scanned and saved successfully!");
+        console.log("Ultra-fast barcode save successful:", saveResult);
+        toast.success("Barcode scanned and saved in record time!");
         
-        // Trigger the callback with the barcode data
+        // Trigger callback
         onBarcodeDetected(cleanBarcode);
         
-        // Close the scanner after 2 seconds
+        // Quick auto-close after success
         setTimeout(() => {
           onClose();
-        }, 2000);
+        }, 1500);
       } else {
         console.error("Failed to save barcode data:", saveResult.error);
         toast.error("Scanned but failed to save: " + (saveResult.error || "Unknown error"));
         
-        // Still allow the user to continue even if save failed
+        // Still allow continuation
         onBarcodeDetected(cleanBarcode);
         setTimeout(() => {
           onClose();
-        }, 2000);
+        }, 1500);
       }
       
       setIsProcessing(false);
@@ -301,30 +303,30 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           autoPlay
         />
         
-        {/* Scanning overlay */}
+        {/* Enhanced scanning overlay for ultra-fast detection */}
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute inset-4 border-2 border-white/50 rounded-lg">
-            <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-indomie-yellow rounded-tl-lg"></div>
-            <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-indomie-yellow rounded-tr-lg"></div>
-            <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-indomie-yellow rounded-bl-lg"></div>
-            <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-indomie-yellow rounded-br-lg"></div>
+            <div className="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-green-400 rounded-tl-lg animate-pulse"></div>
+            <div className="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-green-400 rounded-tr-lg animate-pulse"></div>
+            <div className="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-green-400 rounded-bl-lg animate-pulse"></div>
+            <div className="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-green-400 rounded-br-lg animate-pulse"></div>
           </div>
           
-          {/* Center scanning line animation */}
+          {/* Ultra-fast scanning line animation */}
           {!scanResult && !isProcessing && (
             <div className="absolute inset-4 flex items-center justify-center">
-              <div className="w-full h-0.5 bg-indomie-yellow animate-pulse"></div>
+              <div className="w-full h-1 bg-gradient-to-r from-transparent via-green-400 to-transparent animate-pulse"></div>
             </div>
           )}
         </div>
 
-        {/* Barcode scan result display */}
+        {/* Success result display */}
         {scanResult && scanDetails && (
           <div className="absolute top-20 left-4 right-4 bg-green-600/95 backdrop-blur-sm p-4 rounded-lg border border-green-400/30">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <CheckCircle className="text-white" size={20} />
-                <h3 className="text-white font-semibold">Barcode Detected!</h3>
+                <h3 className="text-white font-semibold">Ultra-Fast Detection!</h3>
               </div>
               <Button
                 variant="ghost"
@@ -348,33 +350,33 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
                 </div>
                 <div>
                   <span className="text-white/80">Status:</span>
-                  <div className="font-medium">Saved ✓</div>
+                  <div className="font-medium text-green-300">Ultra-Fast ⚡</div>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Scanning status */}
+        {/* Enhanced scanning status */}
         <div className="absolute bottom-32 left-0 right-0 text-center">
           {isProcessing && (
             <div className="bg-blue-600/90 backdrop-blur-sm mx-4 p-3 rounded-lg">
               <div className="animate-spin mx-auto mb-2 w-6 h-6 border-2 border-white border-t-transparent rounded-full"></div>
-              <p className="text-white text-sm font-medium">Processing & saving...</p>
+              <p className="text-white text-sm font-medium">Ultra-fast processing...</p>
             </div>
           )}
           
           {!scanResult && !isProcessing && (
             <div className="bg-black/60 backdrop-blur-sm mx-4 p-3 rounded-lg">
-              <Barcode className="mx-auto mb-2 text-indomie-yellow animate-pulse" size={24} />
-              <p className="text-white text-sm">Scanning for barcode...</p>
-              <p className="text-white/80 text-xs mt-1">Ultra-fast detection enabled</p>
+              <Barcode className="mx-auto mb-2 text-green-400 animate-pulse" size={24} />
+              <p className="text-white text-sm font-bold">Ultra-Fast Scanning Active</p>
+              <p className="text-green-300 text-xs mt-1">⚡ 50ms detection intervals</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Controls */}
+      {/* Enhanced controls */}
       <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent">
         {scanResult ? (
           <div className="flex gap-2">
@@ -389,15 +391,15 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
             <Button
               onClick={onClose}
               disabled={isProcessing}
-              className="flex-1 bg-indomie-yellow text-black hover:bg-indomie-yellow/90 disabled:opacity-50"
+              className="flex-1 bg-green-500 text-black hover:bg-green-400 disabled:opacity-50 font-semibold"
             >
-              Continue
+              Continue ⚡
             </Button>
           </div>
         ) : (
           <div className="text-center">
             <p className="text-white/80 text-sm">
-              {isProcessing ? "Processing & saving..." : "Ultra-fast scanning active..."}
+              {isProcessing ? "Ultra-fast processing..." : "⚡ Ultra-fast scanning active..."}
             </p>
           </div>
         )}
