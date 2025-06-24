@@ -27,13 +27,13 @@ export interface FeedbackFormProps {
 export const DEFAULT_PRODUCT: Product = {
   id: "indomie",
   name: "Indomie",
-  image: "/my-uploads/461ea3d8-05b3-48c8-8bc4-9e4b89861ab6.png",
+  image: "/lovable-uploads/461ea3d8-05b3-48c8-8bc4-9e4b89861ab6.png",
   description: "Delicious instant noodles with a variety of flavors",
   variants: [
     {
       id: "indomie-chicken",
       name: "Indomie Tables Chicken",
-      image: "/my-uploads/19507191-d68b-49e6-b02b-a3fc272a922e.png"
+      image: "/lovable-uploads/19507191-d68b-49e6-b02b-a3fc272a922e.png"
     }
   ]
 };
