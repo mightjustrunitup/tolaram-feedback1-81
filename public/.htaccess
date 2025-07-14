@@ -19,20 +19,24 @@ RewriteEngine On
 RewriteCond %{REQUEST_METHOD} OPTIONS
 RewriteRule ^(.*)$ $1 [R=200,L]
 
-# Serve static files directly (CSS, JS, images)
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^.*$ - [L]
-
-# Handle API requests
+# Handle API requests FIRST (before React Router fallback)
 RewriteCond %{REQUEST_URI} ^/api/
 RewriteRule ^api/(.*)$ api/config.php?path=$1 [QSA,L]
 
-# Handle React Router (client-side routing) - redirect all other requests to index.html
+# Serve static files directly (CSS, JS, images, etc.)
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^.*$ - [L]
+
+# Serve static directories directly
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^.*$ - [L]
+
+# Handle React Router (client-side routing) - redirect ALL other requests to index.html
+# This prevents 404 errors for React routes
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_URI} !^/api/
-RewriteRule ^(.*)$ index.html [L,QSA]
+RewriteRule ^(.*)$ /index.html [L,QSA]
 
 # Set proper MIME types
 <IfModule mod_mime.c>
@@ -73,3 +77,6 @@ RewriteRule ^(.*)$ index.html [L,QSA]
 <FilesMatch "\.(htaccess|htpasswd|ini|log|sh|inc|bak)$">
     Require all denied
 </FilesMatch>
+
+# Disable Apache's default 404 error page for missing files (let React handle routing)
+ErrorDocument 404 /index.html
