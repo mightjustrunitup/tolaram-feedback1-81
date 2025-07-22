@@ -139,6 +139,14 @@ try {
             }
             break;
         
+        case '/rewards/submit':
+            if ($method === 'POST') {
+                require_once __DIR__ . '/rewards/submit.php';
+            } else {
+                handleError('Method not allowed', 405);
+            }
+            break;
+        
         default:
             handleError('Endpoint not found: ' . $path, 404);
     }

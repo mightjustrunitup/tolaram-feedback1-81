@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
 export function useImageHandling() {
   const [uploadedImages, setUploadedImages] = useState<File[]>([]);
@@ -129,68 +128,11 @@ export function useImageHandling() {
     });
   };
 
-  // Upload files to Supabase storage
+  // Images are now handled directly in the feedback submission
   const uploadFilesToStorage = async (feedbackId: string) => {
-    if (uploadedImages.length === 0) return [];
-    
-    console.log(`Uploading ${uploadedImages.length} files to storage for feedback ${feedbackId}`);
-    setIsUploading(true);
-    
-    const imageUrls: string[] = [];
-    
-    try {
-      for (const file of uploadedImages) {
-        const filename = `${feedbackId}_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
-        
-        console.log(`Uploading ${filename} to feedback-images bucket`);
-        
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('feedback-images')
-          .upload(filename, file);
-          
-        if (uploadError) {
-          console.error("Error uploading file:", uploadError);
-          toast.error(`Failed to upload ${file.name}`);
-          continue;
-        }
-        
-        if (uploadData) {
-          // Get the public URL
-          const { data: publicUrlData } = supabase.storage
-            .from('feedback-images')
-            .getPublicUrl(filename);
-          
-          if (publicUrlData && publicUrlData.publicUrl) {
-            imageUrls.push(publicUrlData.publicUrl);
-            console.log("Uploaded image URL:", publicUrlData.publicUrl);
-            
-            // Verify the image is accessible by making a HEAD request
-            try {
-              const response = await fetch(publicUrlData.publicUrl, { method: 'HEAD' });
-              if (!response.ok) {
-                console.warn(`Image might not be publicly accessible: ${publicUrlData.publicUrl}`);
-              } else {
-                console.log(`Verified image is accessible: ${publicUrlData.publicUrl}`);
-              }
-            } catch (error) {
-              console.warn(`Could not verify image accessibility: ${error}`);
-            }
-          }
-        }
-      }
-      
-      if (imageUrls.length > 0) {
-        toast.success(`Successfully uploaded ${imageUrls.length} image${imageUrls.length > 1 ? 's' : ''}`);
-      }
-      
-      return imageUrls;
-    } catch (error) {
-      console.error("Error in file upload process:", error);
-      toast.error("Error uploading images. Please try again.");
-      return [];
-    } finally {
-      setIsUploading(false);
-    }
+    // This function is no longer needed as images are sent as base64 to PHP
+    // Return the uploaded files for backwards compatibility
+    return uploadedImages;
   };
 
   return {

@@ -1,5 +1,4 @@
 import { get, post } from "@/lib/api";
-import { supabase } from "@/integrations/supabase/client";
 import { CompleteFeedback } from "@/pages/feedback/components/types";
 
 // Define types for the service
@@ -24,152 +23,90 @@ export interface FeedbackResponse {
   message: string;
 }
 
+export interface ApiResponse {
+  id?: string;
+  message?: string;
+  success?: boolean;
+}
+
 /**
- * Service for feedback-related API operations
+ * Service for feedback-related API operations using PHP backend
  */
 export const FeedbackService = {
   /**
-   * Test if we can access the feedback table (checks if RLS policies are working)
+   * Test if we can access the feedback endpoint
    */
   testTableAccess: async () => {
-    return await supabase
-      .from('feedback')
-      .select('*')
-      .limit(1);
+    try {
+      const data = await get('/api/feedback/list');
+      return { data, error: null };
+    } catch (error) {
+      return { data: null, error };
+    }
   },
 
   /**
-   * Upload images to Supabase storage and return their public URLs
+   * Convert images to base64 for PHP upload
    */
-  uploadImages: async (files: File[], feedbackId: string): Promise<string[]> => {
+  convertImagesToBase64: async (files: File[]): Promise<string[]> => {
     if (!files || files.length === 0) return [];
     
-    console.log(`Uploading ${files.length} images for feedback ${feedbackId}`);
-    const imageUrls: string[] = [];
+    const base64Images: string[] = [];
     
     for (const file of files) {
       try {
-        const filename = `${feedbackId}_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
         
-        const { data, error } = await supabase.storage
-          .from('feedback-images')
-          .upload(filename, file);
-          
-        if (error) {
-          console.error("Error uploading file:", error);
-          continue;
-        }
-        
-        if (data) {
-          // Get the public URL
-          const { data: publicUrlData } = supabase.storage
-            .from('feedback-images')
-            .getPublicUrl(filename);
-          
-          if (publicUrlData && publicUrlData.publicUrl) {
-            imageUrls.push(publicUrlData.publicUrl);
-            console.log("Uploaded image URL:", publicUrlData.publicUrl);
-          }
-        }
+        base64Images.push(base64);
       } catch (error) {
-        console.error("Error in file upload process:", error);
+        console.error("Error converting file to base64:", error);
       }
     }
     
-    return imageUrls;
+    return base64Images;
   },
 
   /**
-   * Submit feedback to the backend
+   * Submit feedback to the PHP backend
    */
   submitFeedback: async (data: FeedbackSubmission): Promise<FeedbackResponse> => {
     try {
-      console.log("Submitting feedback (raw input):", {
+      console.log("Submitting feedback to PHP backend:", {
         ...data,
         imageFiles: data.imageFiles ? `${data.imageFiles.length} files` : 'none'
       });
       
-      // Step 1: Insert the main feedback record
-      const { data: feedbackData, error: feedbackError } = await supabase
-        .from('feedback')
-        .insert({
-          customer_name: data.customerName || null,
-          location: data.location || null,
-          product_id: data.productId,
-          variant_id: data.variantId,
-          comments: data.comments || null
-        })
-        .select('id, created_at')
-        .single();
-      
-      if (feedbackError) {
-        console.error('Supabase error during feedback submission:', feedbackError);
-        return {
-          id: '',
-          submitted: false,
-          timestamp: new Date().toISOString(),
-          message: `Database error: ${feedbackError.message || 'Unknown error'}`
-        };
-      }
-      
-      const feedbackId = feedbackData.id;
-      console.log("Feedback record created with ID:", feedbackId);
-      
-      // Step 2: Insert the issues
-      if (data.issues && data.issues.length > 0) {
-        const issueRecords = data.issues.map(issue => ({
-          feedback_id: feedbackId,
-          issue: issue
-        }));
-        
-        const { error: issuesError } = await supabase
-          .from('feedback_issues')
-          .insert(issueRecords);
-        
-        if (issuesError) {
-          console.error('Error inserting issues:', issuesError);
-        }
-      }
-      
-      // Step 3: Upload images and insert image URLs if any
-      let imageUrls: string[] = [];
+      // Convert images to base64 for upload
+      let imageData: string[] = [];
       if (data.imageFiles && data.imageFiles.length > 0) {
-        imageUrls = await FeedbackService.uploadImages(data.imageFiles, feedbackId);
-        
-        console.log("Processed image URLs:", imageUrls);
-        
-        if (imageUrls.length > 0) {
-          const imageRecords = imageUrls.map(url => ({
-            feedback_id: feedbackId,
-            image_url: url
-          }));
-          
-          console.log("Image records to insert:", imageRecords);
-          
-          const { error: imagesError } = await supabase
-            .from('feedback_images')
-            .insert(imageRecords);
-          
-          if (imagesError) {
-            console.error('Error inserting images:', imagesError);
-          }
-        }
+        imageData = await FeedbackService.convertImagesToBase64(data.imageFiles);
       }
       
-      // Step 4: Store coordinates data if available
-      if (data.coordinates) {
-        console.log("Coordinates data available:", data.coordinates);
-        // We're storing this with the feedback record for now
-        // If we need to store it separately later, we can update this
-      }
+      // Prepare data for PHP backend
+      const submissionData = {
+        customerName: data.customerName || null,
+        location: data.location || null,
+        productId: data.productId,
+        variantId: data.variantId,
+        issues: data.issues,
+        comments: data.comments || null,
+        images: imageData,
+        coordinates: data.coordinates || null
+      };
       
-      console.log("Feedback submission completed successfully");
+      // Submit to PHP API
+      const response = await post<ApiResponse>('/api/feedback/submit', submissionData);
       
       return {
-        id: feedbackId,
+        id: response.id || Date.now().toString(),
         submitted: true,
-        timestamp: feedbackData.created_at,
-        message: "Feedback submitted successfully"
+        timestamp: new Date().toISOString(),
+        message: response.message || "Feedback submitted successfully"
       };
     } catch (error) {
       console.error('Error submitting feedback:', error);
@@ -205,27 +142,17 @@ export const FeedbackService = {
     try {
       console.log("Submitting customer rewards data:", data);
       
-      const { error } = await supabase
-        .from('customer_rewards')
-        .insert({
-          customer_name: data.customerName || null,
-          phone: data.phone,
-          feedback_id: data.feedbackId || null,
-          location: data.location || null,
-          coordinates: data.coordinates || null
-        });
-      
-      if (error) {
-        console.error('Error submitting customer rewards:', error);
-        return {
-          success: false,
-          message: `Failed to join rewards program: ${error.message}`
-        };
-      }
+      const response = await post<ApiResponse>('/api/rewards/submit', {
+        customerName: data.customerName || null,
+        phone: data.phone,
+        feedbackId: data.feedbackId || null,
+        location: data.location || null,
+        coordinates: data.coordinates || null
+      });
       
       return {
         success: true,
-        message: "Successfully joined rewards program"
+        message: response.message || "Successfully joined rewards program"
       };
     } catch (error) {
       console.error('Error in customer rewards submission:', error);
@@ -258,21 +185,11 @@ export const FeedbackService = {
   },
   
   /**
-   * Get complete feedback data using the view
-   * This uses the complete_feedback view directly without RPC calls
+   * Get complete feedback data from PHP backend
    */
   getCompleteFeedback: async (): Promise<CompleteFeedback[]> => {
     try {
-      // We're directly using the view that was created in the database
-      const { data, error } = await supabase
-        .from('complete_feedback')
-        .select('*') as { data: CompleteFeedback[] | null, error: any };
-        
-      if (error) {
-        console.error('Error fetching complete feedback:', error);
-        throw error;
-      }
-      
+      const data = await get<CompleteFeedback[]>('/api/feedback/list');
       return data || [];
     } catch (error) {
       console.error('Error in getCompleteFeedback:', error);

@@ -46,11 +46,33 @@ try {
             }
         }
         
-        // Handle image uploads if provided
-        if (!empty($input['imageUrls']) && is_array($input['imageUrls'])) {
+        // Handle base64 image uploads if provided
+        if (!empty($input['images']) && is_array($input['images'])) {
             $imageStmt = $pdo->prepare("INSERT INTO feedback_images (feedback_id, image_url) VALUES (?, ?)");
-            foreach ($input['imageUrls'] as $imageUrl) {
-                $imageStmt->execute([$feedbackId, $imageUrl]);
+            
+            // Create uploads directory if it doesn't exist
+            $uploadDir = '../../lovable-uploads/';
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            
+            foreach ($input['images'] as $index => $base64Image) {
+                // Extract base64 data and save as file
+                if (preg_match('/^data:image\/(\w+);base64,(.*)$/', $base64Image, $matches)) {
+                    $imageType = $matches[1]; // jpg, png, etc.
+                    $imageData = base64_decode($matches[2]);
+                    
+                    // Generate unique filename
+                    $filename = $feedbackId . '_' . time() . '_' . $index . '.' . $imageType;
+                    $filePath = $uploadDir . $filename;
+                    
+                    // Save file
+                    if (file_put_contents($filePath, $imageData)) {
+                        // Store the relative URL in database
+                        $imageUrl = '/lovable-uploads/' . $filename;
+                        $imageStmt->execute([$feedbackId, $imageUrl]);
+                    }
+                }
             }
         }
         
