@@ -131,6 +131,16 @@ try {
             }
             break;
         
+        case '/feedback/debug':
+            if ($method === 'GET') {
+                // For debug page, we want HTML output
+                header('Content-Type: text/html; charset=utf-8');
+                require_once __DIR__ . '/feedback/debug.php';
+            } else {
+                handleError('Method not allowed', 405);
+            }
+            break;
+        
         case '/feedback/test':
             if ($method === 'GET') {
                 require_once __DIR__ . '/feedback/test.php';
