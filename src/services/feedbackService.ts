@@ -1,4 +1,4 @@
-import { get, post } from "@/lib/api";
+import { supabase } from "@/integrations/supabase/client";
 import { CompleteFeedback } from "@/pages/feedback/components/types";
 
 // Define types for the service
@@ -23,97 +23,137 @@ export interface FeedbackResponse {
   message: string;
 }
 
-export interface ApiResponse {
-  id?: string;
-  message?: string;
-  success?: boolean;
-}
-
 /**
- * Service for feedback-related API operations using PHP backend
+ * Service for feedback-related API operations using Supabase
  */
 export const FeedbackService = {
   /**
-   * Test if we can access the feedback endpoint
+   * Test if we can access the feedback table
    */
   testTableAccess: async () => {
     try {
-      const data = await get('/api/feedback/list');
-      return { data, error: null };
+      const { data, error } = await supabase
+        .from('feedback')
+        .select('*')
+        .limit(1);
+      return { data, error };
     } catch (error) {
       return { data: null, error };
     }
   },
 
   /**
-   * Convert images to base64 for PHP upload
+   * Upload images to Supabase Storage
    */
-  convertImagesToBase64: async (files: File[]): Promise<string[]> => {
+  uploadImages: async (files: File[]): Promise<string[]> => {
     if (!files || files.length === 0) return [];
     
-    const base64Images: string[] = [];
+    const uploadedUrls: string[] = [];
     
     for (const file of files) {
       try {
-        const base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-        
-        base64Images.push(base64);
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
+        const filePath = fileName;
+
+        const { error: uploadError } = await supabase.storage
+          .from('feedback-images')
+          .upload(filePath, file);
+
+        if (uploadError) {
+          console.error('Error uploading image:', uploadError);
+          continue;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('feedback-images')
+          .getPublicUrl(filePath);
+
+        uploadedUrls.push(publicUrl);
       } catch (error) {
-        console.error("Error converting file to base64:", error);
+        console.error('Error uploading file:', error);
       }
     }
     
-    return base64Images;
+    return uploadedUrls;
   },
 
   /**
-   * Submit feedback to the PHP backend
+   * Submit feedback to Supabase
    */
   submitFeedback: async (data: FeedbackSubmission): Promise<FeedbackResponse> => {
     try {
-      console.log("Submitting feedback to PHP backend:", {
+      console.log("Submitting feedback to Supabase:", {
         ...data,
         imageFiles: data.imageFiles ? `${data.imageFiles.length} files` : 'none'
       });
       
-      // Convert images to base64 for upload
-      let imageData: string[] = [];
+      // Upload images first
+      let imageUrls: string[] = [];
       if (data.imageFiles && data.imageFiles.length > 0) {
-        imageData = await FeedbackService.convertImagesToBase64(data.imageFiles);
+        imageUrls = await FeedbackService.uploadImages(data.imageFiles);
       }
       
-      // Prepare data for PHP backend
-      const submissionData = {
-        customerName: data.customerName || null,
-        location: data.location || null,
-        productId: data.productId,
-        variantId: data.variantId,
-        issues: data.issues,
-        comments: data.comments || null,
-        images: imageData,
-        coordinates: data.coordinates || null
-      };
-      
-      // Submit to PHP API
-      const response = await post<ApiResponse>('/api/feedback/submit', submissionData);
+      // Insert feedback record
+      const { data: feedbackData, error: feedbackError } = await supabase
+        .from('feedback')
+        .insert({
+          customer_name: data.customerName || null,
+          location: data.location || null,
+          product_id: data.productId,
+          variant_id: data.variantId,
+          comments: data.comments || null,
+        })
+        .select()
+        .single();
+
+      if (feedbackError) {
+        console.error('Error inserting feedback:', feedbackError);
+        throw new Error(feedbackError.message);
+      }
+
+      // Insert issues
+      if (data.issues && data.issues.length > 0) {
+        const issueRecords = data.issues.map(issue => ({
+          feedback_id: feedbackData.id,
+          issue: issue
+        }));
+
+        const { error: issuesError } = await supabase
+          .from('feedback_issues')
+          .insert(issueRecords);
+
+        if (issuesError) {
+          console.error('Error inserting issues:', issuesError);
+        }
+      }
+
+      // Insert images
+      if (imageUrls.length > 0) {
+        const imageRecords = imageUrls.map(url => ({
+          feedback_id: feedbackData.id,
+          image_url: url
+        }));
+
+        const { error: imagesError } = await supabase
+          .from('feedback_images')
+          .insert(imageRecords);
+
+        if (imagesError) {
+          console.error('Error inserting images:', imagesError);
+        }
+      }
       
       return {
-        id: response.id || Date.now().toString(),
+        id: feedbackData.id,
         submitted: true,
-        timestamp: new Date().toISOString(),
-        message: response.message || "Feedback submitted successfully"
+        timestamp: feedbackData.created_at,
+        message: "Feedback submitted successfully"
       };
     } catch (error) {
       console.error('Error submitting feedback:', error);
       let errorMessage = "Failed to submit feedback";
-      if (error && typeof error === 'object' && 'message' in error) {
-        errorMessage = (error as { message: string }).message;
-      } else if (error instanceof Error) {
+      if (error instanceof Error) {
         errorMessage = error.message;
       }
       
@@ -142,24 +182,28 @@ export const FeedbackService = {
     try {
       console.log("Submitting customer rewards data:", data);
       
-      const response = await post<ApiResponse>('/api/rewards/submit', {
-        customerName: data.customerName || null,
-        phone: data.phone,
-        feedbackId: data.feedbackId || null,
-        location: data.location || null,
-        coordinates: data.coordinates || null
-      });
+      const { error } = await supabase
+        .from('customer_rewards')
+        .insert({
+          customer_name: data.customerName || null,
+          phone: data.phone,
+          feedback_id: data.feedbackId || null,
+          location: data.location || null,
+          coordinates: data.coordinates ? JSON.stringify(data.coordinates) : null
+        });
+
+      if (error) {
+        throw new Error(error.message);
+      }
       
       return {
         success: true,
-        message: response.message || "Successfully joined rewards program"
+        message: "Successfully joined rewards program"
       };
     } catch (error) {
       console.error('Error in customer rewards submission:', error);
       let errorMessage = "Failed to join rewards program";
-      if (error && typeof error === 'object' && 'message' in error) {
-        errorMessage = (error as { message: string }).message;
-      } else if (error instanceof Error) {
+      if (error instanceof Error) {
         errorMessage = error.message;
       }
       
@@ -174,22 +218,33 @@ export const FeedbackService = {
    * Get available products from the backend
    */
   getProducts: () => {
-    return get<any[]>('/products');
+    // This would need to be implemented if you have a products table
+    return Promise.resolve([]);
   },
 
   /**
    * Get product variants by product ID
    */
   getProductVariants: (productId: string) => {
-    return get<any[]>(`/products/${productId}/variants`);
+    // This would need to be implemented if you have a product_variants table
+    return Promise.resolve([]);
   },
   
   /**
-   * Get complete feedback data from PHP backend
+   * Get complete feedback data from Supabase
    */
   getCompleteFeedback: async (): Promise<CompleteFeedback[]> => {
     try {
-      const data = await get<CompleteFeedback[]>('/api/feedback/list');
+      const { data, error } = await supabase
+        .from('complete_feedback')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching complete feedback:', error);
+        throw error;
+      }
+
       return data || [];
     } catch (error) {
       console.error('Error in getCompleteFeedback:', error);
