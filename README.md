@@ -41,7 +41,7 @@ http://localhost:8080
   - `/components`: Reusable UI components
   - `/pages`: Page components
   - `/hooks`: Custom React hooks
-  - `/lib`: Utility functions
+  - `/lib`: Utility function
 
 ## Technologies Used
 - React
